@@ -24,7 +24,7 @@
     resize();
 
     let dotCount = 1;
-    let delay = 1000;
+    let delay = 10; // 0.01 giây ban đầu (10ms)
 
     function drawFastDots() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -39,7 +39,7 @@
     function loop() {
       drawFastDots();
       dotCount += 100;
-      delay = Math.max(50, delay * 0.9); // Giảm dần delay nhưng không dưới 50ms
+      delay = Math.max(0.001, delay * 0.9); // Giảm dần đến tối đa tốc độ 0.000001 giây (1 microsecond)
       setTimeout(loop, delay);
     }
 
