@@ -23,7 +23,8 @@
     window.addEventListener('resize', resize);
     resize();
 
-    let dotCount = 100;
+    let dotCount = 1;
+    let delay = 1000;
 
     function drawFastDots() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -38,7 +39,8 @@
     function loop() {
       drawFastDots();
       dotCount += 100;
-      setTimeout(loop, 1000);
+      delay = Math.max(50, delay * 0.9); // Giảm dần delay nhưng không dưới 50ms
+      setTimeout(loop, delay);
     }
 
     loop();
