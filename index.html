@@ -15,7 +15,7 @@
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    // Resize canvas to full window size
+
     function resize() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -23,26 +23,24 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // Draw as many dots as possible within 1 millisecond (0.001 seconds)
+    let dotCount = 10000;
+
     function drawFastDots() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const startTime = performance.now();
-      while (performance.now() - startTime < 1) {
+      for (let i = 0; i < dotCount; i++) {
         const x = Math.random() * canvas.width;
         const y = Math.random() * canvas.height;
-        // Draw small white dot
         ctx.fillStyle = '#fff';
         ctx.fillRect(x, y, 2, 2);
       }
     }
 
-    // Main loop: draw dots then wait 1 second before next draw
     function loop() {
       drawFastDots();
+      dotCount += 10000;
       setTimeout(loop, 1000);
     }
 
-    // Start the loop
     loop();
   </script>
 </body>
