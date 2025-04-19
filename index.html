@@ -4,16 +4,21 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HTML Benchmark</title>
+  <title>HTML Benchmark - Modified</title>
   <style>
     body, html {
       margin: 0;
       padding: 0;
       overflow: hidden;
       font-family: monospace;
+      /* Đặt nền body thành màu đen nếu muốn */
+      /* background-color: black; */
     }
     canvas {
       display: block;
+      /* Đảm bảo canvas nằm trên cùng */
+      position: relative;
+      z-index: 1;
     }
     .bg {
       position: absolute;
@@ -21,9 +26,11 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      z-index: -1;
+      z-index: -1; /* Nằm sau canvas */
       background-size: cover;
       background-repeat: no-repeat;
+      /* Đặt màu nền thành đen cố định */
+      background-color: black;
     }
   </style>
 </head>
@@ -33,12 +40,16 @@
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
+    // Không cần lấy backgroundDiv nữa vì màu được đặt trong CSS
+
     function resize() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     }
     window.addEventListener('resize', resize);
     resize();
+
+    // Không cần đặt màu nền đen bằng JS nữa
 
     let dotCount = 1;
     let delay = 10;
@@ -51,14 +62,21 @@
     }
 
     function drawFastDots() {
-      document.getElementById('background').style.backgroundColor = getRandomColor();
+      // Không còn thay đổi màu nền của div .bg ở đây nữa
+
+      // Xóa/vẽ lại nền canvas bằng một màu ngẫu nhiên mỗi khung hình (giữ hiệu ứng nhấp nháy gốc của canvas)
+      // Nếu bạn muốn nền canvas cũng màu đen, hãy thay đổi dòng dưới:
+      // ctx.fillStyle = 'black';
       ctx.fillStyle = getRandomColor();
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = getRandomColor();
+
+      // Vẽ các dấu chấm, mỗi chấm có màu ngẫu nhiên riêng
       for (let i = 0; i < dotCount; i++) {
         const x = Math.random() * canvas.width;
         const y = Math.random() * canvas.height;
-        ctx.fillRect(x, y, 1, 1);
+        // Đặt fillStyle BÊN TRONG vòng lặp để mỗi chấm có màu riêng
+        ctx.fillStyle = getRandomColor();
+        ctx.fillRect(x, y, 1, 1); // Vẽ một chấm pixel 1x1
       }
     }
 
@@ -71,14 +89,13 @@
 
     loop();
 
-    // Tạo dữ liệu lớn vô nghĩa để benchmark bộ nhớ
+    // --- Mã tạo tải Benchmark (Không thay đổi) ---
     let meaninglessData = new Array(300000).fill("Benchmark lorem ipsum dolor sit amet.").join(" ");
     const hiddenDiv = document.createElement('div');
     hiddenDiv.style.display = 'none';
     hiddenDiv.textContent = meaninglessData;
     document.body.appendChild(hiddenDiv);
 
-    // Chèn nhiều hình ảnh base64 để tạo tải nặng
     for (let i = 0; i < 50; i++) {
       const img = document.createElement('img');
       img.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=";
@@ -86,7 +103,6 @@
       document.body.appendChild(img);
     }
 
-    // Tạo nhiều đoạn mã script vô nghĩa
     for (let i = 0; i < 500; i++) {
       const script = document.createElement('script');
       script.textContent = `console.log('Benchmark script ${i}');`;
