@@ -1,149 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Binary Text Encoder/Decoder</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-
-        textarea {
-            width: 100%;
-            max-width: 400px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-            font-family: monospace;
-        }
-
-        button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .output-container {
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .output-area {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-            font-family: monospace;
-            background-color: #e9ecef;
-            white-space: pre-wrap; /* Preserve whitespace and line breaks */
-            margin-bottom: 10px;
-        }
-
-        .output-buttons button {
-            margin-right: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fast Dots</title>
+  <style>
+    body, html { margin: 0; padding: 0; overflow: hidden; background: #000; }
+    canvas { display: block; }
+  </style>
 </head>
 <body>
-    <h1>Text to Binary and Binary to Text</h1>
+  <canvas id="canvas"></canvas>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    // Resize canvas to full window size
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
 
-    <textarea id="inputText" placeholder="Enter text here..."></textarea>
+    // Draw as many dots as possible within 1 millisecond (0.001 seconds)
+    function drawFastDots() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const startTime = performance.now();
+      while (performance.now() - startTime < 1) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        // Draw small white dot
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(x, y, 2, 2);
+      }
+    }
 
-    <button onclick="encodeText()">Encode to Binary</button>
+    // Main loop: draw dots then wait 1 second before next draw
+    function loop() {
+      drawFastDots();
+      setTimeout(loop, 1000);
+    }
 
-    <div class="output-container">
-        <strong>Binary Output:</strong>
-        <div class="output-buttons">
-            <button onclick="copyToClipboard('output')">Copy</button>
-            <button onclick="downloadAsTxt('output', 'binary_output.txt')">Download as TXT</button>
-        </div>
-        <div id="output" class="output-area"></div>
-    </div>
-
-    <h2>Binary to Text</h2>
-    <textarea id="binaryInput" placeholder="Enter binary code here (separated by spaces)..."></textarea>
-    <button onclick="decodeBinary()">Decode to Text</button>
-
-    <div class="output-container">
-        <strong>Decoded Text:</strong>
-        <div class="output-buttons">
-            <button onclick="copyToClipboard('decodedText')">Copy</button>
-            <button onclick="downloadAsTxt('decodedText', 'decoded_text.txt')">Download as TXT</button>
-        </div>
-        <div id="decodedText" class="output-area"></div>
-    </div>
-
-    <script>
-        function encodeText() {
-            const inputText = document.getElementById('inputText').value;
-            let binaryString = "";
-
-            for (let i = 0; i < inputText.length; i++) {
-                const charCode = inputText.charCodeAt(i);
-                const binary = charCode.toString(2).padStart(8, '0'); // Convert to 8-bit binary
-                binaryString += binary + " ";
-            }
-
-            document.getElementById('output').textContent = binaryString.trim();
-        }
-
-        function decodeBinary() {
-            const binaryInput = document.getElementById('binaryInput').value;
-            const binaryArray = binaryInput.trim().split(" ");
-            let decodedString = "";
-
-            for (let i = 0; i < binaryArray.length; i++) {
-                const binary = binaryArray[i];
-                if (binary.length === 8 && /^[01]+$/.test(binary)) {
-                    const charCode = parseInt(binary, 2);
-                    decodedString += String.fromCharCode(charCode);
-                } else if (binary !== "") {
-                    alert(`Invalid binary format: "${binary}". Please use 8-bit binary strings separated by spaces.`);
-                    return;
-                }
-            }
-
-            document.getElementById('decodedText').textContent = decodedString;
-        }
-
-        function copyToClipboard(elementId) {
-            const textToCopy = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                alert('Text copied to clipboard!');
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-                alert('Failed to copy text to clipboard.');
-            });
-        }
-
-        function downloadAsTxt(elementId, filename) {
-            const textToDownload = document.getElementById(elementId).textContent;
-            const blob = new Blob([textToDownload], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-    </script>
+    // Start the loop
+    loop();
+  </script>
 </body>
 </html>
