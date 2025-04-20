@@ -4,45 +4,27 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HTML Benchmark</title>
+  <title>Fast Dots</title>
   <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      font-family: monospace;
-      background: #000;              /* nền đen cố định */
-    }
-    canvas {
-      display: block;
-    }
-    .bg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: -1;
-      background: #000;              /* lớp nền phụ cũng đen */
-    }
+    body, html { margin: 0; padding: 0; overflow: hidden; background: #000; }
+    canvas { display: block; }
   </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
-  <div class="bg" id="background"></div>
   <script>
     const canvas = document.getElementById('canvas');
-    const ctx    = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
 
     function resize() {
-      canvas.width  = window.innerWidth;
+      canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     }
     window.addEventListener('resize', resize);
     resize();
 
     let dotCount = 1;
-    let delay    = 10;
+    let delay = 10; // ms
 
     function getRandomColor() {
       const r = Math.floor(Math.random() * 256);
@@ -52,11 +34,11 @@
     }
 
     function drawFastDots() {
-      // Vẽ nền đen (nếu muốn dùng canvas thay vì div .bg)
+      // Vẽ nền đen
       ctx.fillStyle = 'black';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Vẽ từng chấm với màu ngẫu nhiên
+      // Vẽ từng chấm một màu
       for (let i = 0; i < dotCount; i++) {
         ctx.fillStyle = getRandomColor();
         const x = Math.random() * canvas.width;
@@ -67,35 +49,22 @@
 
     function loop() {
       drawFastDots();
-      dotCount += 100;
-      delay    = Math.max(0.000001, delay * 0.9);
+      dotCount += 100;                          // tăng thêm 100 chấm mỗi lần
+      delay = Math.max(0.000001, delay * 0.9);  // giảm dần delay đến 1µs
       setTimeout(loop, delay);
     }
 
     loop();
 
-    // --- Phần benchmark giữ nguyên ---
-    // Dữ liệu lớn vô nghĩa
-    let meaninglessData = new Array(300000).fill("Benchmark lorem ipsum dolor sit amet.").join(" ");
+    // Các dữ liệu vô nghĩa để tăng dung lượng file
+    let meaninglessData = "";
+    for (let i = 0; i < 200000; i++) {
+      meaninglessData += "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ";
+    }
     const hiddenDiv = document.createElement('div');
     hiddenDiv.style.display = 'none';
     hiddenDiv.textContent = meaninglessData;
     document.body.appendChild(hiddenDiv);
-
-    // Hình ảnh base64 để tăng tải
-    for (let i = 0; i < 50; i++) {
-      const img = document.createElement('img');
-      img.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=";
-      img.style.display = 'none';
-      document.body.appendChild(img);
-    }
-
-    // Script vô nghĩa
-    for (let i = 0; i < 500; i++) {
-      const script = document.createElement('script');
-      script.textContent = `console.log('Benchmark script ${i}');`;
-      document.body.appendChild(script);
-    }
   </script>
 </body>
 </html>
