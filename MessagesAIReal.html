@@ -2,15 +2,30 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Ứng dụng Trò chuyện</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat App</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="chat-container">
+    <header>
+      <h2>Chat App</h2>
+      <div class="actions">
+        <button id="voice-call-button"><img src="assets/icons/call.png" alt="Call">Gọi thoại</button>
+        <button id="video-call-button"><img src="assets/icons/call.png" alt="Video">Gọi video</button>
+        <button id="share-location-button">Chia sẻ vị trí</button>
+      </div>
+    </header>
     <div id="messages"></div>
-    <input type="text" id="message-input" placeholder="Nhập tin nhắn...">
-    <input type="file" id="file-input">
-    <button id="send-button">Gửi</button>
+    <div id="input-area">
+      <div id="emoji-picker">
+        <button onclick="sendEmoji('😊')">😊</button>
+        <button onclick="sendEmoji('😂')">😂</button>
+      </div>
+      <input type="text" id="message-input" placeholder="Nhập tin nhắn...">
+      <input type="file" id="file-input">
+      <button id="send-button">Gửi</button>
+    </div>
   </div>
 
   <!-- Firebase SDKs -->
@@ -18,10 +33,10 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+  <!-- Libsodium for E2E Encryption (tùy chọn) -->
+  <script src="https://cdn.jsdelivr.net/npm/libsodium-wrappers/dist/libsodium-wrappers.js"></script>
 
-  <!-- Cấu hình Firebase -->
   <script src="firebase-config.js"></script>
-  <!-- Logic ứng dụng -->
   <script src="app.js"></script>
 </body>
 </html>
