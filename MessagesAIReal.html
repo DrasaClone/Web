@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat App</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Chat App Nâng Cao</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,20 +11,29 @@
     <header>
       <h2>Chat App</h2>
       <div class="actions">
-        <button id="voice-call-button"><img src="assets/icons/call.png" alt="Call">Gọi thoại</button>
-        <button id="video-call-button"><img src="assets/icons/call.png" alt="Video">Gọi video</button>
+        <button id="voice-call-button"><img src="assets/icons/call.png"/>Gọi thoại</button>
+        <button id="video-call-button"><img src="assets/icons/call.png"/>Gọi video</button>
         <button id="share-location-button">Chia sẻ vị trí</button>
       </div>
     </header>
-    <div id="messages"></div>
-    <div id="input-area">
-      <div id="emoji-picker">
-        <button onclick="sendEmoji('😊')">😊</button>
-        <button onclick="sendEmoji('😂')">😂</button>
+
+    <div id="rooms">
+      <button onclick="createRoom()">Tạo nhóm mới</button>
+      <ul id="room-list"></ul>
+    </div>
+
+    <div id="chat-room">
+      <h3 id="room-name">Phòng: Công khai</h3>
+      <div id="messages"></div>
+      <div id="input-area">
+        <div id="emoji-picker">
+          <button onclick="sendEmoji('😊')">😊</button>
+          <button onclick="sendEmoji('😂')">😂</button>
+        </div>
+        <input type="text" id="message-input" placeholder="Nhập tin nhắn...">
+        <input type="file" id="file-input">
+        <button id="send-button">Gửi</button>
       </div>
-      <input type="text" id="message-input" placeholder="Nhập tin nhắn...">
-      <input type="file" id="file-input">
-      <button id="send-button">Gửi</button>
     </div>
   </div>
 
@@ -33,7 +42,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
-  <!-- Libsodium for E2E Encryption (tùy chọn) -->
+  <!-- Libsodium E2E Encryption -->
   <script src="https://cdn.jsdelivr.net/npm/libsodium-wrappers/dist/libsodium-wrappers.js"></script>
 
   <script src="firebase-config.js"></script>
