@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Static Social Network</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+    header { background: #4267B2; color: #fff; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { margin: 0; font-size: 1.5em; }
+    header nav button { margin-left: 10px; padding: 5px 10px; border: none; background: #fff; color: #4267B2; cursor: pointer; border-radius: 3px; }
+    main { padding: 20px; }
+    .hidden { display: none; }
+    .card { background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    .post textarea { width: 100%; height: 60px; }
+    .post input[type=file] { margin-top: 5px; }
+    .post button, .btn { padding: 5px 10px; cursor: pointer; background: #4267B2; color: #fff; border: none; border-radius: 3px; }
+    .like, .comment-btn { margin-right: 10px; cursor: pointer; color: #4267B2; }
+    .notification { position: relative; }
+    .notification span { position: absolute; top: -5px; right: -5px; background: red; color: #fff; border-radius: 50%; padding: 2px 5px; font-size: 0.8em; }
+    .infinite-loading { text-align: center; padding: 10px; color: #666; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MySocial</h1>
+    <nav>
+      <span class="notification" id="notifIcon">🔔<span id="notifCount">0</span></span>
+      <button id="btnLogout" class="hidden">Logout</button>
+    </nav>
+  </header>
+  <main>
+    <!-- Login / Register -->
+    <div id="authSection" class="card">
+      <h2>Welcome</h2>
+      <div id="loginForm">
+        <input placeholder="Username" id="loginUser" /><br /><br />
+        <input type="password" placeholder="Password" id="loginPass" /><br /><br />
+        <button onclick="login()">Login</button>
+        <p>or <a href="#" onclick="showRegister()">Register</a></p>
+      </div>
+      <div id="registerForm" class="hidden">
+        <input placeholder="Username" id="regUser" /><br /><br />
+        <input type="password" placeholder="Password" id="regPass" /><br /><br />
+        <button onclick="registerUser()">Register</button>
+        <p>or <a href="#" onclick="showLogin()">Login</a></p>
+      </div>
+    </div>
+
+    <!-- Feed and Posting -->
+    <div id="feedSection" class="hidden">
+      <div class="card post">
+        <h3>Create Post</h3>
+        <textarea id="postContent" placeholder="What's on your mind?"></textarea><br />
+        <input type="file" id="postImage" accept="image/*" /><br /><br />
+        <button onclick="createPost()">Post</button>
+      </div>
+      <div id="feed"></div>
+      <div id="infiniteLoader" class="infinite-loading">Loading more posts...</div>
+    </div>
+  </main>
+
+  <template id="postTemplate">
+    <div class="card">
+      <p><strong data-field="user"></strong> <em data-field="time"></em></p>
+      <p data-field="content"></p>
+      <img data-field="image" style="max-width:100%;border-radius:5px;" class="hidden" />
+      <div>
+        <span class="like" onclick="toggleLike(this)" data-postid="">👍 <span data-field="likesCount">0</span></span>
+        <span class="comment-btn" onclick="addComment(this)" data-postid="">💬</span>
+      </div>
+      <div data-field="comments" class="comments"></div>
+    </div>
+  </template>
+
+  <script>
+    // Utility: get/set localStorage JSON
+    const db = {
+      get(key){ return JSON.parse(localStorage.getItem(key)||'null'); },
+      set(key,val){ localStorage.setItem(key, JSON.stringify(val)); }
+    };
+
+    // Initialize data stores
+    if(!db.get('users')) db.set('users', []);
+    if(!db.get('posts')) db.set('posts', []);
+    if(!db.get('follows')) db.set('follows', {});
+    if(!db.get('notifications')) db.set('notifications', {});
+
+    let currentUser = null;
+    let postsPerLoad = 5; let loaded = 0;
+
+    // Auth
+    function showRegister(){ document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); }
+    function showLogin(){ document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); }
+
+    function registerUser(){
+      const u = document.getElementById('regUser').value;
+      const p = document.getElementById('regPass').value;
+      const users = db.get('users');
+      if(users.find(x=>x.username===u)){ alert('Username exists'); return; }
+      users.push({username:u,password:p});
+      db.set('users',users);
+      alert('Registered! Please login.'); showLogin();
+    }
+
+    function login(){
+      const u=document.getElementById('loginUser').value;
+      const p=document.getElementById('loginPass').value;
+      const users=db.get('users');
+      const user=users.find(x=>x.username===u&&x.password===p);
+      if(!user){ alert('Invalid credentials'); return; }
+      currentUser=u;
+      startApp();
+    }
+
+    function logout(){ location.reload(); }
+
+    // Notifications
+    function pushNotification(to, text){
+      let n=db.get('notifications');
+      if(!n[to]) n[to]=[];
+      n[to].push({text, time: Date.now(), read:false});
+      db.set('notifications',n);
+      if(to===currentUser) updateNotifCount();
+    }
+    function updateNotifCount(){
+      const n=db.get('notifications')[currentUser]||[];
+      const c=n.filter(x=>!x.read).length;
+      document.getElementById('notifCount').innerText=c;
+    }
+
+    // Posts
+    function createPost(){
+      const text=document.getElementById('postContent').value.trim();
+      const imgInput=document.getElementById('postImage');
+      if(!text && imgInput.files.length===0){ alert('Empty post'); return; }
+      const reader=new FileReader();
+      reader.onload=()=>{
+        const posts=db.get('posts');
+        const post={ id:Date.now(), user:currentUser, content:text, image:reader.result||'', time:Date.now(), likes:[], comments:[] };
+        posts.unshift(post);
+        db.set('posts',posts);
+        document.getElementById('postContent').value=''; imgInput.value='';
+        renderFeed(true);
+        // notify followers
+        const follows=db.get('follows')[currentUser]||[];
+        follows.forEach(f=> pushNotification(f, currentUser+' posted'));
+      };
+      if(imgInput.files[0]) reader.readAsDataURL(imgInput.files[0]); else reader.onload();
+    }
+
+    function renderFeed(reset=false){
+      if(reset){ document.getElementById('feed').innerHTML=''; loaded=0; }
+      const posts=db.get('posts');
+      const feed=document.getElementById('feed');
+      const template=document.getElementById('postTemplate');
+      const slice=posts.slice(loaded, loaded+postsPerLoad);
+      slice.forEach(post=>{
+        const clone=template.content.cloneNode(true);
+        clone.querySelector('[data-field=user]').innerText=post.user;
+        clone.querySelector('[data-field=time]').innerText=new Date(post.time).toLocaleString();
+        clone.querySelector('[data-field=content]').innerText=post.content;
+        if(post.image) { const img=clone.querySelector('[data-field=image]'); img.src=post.image; img.classList.remove('hidden'); }
+        const likeSpan=clone.querySelector('.like'); likeSpan.dataset.postid=post.id;
+        clone.querySelector('[data-field=likesCount]').innerText=post.likes.length;
+        clone.querySelector('.comment-btn').dataset.postid=post.id;
+        const commentsEl=clone.querySelector('[data-field=comments]');
+        post.comments.forEach(c=>{
+          const p=document.createElement('p'); p.innerHTML=`<strong>${c.user}</strong>: ${c.text}`; commentsEl.append(p);
+        });
+        feed.append(clone);
+      });
+      loaded+=slice.length;
+      if(loaded>=posts.length) document.getElementById('infiniteLoader').innerText='No more posts.';
+    }
+
+    function toggleLike(el){
+      const id=+el.dataset.postid;
+      const posts=db.get('posts');
+      const post=posts.find(p=>p.id===id);
+      const idx=post.likes.indexOf(currentUser);
+      if(idx>=0) post.likes.splice(idx,1);
+      else { post.likes.push(currentUser); pushNotification(post.user, currentUser+' liked your post'); }
+      db.set('posts',posts);
+      el.querySelector('[data-field=likesCount]').innerText=post.likes.length;
+    }
+
+    function addComment(el){
+      const id=+el.dataset.postid;
+      const text=prompt('Your comment:'); if(!text) return;
+      const posts=db.get('posts');
+      const post=posts.find(p=>p.id===id);
+      post.comments.push({user:currentUser, text, time:Date.now()});
+      pushNotification(post.user, currentUser+' commented');
+      db.set('posts',posts);
+      renderFeed(true);
+    }
+
+    // Infinite scroll
+    window.addEventListener('scroll', ()=>{
+      if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) renderFeed();
+    });
+
+    // Initialize app
+    function startApp(){
+      document.getElementById('authSection').classList.add('hidden');
+      document.getElementById('feedSection').classList.remove('hidden');
+      document.getElementById('btnLogout').classList.remove('hidden');
+      document.getElementById('btnLogout').onclick=logout;
+      updateNotifCount(); renderFeed(true);
+    }
+  </script>
+</body>
+</html>
