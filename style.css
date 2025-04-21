@@ -1,34 +1,50 @@
 /* style.css */
 body {
   font-family: Arial, sans-serif;
-  background-color: #f0f0f0;
+  background-color: #f0f2f5;
+  margin: 0;
 }
-
 #chat-container {
-  width: 500px;
-  margin: 50px auto;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 5px;
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto;
+  background: #fff;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
-
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+header h2 { margin: 0; }
+.actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 5px;
+}
 #messages {
-  height: 300px;
-  overflow-y: scroll;
-  border: 1px solid #ccc;
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+}
+.msg { margin-bottom: 12px; display: flex; align-items: center; }
+.msg .time { font-size: 0.8em; color: #888; margin-right: 8px; }
+.msg.sent { justify-content: flex-end; }
+.msg.received { justify-content: flex-start; }
+#input-area {
+  display: flex;
+  align-items: center;
   padding: 10px;
-  margin-bottom: 10px;
+  border-top: 1px solid #ddd;
 }
-
-#message-input {
-  width: 70%;
-  padding: 10px;
-}
-
-#file-input {
-  width: 20%;
-}
-
-#send-button {
-  padding: 10px 20px;
-}
+#emoji-picker button { font-size: 1.2em; background: none; border: none; cursor: pointer; margin-right: 5px; }
+#message-input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+#file-input { margin: 0 10px; }
+#send-button { padding: 8px 12px; 
