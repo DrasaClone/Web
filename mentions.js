@@ -1,0 +1,1 @@
+const plugin = createMentionPlugin({ /* options */ });
