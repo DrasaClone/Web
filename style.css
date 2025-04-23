@@ -17,7 +17,7 @@ body {
   padding: 10px;
 }
 
-/* Phần xác thực */
+/* Phần Xác Thực */
 #auth-section {
   background: #fff;
   padding: 30px;
@@ -50,7 +50,7 @@ body {
   cursor: pointer;
 }
 
-/* Chat container */
+/* Chat Container */
 #chat-container {
   display: flex;
   background: #fff;
@@ -59,7 +59,7 @@ body {
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Sidebar */
+/* Sidebar: Danh bạ */
 #sidebar {
   width: 250px;
   background: #f8f9fa;
@@ -81,7 +81,7 @@ body {
   cursor: pointer;
 }
 
-/* Chat window */
+/* Khu vực Chat */
 #chat-window {
   flex: 1;
   display: flex;
@@ -102,7 +102,7 @@ body {
   background: #e9ecef;
 }
 
-/* Form gửi tin */
+/* Form Gửi Tin */
 #message-form {
   display: flex;
   align-items: center;
@@ -123,13 +123,14 @@ body {
   cursor: pointer;
 }
 
+/* Các nút chức năng (emoji, đính kèm) */
 #message-form button[type="button"] {
   background: transparent;
   font-size: 18px;
   margin: 0 5px;
 }
 
-/* Hiển thị trạng thái typing */
+/* Hiển thị trạng thái "typing…" */
 #typing-indicator {
   padding: 5px 10px;
   font-style: italic;
