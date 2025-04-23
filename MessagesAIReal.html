@@ -1,25 +1,78 @@
 <!DOCTYPE html>
-<html lang="vi" data-theme="light">
+<html lang="vi">
 <head>
-  <!-- CDN Tailwind CSS, Firebase SDKs, PubNub SDK -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chat App Nâng Cao</title>
+  <!-- Liên kết CSS -->
+  <link rel="stylesheet" href="assets/css/style.css" />
+  
+  <!-- Firebase SDK (phiên bản module không chính thức, có thể sử dụng script CDN như bên dưới) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+  
+  <!-- PubNub SDK -->
+  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.21.7.min.js"></script>
+  
+  <!-- Nếu dùng PWA -->
+  <link rel="manifest" href="manifest.json">
 </head>
-<body class="flex flex-col h-screen">
-  <div id="login-screen" class="..."></div>
-  <div id="chat-screen" class="hidden ..."></div>
-
-  <!-- Load all scripts -->
-  <script src="firebase-config.js"></script>
-  <script src="pubnub-config.js"></script>
-  <script src="auth.js"></script>
-  <script src="pwa.js"></script>
-  <script src="i18n.js"></script>
-  <script src="markdown.js"></script>
-  <script src="mentions.js"></script>
-  <script src="link-preview.js"></script>
-  <script src="threading.js"></script>
-  <script src="slash-commands.js"></script>
-  <script src="analytics.js"></script>
-  <script src="chat.js"></script>
-  <script src="ui.js"></script>
+<body>
+  <div id="app">
+    <!-- Phần xác thực -->
+    <section id="auth-section">
+      <h2 id="auth-title">Đăng nhập</h2>
+      <form id="auth-form">
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Mật khẩu" required />
+        <button type="submit" id="auth-button">Đăng nhập</button>
+      </form>
+      <p>
+        Chưa có tài khoản? <a href="#" id="toggle-auth">Đăng ký ngay</a>
+      </p>
+    </section>
+    
+    <!-- Phần chat chính (ẩn cho đến xác thực thành công) -->
+    <section id="chat-section" style="display: none;">
+      <div id="chat-container">
+        <!-- Sidebar: Danh sách bạn bè/giao dịch -->
+        <aside id="sidebar">
+          <h3>Danh bạ</h3>
+          <ul id="chat-list">
+            <!-- Danh sách cuộc trò chuyện/nhóm chat -->
+          </ul>
+        </aside>
+        
+        <!-- Khu vực chat -->
+        <main id="chat-window">
+          <ul id="messages">
+            <!-- Tin nhắn được thêm vào đây -->
+          </ul>
+          
+          <!-- Form gửi tin, tích hợp nút gửi emoji và đính kèm file -->
+          <form id="message-form">
+            <input type="text" id="message-input" placeholder="Nhập tin nhắn..." required />
+            <button type="button" id="emoji-btn">😊</button>
+            <input type="file" id="file-input" style="display:none;" />
+            <button type="button" id="attach-btn">📎</button>
+            <button type="submit">Gửi</button>
+          </form>
+          <!-- Hiển thị trạng thái đang gõ -->
+          <div id="typing-indicator" style="display: none;">Đang nhập tin...</div>
+        </main>
+      </div>
+    </section>
+  </div>
+  
+  <!-- Các tệp cấu hình và JS -->
+  <script src="assets/js/firebase-config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/file-upload.js"></script>
+  
+  <!-- Nếu có thư viện Emoji (ví dụ: Emoji Button) thì thêm script của thư viện -->
+  <!-- <script src="path/to/emoji-button.min.js"></script> -->
 </body>
 </html>
