@@ -1,0 +1,13 @@
+chat-app/
+├── index.html
+├── manifest.json            // Cho PWA (tuỳ chọn)
+├── service-worker.js        // Cho PWA (tuỳ chọn)
+├── README.md
+└── assets/
+    ├── css/
+    │   └── style.css
+    └── js/
+        ├── firebase-config.js
+        ├── auth.js         // Xử lý đăng ký, đăng nhập, chuyển đổi màn hình xác thực
+        ├── app.js          // Xử lý chat thời gian thực, nhóm chat, typing indicator, emoji,...
+        └── file-upload.js  // (Tuỳ chọn) Xử lý upload file đính kèm sử dụng Firebase Storage
