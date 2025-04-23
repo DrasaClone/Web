@@ -8,7 +8,6 @@ const firebaseConfig = {
   storageBucket: "webai-7642b.firebasestorage.app",
   messagingSenderId: "967881370128",
   appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
-  measurementId: "G-61XJ390Q30"
 };
 
 // Khởi tạo Firebase
