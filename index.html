@@ -1,55 +1,22 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trang Tải Xuống</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9f9f9; display: flex; flex-direction: column; align-items: center; }
-    header { background: #4CAF50; color: white; width: 100%; padding: 1rem; text-align: center; }
-    main { width: 90%; max-width: 600px; margin: 2rem 0; background: white; padding: 1.5rem; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .file-list { list-style: none; padding: 0; }
-    .file-list li { margin: 0.5rem 0; }
-    .file-list a { color: #4CAF50; text-decoration: none; }
-    .file-list a:hover { text-decoration: underline; }
-    form { margin-top: 1.5rem; }
-    input[type="text"] { width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; }
-    button { margin-top: 0.5rem; padding: 0.5rem 1rem; border: none; background: #4CAF50; color: white; border-radius: 4px; cursor: pointer; }
-    button:hover { background: #45A049; }
-    footer { margin: 2rem 0; color: #777; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nền tảng trò chuyện trực tuyến</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"></script>
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.9.js"></script>
+    <script src="init-firebase.js"></script>
+    <script src="app.js" defer></script>
 </head>
 <body>
-  <header>
-    <h1>Trang Tải Xuống</h1>
-  </header>
-  <main>
-    <h2>Các tập tin có sẵn</h2>
-    <ul class="file-list">
-      <li><a href="/downloads/report.pdf" download>report.pdf</a></li>
-      <li><a href="/downloads/presentation.pptx" download>presentation.pptx</a></li>
-      <li><a href="/downloads/data.zip" download>data.zip</a></li>
-    </ul>
-
-    <h3>Tải xuống theo tên tệp</h3>
-    <form id="downloadForm">
-      <input type="text" id="filename" placeholder="Nhập tên tệp, ví dụ: file.pdf" required />
-      <button type="submit">Tải xuống</button>
-    </form>
-  </main>
-  <footer>&copy;Trang Tải Xuống. All rights reserved.</footer>
-
-  <script>
-    document.getElementById('downloadForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      var raw = document.getElementById('filename').value.trim();
-      if (!raw) {
-        alert('Vui lòng nhập tên tệp!');
-        return;
-      }
-      var safe = encodeURIComponent(raw);
-      window.location.href = '/Web/' + safe;
-    });
-  </script>
+    <div id="chat-container">
+        <div id="messages"></div>
+        <input type="text" id="message-input" placeholder="Nhập tin nhắn...">
+        <button id="send-button">Gửi</button>
+    </div>
 </body>
 </html>
