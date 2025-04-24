@@ -33,7 +33,7 @@ function updateUserInfo() {
 
 function uploadAvatar(file) {
   const cloudName = "YOUR_CLOUD_NAME";
-  const uploadPreset = "YOUR_UPLOAD_PRESET";
+  const uploadPreset = "ml_default";
   const url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
   const formData = new FormData();
   formData.append("file", file);
