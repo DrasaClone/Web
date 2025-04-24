@@ -1,22 +1,71 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nền tảng trò chuyện trực tuyến</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"></script>
-    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.9.js"></script>
-    <script src="init-firebase.js"></script>
-    <script src="app.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nền tảng Chat Nâng Cao</title>
+  <!-- Liên kết CSS -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <!-- PubNub SDK -->
+  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.11.js"></script>
 </head>
 <body>
-    <div id="chat-container">
-        <div id="messages"></div>
-        <input type="text" id="message-input" placeholder="Nhập tin nhắn...">
-        <button id="send-button">Gửi</button>
+  <!-- Thanh header: xác thực, nhóm chat, cập nhật hồ sơ & chuyển theme -->
+  <header>
+    <div class="auth-container">
+      <div id="user-info">Chưa đăng nhập</div>
+      <div id="auth-controls">
+        <button id="sign-in-btn">Đăng nhập</button>
+        <button id="sign-out-btn" style="display: none;">Đăng xuất</button>
+      </div>
+      <!-- Nút cập nhật hồ sơ -->
+      <button id="profile-btn">Cập nhật hồ sơ</button>
+      <!-- Nút chuyển theme -->
+      <button id="theme-toggle-btn">Chuyển giao diện</button>
     </div>
+    <!-- Menu nhóm chat -->
+    <nav class="groups-menu" id="groups-menu">
+      <!-- Các nút nhóm được tạo bởi groups.js -->
+    </nav>
+  </header>
+
+  <!-- Hộp tìm kiếm tin nhắn -->
+  <div class="chat-search">
+    <input type="text" id="search-input" placeholder="Tìm kiếm tin nhắn...">
+  </div>
+
+  <!-- Phần hiển thị tin nhắn và chức năng ghim -->
+  <div class="chat-container" id="chat-container">
+    <div class="chat-header">
+      <h2>Phòng Chat</h2>
+      <!-- Nút bật/tắt video chat -->
+      <button id="video-chat-btn">Bật Video Chat</button>
+      <!-- Vùng hiển thị tin nhắn ghim -->
+      <div id="pinned-message" class="pinned-message"></div>
+    </div>
+    <div class="chat-messages" id="messages">
+      <!-- Tin nhắn sẽ được hiển thị tại đây.
+           Mỗi tin nhắn có thể có nút sửa, xoá, reaction và button trả lời cho thread -->
+    </div>
+    <!-- Hiển thị typing indicator -->
+    <div class="typing-indicator" id="typing-indicator" style="display: none;">Người dùng đang gõ…</div>
+    <div class="chat-input">
+      <button id="emoji-btn">😊</button>
+      <input type="text" id="msg-input" placeholder="Nhập tin nhắn...">
+      <!-- Input chọn file (ẩn) dùng cho upload file chat -->
+      <input type="file" id="file-input" style="display: none;">
+      <button id="file-btn">⬆️</button>
+      <button id="send-btn">Gửi</button>
+    </div>
+    <!-- Vùng chọn emoji picker -->
+    <div class="emoji-picker" id="emoji-picker" style="display: none;"></div>
+  </div>
+
+  <!-- Liên kết file JS chính -->
+  <script type="module" src="main.js"></script>
 </body>
 </html>
