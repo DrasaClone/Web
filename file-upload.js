@@ -11,7 +11,7 @@ export function initFileUpload() {
   fileInput.addEventListener("change", (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const cloudName = "YOUR_CLOUD_NAME";
+    const cloudName = "dgbux4wzo";
     const uploadPreset = "ml_default";
     const url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
     const formData = new FormData();
