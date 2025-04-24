@@ -12,7 +12,7 @@ export function initFileUpload() {
     const file = e.target.files[0];
     if (!file) return;
     const cloudName = "YOUR_CLOUD_NAME";
-    const uploadPreset = "YOUR_UPLOAD_PRESET";
+    const uploadPreset = "ml_default";
     const url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
     const formData = new FormData();
     formData.append("file", file);
