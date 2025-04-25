@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>SocialNet Chat - Nền tảng giao tiếp đa năng</title>
   <link rel="stylesheet" href="style.css">
-  <!-- dark-mode.css sẽ được dùng khi bật chế độ ban đêm -->
+  <!-- dark-mode.css được áp dụng khi bật chế độ ban đêm -->
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js" defer></script>
@@ -57,11 +57,11 @@
       </div>
     </header>
     <main>
-      <!-- Timeline: đăng bài và các bài đăng -->
+      <!-- Timeline: đăng bài & bài đăng -->
       <section id="timeline">
         <h2>Timeline</h2>
         <div id="posts">
-          <!-- Các bài đăng realtime từ Firebase -->
+          <!-- Bài đăng realtime từ Firebase -->
         </div>
         <div id="new-post">
           <textarea id="post-content" placeholder="Bạn đang nghĩ gì?"></textarea>
@@ -69,7 +69,7 @@
         </div>
       </section>
 
-      <!-- Chat: bao gồm danh sách bạn và khung chat riêng -->
+      <!-- Chat: giao diện chat riêng -->
       <section id="chat">
         <h2>Chat</h2>
         <div id="chat-section">
@@ -77,7 +77,7 @@
           <div id="friends-list">
               <h3>Bạn bè</h3>
               <ul id="friend-list-ul">
-                <!-- Cập nhật qua friends.js -->
+                <!-- Cập nhật bởi friends.js -->
               </ul>
               <input type="text" id="add-friend-email" placeholder="Nhập email bạn bè mới">
               <button id="add-friend-btn">Thêm bạn</button>
@@ -88,13 +88,15 @@
                   <h3 id="chat-with">Chọn bạn để trò chuyện</h3>
               </div>
               <div id="chat-messages">
-                  <!-- Tin nhắn sẽ hiển thị sắp xếp theo thứ tự -->
+                  <!-- Tin nhắn sẽ hiển thị ở đây -->
               </div>
               <div id="chat-input-area">
                   <input type="text" id="chat-input" placeholder="Nhập tin nhắn...">
                   <button id="chat-send-btn">Gửi</button>
                   <input type="file" id="chat-attachment" accept="image/*">
               </div>
+              <!-- Vùng hiển thị typing indicator -->
+              <div id="typing-indicator" style="font-style: italic; color: gray;"></div>
           </div>
         </div>
       </section>
@@ -107,7 +109,7 @@
           <div id="group-list">
             <h3>Nhóm của tôi</h3>
             <ul id="group-list-ul">
-              <!-- Cập nhật qua groups.js -->
+              <!-- Cập nhật bởi groups.js -->
             </ul>
             <input type="text" id="new-group-name" placeholder="Tên nhóm mới">
             <button id="create-group-btn">Tạo nhóm</button>
@@ -128,15 +130,15 @@
         </div>
       </section>
 
-      <!-- Profile: hiển thị và cập nhật thông tin người dùng -->
+      <!-- Profile: thông tin cá nhân -->
       <section id="profile">
         <h2>Profile</h2>
         <div id="profile-info">
-          <!-- Thông tin người dùng cập nhật qua auth.js & settings.js -->
+          <!-- Cập nhật bởi auth.js và settings.js -->
         </div>
       </section>
 
-      <!-- Settings: cài đặt cá nhân (Dark Mode, cập nhật Profile, …) -->
+      <!-- Settings: cài đặt cá nhân (ví dụ: dark mode, cập nhật profile) -->
       <section id="settings">
         <h2>Cài đặt</h2>
         <div id="settings-panel">
@@ -165,7 +167,10 @@
   <script src="status.js" defer></script>
   <script src="settings.js" defer></script>
   <script src="security.js" defer></script>
+  <!-- Các module chat nâng cao -->
+  <script src="reactions.js" defer></script>
+  <script src="messageActions.js" defer></script>
+  <script src="typing.js" defer></script>
   <script src="main.js" defer></script>
 </body>
-        </html>
-                          
+</html>
