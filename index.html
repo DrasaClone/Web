@@ -4,12 +4,14 @@
   <meta charset="UTF-8">
   <title>SocialNet Chat - Nền tảng giao tiếp đa năng</title>
   <link rel="stylesheet" href="style.css">
-  <!-- dark-mode.css được áp dụng khi bật chế độ ban đêm -->
-  <!-- Firebase SDKs -->
+  <!-- dark-mode.css sẽ được áp dụng khi bật chế độ ban đêm -->
+  
+  <!-- Firebase SDKs (với defer để đảm bảo file HTML được parse xong trước khi tải script) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js" defer></script>
+  
   <!-- PubNub SDK -->
   <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.11.js" defer></script>
 </head>
@@ -23,6 +25,18 @@
       <button type="submit">Đăng nhập</button>
     </form>
     <p>Bạn chưa có tài khoản? <a href="#signup" id="go-signup">Đăng ký ngay</a></p>
+    
+    <!-- Các nút đăng nhập bổ sung -->
+    <button id="anonymous-login-btn">Đăng nhập ẩn danh</button>
+    <button id="google-login-btn">Đăng nhập qua Google</button>
+    
+    <!-- Đăng nhập bằng SĐT -->
+    <div id="phone-auth">
+      <input type="text" id="phone-number" placeholder="Nhập số điện thoại" />
+      <!-- Container reCAPTCHA cho Phone Sign-In -->
+      <div id="recaptcha-container"></div>
+      <button id="phone-login-btn">Đăng nhập qua SĐT</button>
+    </div>
   </div>
 
   <!-- Trang đăng ký -->
@@ -57,11 +71,11 @@
       </div>
     </header>
     <main>
-      <!-- Timeline: đăng bài & bài đăng -->
+      <!-- Timeline: đăng bài và hiển thị bài đăng -->
       <section id="timeline">
         <h2>Timeline</h2>
         <div id="posts">
-          <!-- Bài đăng realtime từ Firebase -->
+          <!-- Bài đăng realtime tải từ Firebase -->
         </div>
         <div id="new-post">
           <textarea id="post-content" placeholder="Bạn đang nghĩ gì?"></textarea>
@@ -69,7 +83,7 @@
         </div>
       </section>
 
-      <!-- Chat: giao diện chat riêng -->
+      <!-- Chat riêng -->
       <section id="chat">
         <h2>Chat</h2>
         <div id="chat-section">
@@ -77,31 +91,31 @@
           <div id="friends-list">
               <h3>Bạn bè</h3>
               <ul id="friend-list-ul">
-                <!-- Cập nhật bởi friends.js -->
+                <!-- Danh sách bạn cập nhật bởi friends.js -->
               </ul>
               <input type="text" id="add-friend-email" placeholder="Nhập email bạn bè mới">
               <button id="add-friend-btn">Thêm bạn</button>
           </div>
-          <!-- Khung chat cho trò chuyện riêng -->
+          <!-- Khung chat riêng -->
           <div id="chat-container">
               <div id="chat-header">
                   <h3 id="chat-with">Chọn bạn để trò chuyện</h3>
               </div>
               <div id="chat-messages">
-                  <!-- Tin nhắn sẽ hiển thị ở đây -->
+                <!-- Tin nhắn hiển thị ở đây, mỗi tin nhắn sẽ được gán thuộc tính data-message-id -->
               </div>
               <div id="chat-input-area">
                   <input type="text" id="chat-input" placeholder="Nhập tin nhắn...">
                   <button id="chat-send-btn">Gửi</button>
                   <input type="file" id="chat-attachment" accept="image/*">
               </div>
-              <!-- Vùng hiển thị typing indicator -->
+              <!-- Vùng hiển thị chỉ báo "đang gõ" -->
               <div id="typing-indicator" style="font-style: italic; color: gray;"></div>
           </div>
         </div>
       </section>
 
-      <!-- Nhóm: giao diện chat nhóm -->
+      <!-- Chat nhóm -->
       <section id="groups">
         <h2>Chat Nhóm</h2>
         <div id="group-section">
@@ -130,15 +144,15 @@
         </div>
       </section>
 
-      <!-- Profile: thông tin cá nhân -->
+      <!-- Profile -->
       <section id="profile">
         <h2>Profile</h2>
         <div id="profile-info">
-          <!-- Cập nhật bởi auth.js và settings.js -->
+          <!-- Thông tin người dùng được cập nhật bởi auth.js và settings.js -->
         </div>
       </section>
 
-      <!-- Settings: cài đặt cá nhân (ví dụ: dark mode, cập nhật profile) -->
+      <!-- Settings -->
       <section id="settings">
         <h2>Cài đặt</h2>
         <div id="settings-panel">
@@ -154,7 +168,7 @@
     </main>
   </div>
 
-  <!-- Tích hợp các module JS -->
+  <!-- Tích hợp các module JS (đặt ở thư mục gốc) -->
   <script src="firebase-setup.js" defer></script>
   <script src="pubnub-setup.js" defer></script>
   <script src="auth.js" defer></script>
