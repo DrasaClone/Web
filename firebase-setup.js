@@ -12,3 +12,4 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+const perf = getPerformance(app);
