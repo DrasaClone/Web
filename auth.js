@@ -40,6 +40,28 @@ export function initAuth() {
       })
       .catch(error => console.error("Lỗi đăng nhập bằng Google:", error));
   });
+        // auth.js thêm phần này hoặc tạo file phone-auth.js
+export function signInWithPhoneNumber(phoneNumber) {
+  // Tạo reCAPTCHA verifier (invisible)
+  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('sign-in-btn', {
+    'size': 'invisible',
+    'callback': function(response) {
+      // reCAPTCHA solved - cho phép đăng nhập qua số điện thoại
+    }
+  });
+  auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+    .then(confirmationResult => {
+      window.confirmationResult = confirmationResult;
+      const code = prompt("Nhập mã OTP được gửi đến số của bạn:");
+      return confirmationResult.confirm(code);
+    })
+    .then(result => {
+      // Người dùng đăng nhập thành công
+      localStorage.setItem("displayName", result.user.phoneNumber);
+    })
+    .catch(error => console.error("Lỗi đăng nhập số điện thoại:", error));
+}
+
 
   // Đăng xuất
   signOutBtn.addEventListener("click", () => {
