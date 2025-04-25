@@ -10,6 +10,6 @@ const firebaseConfig = {
   appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
   measurementId: "G-61XJ390Q30"
 };
-
+const app = initializeApp(firebaseConfig);
 firebase.initializeApp(firebaseConfig);
 const perf = getPerformance(app);
