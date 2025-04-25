@@ -6,45 +6,45 @@ document.addEventListener("DOMContentLoaded", function() {
   const signupPage = document.getElementById("signup-page");
   const mainApp    = document.getElementById("main-app");
 
-  // Đăng nhập
+  // Đăng nhập theo email và mật khẩu (đã có)
   if (loginForm) {
     loginForm.addEventListener("submit", function(e) {
       e.preventDefault();
       const email    = document.getElementById("login-email").value;
       const password = document.getElementById("login-password").value;
       firebase.auth().signInWithEmailAndPassword(email, password)
-      .then(userCredential => {
-        loginPage.style.display  = "none";
-        signupPage.style.display = "none";
-        mainApp.style.display    = "block";
-        loadProfile(userCredential.user);
-      })
-      .catch(error => {
-        alert("Lỗi đăng nhập: " + error.message);
-      });
+        .then(userCredential => {
+          loginPage.style.display  = "none";
+          signupPage.style.display = "none";
+          mainApp.style.display    = "block";
+          loadProfile(userCredential.user);
+        })
+        .catch(error => {
+          alert("Lỗi đăng nhập: " + error.message);
+        });
     });
   }
-
-  // Đăng ký
+  
+  // Đăng ký theo email và mật khẩu (đã có)
   if (signupForm) {
     signupForm.addEventListener("submit", function(e) {
       e.preventDefault();
       const email    = document.getElementById("signup-email").value;
       const password = document.getElementById("signup-password").value;
       firebase.auth().createUserWithEmailAndPassword(email, password)
-      .then(userCredential => {
-        signupPage.style.display = "none";
-        loginPage.style.display  = "none";
-        mainApp.style.display    = "block";
-        userCredential.user.updateProfile({
-          displayName: email,
-          photoURL: 'default-avatar.png'
+        .then(userCredential => {
+          signupPage.style.display = "none";
+          loginPage.style.display  = "none";
+          mainApp.style.display    = "block";
+          userCredential.user.updateProfile({
+            displayName: email,
+            photoURL: 'default-avatar.png'
+          });
+          loadProfile(userCredential.user);
+        })
+        .catch(error => {
+          alert("Lỗi đăng ký: " + error.message);
         });
-        loadProfile(userCredential.user);
-      })
-      .catch(error => {
-        alert("Lỗi đăng ký: " + error.message);
-      });
     });
   }
 
@@ -77,6 +77,79 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     });
   }
+
+  // --- Đăng nhập ẩn danh ---
+  const anonymousLoginBtn = document.getElementById("anonymous-login-btn");
+  if (anonymousLoginBtn) {
+    anonymousLoginBtn.addEventListener("click", function() {
+      firebase.auth().signInAnonymously()
+        .then(userCredential => {
+          loginPage.style.display = "none";
+          signupPage.style.display = "none";
+          mainApp.style.display = "block";
+          loadProfile(userCredential.user);
+        })
+        .catch(error => {
+          alert("Lỗi đăng nhập ẩn danh: " + error.message);
+        });
+    });
+  }
+
+  // --- Đăng nhập qua Google ---
+  const googleLoginBtn = document.getElementById("google-login-btn");
+  if (googleLoginBtn) {
+    googleLoginBtn.addEventListener("click", function() {
+      var provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+        .then(result => {
+          loginPage.style.display = "none";
+          signupPage.style.display = "none";
+          mainApp.style.display = "block";
+          loadProfile(result.user);
+        })
+        .catch(error => {
+          alert("Lỗi đăng nhập Google: " + error.message);
+        });
+    });
+  }
+
+  // --- Đăng nhập bằng Số điện thoại ---
+  // Phần này sử dụng reCAPTCHA – đảm bảo bạn đã tạo container reCAPTCHA ở index.html
+  const phoneLoginBtn = document.getElementById("phone-login-btn");
+  if (phoneLoginBtn) {
+    // Thiết lập reCAPTCHA verifier (chỉ cần tạo một lần)
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+      size: 'invisible', // hoặc "normal" để hiển thị widget
+      callback: response => {
+        // Khi reCAPTCHA được xác minh, có thể thực hiện đăng nhập
+        console.log("reCAPTCHA xác minh thành công:", response);
+      }
+    });
+    
+    phoneLoginBtn.addEventListener("click", function() {
+      const phoneNumber = document.getElementById("phone-number").value;
+      if (!phoneNumber) {
+        alert("Vui lòng nhập số điện thoại");
+        return;
+      }
+      // Gửi mã xác thực đến số điện thoại
+      firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+        .then(confirmationResult => {
+          // confirmationResult.confirm(code) được gọi sau khi người dùng nhập mã xác thực
+          var code = prompt("Nhập mã xác thực được gửi đến số điện thoại của bạn:");
+          return confirmationResult.confirm(code);
+        })
+        .then(result => {
+          loginPage.style.display = "none";
+          signupPage.style.display = "none";
+          mainApp.style.display = "block";
+          loadProfile(result.user);
+        })
+        .catch(error => {
+          alert("Lỗi đăng nhập số điện thoại: " + error.message);
+        });
+    });
+  }
 });
 
 function loadProfile(user) {
@@ -84,8 +157,8 @@ function loadProfile(user) {
   if (profileInfo) {
     profileInfo.innerHTML = `
       <img src="${user.photoURL || 'default-avatar.png'}" alt="Avatar" width="100" style="border-radius:50%;">
-      <p>Email: ${user.email}</p>
-      <p>Tên hiển thị: ${user.displayName}</p>
+      <p>Email: ${user.email || "Ẩn danh"}</p>
+      <p>Tên hiển thị: ${user.displayName || "Ẩn danh"}</p>
     `;
   }
 }
