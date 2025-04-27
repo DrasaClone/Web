@@ -5,10 +5,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/fir
 
 export function sendFriendRequest(receiverId) {
   const currentUser = auth.currentUser;
-  if (!currentUser) {
-    alert("Vui lòng đăng nhập để gửi yêu cầu kết bạn");
-    return;
-  }
+  if (!currentUser) { alert("Vui lòng đăng nhập để gửi yêu cầu kết bạn"); return; }
   const reqRef = ref(database, "friendRequests/" + receiverId);
   push(reqRef, {
     senderId: currentUser.uid,
@@ -55,7 +52,6 @@ export function removeFriend(friendId) {
       }
     });
   }, { onlyOnce: true });
-
   const reciprocalRef = ref(database, "friends/" + friendId);
   onValue(reciprocalRef, snapshot => {
     snapshot.forEach(childSnapshot => {
@@ -84,10 +80,7 @@ export function listenFriends(callback) {
 
 export function sendPrivateMessage(friendId, message) {
   const currentUser = auth.currentUser;
-  if (!currentUser) {
-    alert("Vui lòng đăng nhập để gửi tin nhắn");
-    return;
-  }
+  if (!currentUser) { alert("Vui lòng đăng nhập để gửi tin nhắn"); return; }
   const convId = currentUser.uid < friendId 
     ? currentUser.uid + "_" + friendId 
     : friendId + "_" + currentUser.uid;
