@@ -21,12 +21,11 @@ let isLoginMode = true;
 const emailInput = document.getElementById("auth-email");
 const passwordInput = document.getElementById("auth-password");
 
-// --- Thêm phương thức đăng nhập Google ---
+// Đăng nhập Google
 export function googleSignIn() {
   const provider = new GoogleAuthProvider();
   signInWithPopup(auth, provider)
     .then(result => {
-      // Đăng nhập thành công
       closeAuthModal();
     })
     .catch(error => {
@@ -34,15 +33,11 @@ export function googleSignIn() {
     });
 }
 
-// --- Thêm phương thức đăng nhập bằng Số điện thoại ---
-// Trước tiên, bạn cần có một container cho reCAPTCHA bên trong HTML (ví dụ một div có id "recaptcha-container")
-// Bạn có thể thêm div này vào modal xác thực nếu muốn.
+// Đăng nhập Số điện thoại
 export function setupPhoneAuth(containerId) {
   window.recaptchaVerifier = new RecaptchaVerifier(containerId, {
-    'size': 'invisible',
-    'callback': (response) => {
-      // reCAPTCHA đã xác nhận
-    }
+    size: 'invisible',
+    callback: (response) => { /* reCAPTCHA đã xác nhận */ }
   }, auth);
 }
 
@@ -70,7 +65,7 @@ export function closeAuthModal() {
 }
 
 export function setupAuthListeners() {
-  // Chuyển đổi giữa đăng nhập và đăng ký
+  // Chuyển đổi giữa Đăng nhập và Đăng ký
   document.getElementById("toggle-link").addEventListener("click", (e) => {
     e.preventDefault();
     isLoginMode = !isLoginMode;
@@ -93,34 +88,31 @@ export function setupAuthListeners() {
     const password = passwordInput.value;
     if (isLoginMode) {
       signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          closeAuthModal();
-        })
-        .catch((error) => {
-          alert("Lỗi đăng nhập: " + error.message);
-        });
+        .then(() => closeAuthModal())
+        .catch(error => alert("Lỗi đăng nhập: " + error.message));
     } else {
       createUserWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          closeAuthModal();
-        })
-        .catch((error) => {
-          alert("Lỗi đăng ký: " + error.message);
-        });
+        .then(() => closeAuthModal())
+        .catch(error => alert("Lỗi đăng ký: " + error.message));
     }
+  });
+
+  // Gán sự kiện cho nút Google và Phone
+  document.getElementById("google-login").addEventListener("click", googleSignIn);
+  document.getElementById("phone-login").addEventListener("click", () => {
+    const phone = prompt("Nhập số điện thoại của bạn (bao gồm mã quốc gia):");
+    if (phone) phoneSignIn(phone);
   });
 }
 
 export function updateUserArea(currentUser) {
   const userArea = document.getElementById("user-area");
   if (currentUser) {
-    userArea.innerHTML = `<span>Chào, ${currentUser.email}</span> 
+    userArea.innerHTML = `<span>Chào, ${currentUser.email}</span>
                           <button id="logout-btn">Đăng xuất</button>
                           <a href="profile.html">Trang Cá Nhân</a>`;
     document.getElementById("logout-btn").addEventListener("click", () => {
-      signOut(auth).catch((error) =>
-        alert("Lỗi khi đăng xuất: " + error.message)
-      );
+      signOut(auth).catch(error => alert("Lỗi đăng xuất: " + error.message));
     });
   } else {
     userArea.innerHTML = '<button id="login-btn">Đăng nhập</button> <button id="signup-btn">Đăng ký</button>';
