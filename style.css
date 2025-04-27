@@ -75,7 +75,6 @@ select {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-
 textarea {
   resize: vertical;
 }
@@ -92,7 +91,6 @@ textarea {
   justify-content: center;
   align-items: center;
 }
-
 .modal-content {
   background: #fff;
   padding: 20px;
@@ -101,7 +99,6 @@ textarea {
   border-radius: 5px;
   position: relative;
 }
-
 .close-btn {
   position: absolute;
   top: 10px;
@@ -109,7 +106,6 @@ textarea {
   font-size: 24px;
   cursor: pointer;
 }
-
 .hidden {
   display: none;
 }
@@ -119,45 +115,39 @@ textarea {
   border-bottom: 1px solid #ddd;
   padding: 10px 0;
 }
-
 .post-item:last-child {
   border-bottom: none;
 }
-
 .post-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
 .post-title {
   font-weight: bold;
   color: #0077cc;
   cursor: pointer;
 }
-
 .post-meta {
   color: #666;
   font-size: 0.9em;
   margin-bottom: 5px;
 }
 
-/* Hỗ trợ upload file */
+/* Upload file */
 .file-preview {
   margin: 10px 0;
 }
-
 .file-preview img,
 .file-preview video {
   max-width: 100%;
   height: auto;
 }
-
 .upload-progress {
   margin: 10px 0;
 }
 
-/* Phòng chat */
+/* Chat */
 .chat-messages {
   max-height: 200px;
   overflow-y: auto;
@@ -165,13 +155,11 @@ textarea {
   padding: 10px;
   margin-bottom: 10px;
 }
-
 .chat-message {
   margin-bottom: 5px;
 }
 
 /* Trang Profile */
-#profile-info,
-#user-posts {
+#profile-info, #user-posts, #friend-list, #private-chat {
   margin-bottom: 20px;
 }
