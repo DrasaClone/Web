@@ -7,7 +7,7 @@
  * @returns {Promise<Object>} Đối tượng JSON trả về từ Cloudinary.
  */
 export async function uploadFile(file, onProgress) {
-  const CLOUD_NAME = "YOUR_CLOUD_NAME";       // Thay bằng Cloud Name của bạn
+  const CLOUD_NAME = "dgbux4wzo";       // Thay bằng Cloud Name của bạn
   const UPLOAD_PRESET = "okeqfdx4";   // Thay bằng Upload Preset của bạn
   const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`;
 
