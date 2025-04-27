@@ -7,12 +7,14 @@
     <link rel="stylesheet" href="style.css" />
     <!-- PubNub SDK -->
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.2.0.min.js"></script>
+    <!-- (Nếu sử dụng DOMPurify để bảo vệ đầu vào, bạn có thể thêm thư viện này: -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script> -->
   </head>
   <body>
     <header>
       <h1>Advanced Forum Trực Tuyến</h1>
       <div id="user-area">
-        <!-- Thông tin người dùng (đăng nhập/đăng ký) sẽ hiện tại đây -->
+        <!-- Thông tin người dùng (đăng nhập/đăng ký) -->
       </div>
       <div id="notification-area">
         <!-- Thông báo realtime -->
@@ -33,15 +35,15 @@
             <option value="discussion">Thảo luận</option>
             <option value="help">Trợ giúp</option>
           </select>
-          <!-- File input cho đính kèm (ảnh hoặc video) -->
+          <!-- Chọn file (ảnh/video) -->
           <input type="file" id="post-file" accept="image/*,video/*" />
-          <!-- Khu vực xem trước file -->
+          <!-- Preview file -->
           <div id="file-preview" class="file-preview hidden">
             <p>Preview:</p>
             <img id="preview-img" src="" alt="Preview ảnh" class="hidden" />
             <video id="preview-video" controls class="hidden"></video>
           </div>
-          <!-- Tiến trình upload -->
+          <!-- Hiển thị tiến trình upload -->
           <div id="upload-progress" class="upload-progress hidden">
             <progress id="progress-bar" value="0" max="100"></progress>
             <span id="progress-text"></span>
@@ -50,7 +52,7 @@
         </form>
       </section>
 
-      <!-- Phần tìm kiếm bài viết -->
+      <!-- Tìm kiếm bài viết -->
       <section id="search-post">
         <h2>Tìm kiếm bài viết</h2>
         <input type="text" id="search-input" placeholder="Tìm theo tiêu đề..." />
@@ -88,10 +90,10 @@
         <p id="toggle-auth">
           Chưa có tài khoản? <a href="#" id="toggle-link">Đăng ký ngay</a>
         </p>
-        <!-- Thêm các nút đăng nhập bằng Google và Phone nếu muốn -->
+        <!-- Các nút đăng nhập bổ sung -->
         <button id="google-login">Đăng nhập Google</button>
         <button id="phone-login">Đăng nhập Phone</button>
-        <!-- Container cho reCAPTCHA của Phone Auth -->
+        <!-- Container cho reCAPTCHA (Phone Auth) -->
         <div id="recaptcha-container"></div>
       </div>
     </div>
@@ -106,7 +108,7 @@
       </form>
     </div>
 
-    <!-- Điểm khởi đầu của ES Module -->
+    <!-- ES Module entry point -->
     <script type="module" src="main.js"></script>
   </body>
 </html>
