@@ -9,24 +9,29 @@ import { listenFriends, listenFriendRequests } from "./friends.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Thiết lập xác thực
   setupAuthListeners();
   monitorAuthState();
 
+  // Thiết lập tìm kiếm và load bài viết
   setupPostSearch();
   onAuthStateChanged(auth, user => {
     setupPostCreation(user);
     setupCommentCreation(user);
     loadPosts(user);
-    // Cập nhật danh sách bạn bè (ví dụ: hiển thị trên trang profile qua console hoặc giao diện)
+    // Lắng nghe và cập nhật danh sách bạn bè
     listenFriends(friendsList => {
       console.log("Danh sách bạn bè:", friendsList);
+      // Cập nhật giao diện nếu cần
     });
     // Lắng nghe yêu cầu kết bạn
     listenFriendRequests(requests => {
       console.log("Yêu cầu kết bạn:", requests);
+      // Cập nhật giao diện hoặc thông báo nếu cần
     });
   });
 
+  // Thiết lập chat nhóm và thông báo
   setupChat();
   setupNotifications();
 
