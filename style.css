@@ -1,0 +1,177 @@
+/* Định dạng cơ bản */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 0;
+}
+
+/* Header */
+header {
+  background-color: #0077cc;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+}
+
+#user-area {
+  margin-top: 10px;
+}
+
+/* Thông báo realtime */
+#notification-area {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  background: #ffeb3b;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+/* Nút bấm */
+button {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  background-color: #005fa3;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+button:hover {
+  background-color: #004a80;
+}
+
+/* Main và Section */
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+section {
+  width: 90%;
+  max-width: 700px;
+  background-color: #fff;
+  margin-bottom: 20px;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+/* Input, textarea, select */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* Modal xác thực */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 5px;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Bài viết */
+.post-item {
+  border-bottom: 1px solid #ddd;
+  padding: 10px 0;
+}
+
+.post-item:last-child {
+  border-bottom: none;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.post-title {
+  font-weight: bold;
+  color: #0077cc;
+  cursor: pointer;
+}
+
+.post-meta {
+  color: #666;
+  font-size: 0.9em;
+  margin-bottom: 5px;
+}
+
+/* Hỗ trợ upload file */
+.file-preview {
+  margin: 10px 0;
+}
+
+.file-preview img,
+.file-preview video {
+  max-width: 100%;
+  height: auto;
+}
+
+.upload-progress {
+  margin: 10px 0;
+}
+
+/* Phòng chat */
+.chat-messages {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.chat-message {
+  margin-bottom: 5px;
+}
+
+/* Trang Profile */
+#profile-info,
+#user-posts {
+  margin-bottom: 20px;
+}
