@@ -3,16 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Zola Messi - Forum FF Trực Tuyến</title>
+    <title>Advanced Forum Trực Tuyến</title>
     <link rel="stylesheet" href="style.css" />
     <!-- PubNub SDK -->
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.2.0.min.js"></script>
   </head>
   <body>
     <header>
-      <h1>Zola Messi</h1>
+      <h1>Advanced Forum Trực Tuyến</h1>
       <div id="user-area">
-        <!-- Thông tin người dùng (đăng nhập/đăng ký) sẽ hiện ở đây -->
+        <!-- Thông tin người dùng (đăng nhập/đăng ký) sẽ hiện tại đây -->
       </div>
       <div id="notification-area">
         <!-- Thông báo realtime -->
@@ -33,7 +33,7 @@
             <option value="discussion">Thảo luận</option>
             <option value="help">Trợ giúp</option>
           </select>
-          <!-- Chọn file đính kèm (ảnh hoặc video) -->
+          <!-- File input cho đính kèm (ảnh hoặc video) -->
           <input type="file" id="post-file" accept="image/*,video/*" />
           <!-- Khu vực xem trước file -->
           <div id="file-preview" class="file-preview hidden">
@@ -64,7 +64,7 @@
         </div>
       </section>
 
-      <!-- Phòng chat -->
+      <!-- Phòng chat nhóm -->
       <section id="chat-room">
         <h2>Phòng chat</h2>
         <div id="chat-messages" class="chat-messages"></div>
@@ -75,7 +75,7 @@
       </section>
     </main>
 
-    <!-- Modal xác thực (Đăng nhập/Đăng ký) -->
+    <!-- Modal xác thực -->
     <div id="auth-modal" class="modal hidden">
       <div class="modal-content">
         <span class="close-btn">&times;</span>
@@ -88,6 +88,11 @@
         <p id="toggle-auth">
           Chưa có tài khoản? <a href="#" id="toggle-link">Đăng ký ngay</a>
         </p>
+        <!-- Thêm các nút đăng nhập bằng Google và Phone nếu muốn -->
+        <button id="google-login">Đăng nhập Google</button>
+        <button id="phone-login">Đăng nhập Phone</button>
+        <!-- Container cho reCAPTCHA của Phone Auth -->
+        <div id="recaptcha-container"></div>
       </div>
     </div>
 
