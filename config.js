@@ -5,13 +5,14 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.
 import { getDatabase } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_FIREBASE_API_KEY",
-  authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
-  databaseURL: "YOUR_FIREBASE_DATABASE_URL",
-  projectId: "YOUR_FIREBASE_PROJECT_ID",
-  storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
-  appId: "YOUR_FIREBASE_APP_ID"
+  apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
+  authDomain: "webai-7642b.firebaseapp.com",
+  databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "webai-7642b",
+  storageBucket: "webai-7642b.firebasestorage.app",
+  messagingSenderId: "967881370128",
+  appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
+  measurementId: "G-61XJ390Q30"
 };
 
 const app = initializeApp(firebaseConfig);
