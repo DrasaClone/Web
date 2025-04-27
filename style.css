@@ -1,4 +1,4 @@
-/* Định dạng cơ bản */
+/* Cơ bản cho toàn bộ trang */
 body {
   font-family: Arial, sans-serif;
   background-color: #f5f5f5;
@@ -28,7 +28,7 @@ header {
   font-weight: bold;
 }
 
-/* Button */
+/* Nút bấm */
 button {
   padding: 10px 15px;
   margin: 5px;
@@ -38,11 +38,9 @@ button {
   cursor: pointer;
   border-radius: 4px;
 }
-button:hover {
-  background-color: #004a80;
-}
+button:hover { background-color: #004a80; }
 
-/* Main & section */
+/* Main & Section */
 main {
   display: flex;
   flex-direction: column;
@@ -73,7 +71,7 @@ select {
 }
 textarea { resize: vertical; }
 
-/* Modal */
+/* Modal xác thực */
 .modal {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -106,7 +104,7 @@ textarea { resize: vertical; }
 .post-title { font-weight: bold; color: #0077cc; cursor: pointer; }
 .post-meta { color: #666; font-size: 0.9em; margin-bottom: 5px; }
 
-/* File upload */
+/* Upload file */
 .file-preview { margin: 10px 0; }
 .file-preview img, .file-preview video { max-width: 100%; height: auto; }
 .upload-progress { margin: 10px 0; }
@@ -115,5 +113,5 @@ textarea { resize: vertical; }
 .chat-messages { max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
 .chat-message { margin-bottom: 5px; }
 
-/* Profile page */
+/* Profile trang */
 #profile-info, #user-posts, #friend-list, #private-chat { margin-bottom: 20px; }
