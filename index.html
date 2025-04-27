@@ -1,175 +1,107 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <title>SocialNet Chat - Anonymous Mode</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- dark-mode.css được áp dụng khi bật chế độ ban đêm -->
-  
-  <!-- Firebase SDKs (sử dụng defer để đảm bảo HTML được parse xong trước khi tải script) -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js" defer></script>
-  
-  <!-- PubNub SDK -->
-  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.11.js" defer></script>
-</head>
-<body>
-  <!-- Chỉ hiển thị giao diện chính vì đăng nhập ẩn danh sẽ được thực hiện tự động -->
-  <div id="main-app" class="page" style="display:block;">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Advanced Forum Trực Tuyến</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- PubNub SDK -->
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.2.0.min.js"></script>
+  </head>
+  <body>
     <header>
-      <h1>SocialNet Chat (Anonymous)</h1>
-      <nav>
-        <ul>
-          <li><a href="#timeline">Timeline</a></li>
-          <li><a href="#chat">Chat</a></li>
-          <li><a href="#groups">Nhóm</a></li>
-          <li><a href="#profile">Profile</a></li>
-          <li><a href="#settings">Cài đặt</a></li>
-          <!-- Nếu cần, bạn có thể để nút đăng xuất -->
-          <li><a href="#" id="logout-btn">Đăng xuất</a></li>
-        </ul>
-      </nav>
-      <div id="search-bar">
-        <input type="text" id="search-input" placeholder="Tìm kiếm bài đăng, bạn bè hoặc tin nhắn…">
-        <button id="search-btn">Tìm</button>
+      <h1>Advanced Forum Trực Tuyến</h1>
+      <div id="user-area">
+        <!-- Thông tin người dùng (đăng nhập/đăng ký) sẽ hiện ở đây -->
+      </div>
+      <div id="notification-area">
+        <!-- Thông báo realtime -->
       </div>
     </header>
+
     <main>
-      <!-- Timeline -->
-      <section id="timeline">
-        <h2>Timeline</h2>
-        <div id="posts">
-          <!-- Các bài đăng realtime từ Firebase -->
-        </div>
-        <div id="new-post">
-          <textarea id="post-content" placeholder="Bạn đang nghĩ gì?"></textarea>
-          <button id="post-btn">Đăng bài</button>
+      <!-- Phần tạo bài viết -->
+      <section id="create-post">
+        <h2>Tạo bài viết mới</h2>
+        <form id="post-form">
+          <input type="text" id="post-title" placeholder="Tiêu đề" required />
+          <textarea id="post-content" placeholder="Nội dung (Markdown hỗ trợ)" required></textarea>
+          <select id="post-category">
+            <option value="">Chọn chủ đề</option>
+            <option value="general">Chung</option>
+            <option value="news">Tin tức</option>
+            <option value="discussion">Thảo luận</option>
+            <option value="help">Trợ giúp</option>
+          </select>
+          <!-- Chọn file đính kèm (ảnh hoặc video) -->
+          <input type="file" id="post-file" accept="image/*,video/*" />
+          <!-- Khu vực xem trước file -->
+          <div id="file-preview" class="file-preview hidden">
+            <p>Preview:</p>
+            <img id="preview-img" src="" alt="Preview ảnh" class="hidden" />
+            <video id="preview-video" controls class="hidden"></video>
+          </div>
+          <!-- Tiến trình upload -->
+          <div id="upload-progress" class="upload-progress hidden">
+            <progress id="progress-bar" value="0" max="100"></progress>
+            <span id="progress-text"></span>
+          </div>
+          <button type="submit">Đăng bài</button>
+        </form>
+      </section>
+
+      <!-- Phần tìm kiếm bài viết -->
+      <section id="search-post">
+        <h2>Tìm kiếm bài viết</h2>
+        <input type="text" id="search-input" placeholder="Tìm theo tiêu đề..." />
+      </section>
+
+      <!-- Danh sách bài viết -->
+      <section id="posts">
+        <h2>Bảng tin</h2>
+        <div id="post-list">
+          <!-- Các bài viết được load từ Firebase -->
         </div>
       </section>
-      
-      <!-- Chat riêng -->
-      <section id="chat">
-        <h2>Chat</h2>
-        <div id="chat-section">
-          <!-- Danh sách bạn bè -->
-          <div id="friends-list">
-            <h3>Bạn bè</h3>
-            <ul id="friend-list-ul">
-              <!-- Cập nhật bởi friends.js -->
-            </ul>
-            <input type="text" id="add-friend-email" placeholder="Nhập email bạn bè mới">
-            <button id="add-friend-btn">Thêm bạn</button>
-          </div>
-          <!-- Khung chat riêng -->
-          <div id="chat-container">
-            <div id="chat-header">
-              <h3 id="chat-with">Chọn bạn để trò chuyện</h3>
-            </div>
-            <div id="chat-messages">
-              <!-- Tin nhắn sẽ hiển thị ở đây -->
-            </div>
-            <div id="chat-input-area">
-              <input type="text" id="chat-input" placeholder="Nhập tin nhắn...">
-              <button id="chat-send-btn">Gửi</button>
-              <input type="file" id="chat-attachment" accept="image/*">
-            </div>
-            <!-- Chỉ báo "đang gõ" -->
-            <div id="typing-indicator" style="font-style: italic; color: gray;"></div>
-          </div>
-        </div>
-      </section>
-      
-      <!-- Chat nhóm -->
-      <section id="groups">
-        <h2>Chat Nhóm</h2>
-        <div id="group-section">
-          <div id="group-list">
-            <h3>Nhóm của tôi</h3>
-            <ul id="group-list-ul">
-              <!-- Cập nhật bởi groups.js -->
-            </ul>
-            <input type="text" id="new-group-name" placeholder="Tên nhóm mới">
-            <button id="create-group-btn">Tạo nhóm</button>
-          </div>
-          <div id="group-chat-container">
-            <div id="group-chat-header">
-              <h3 id="chat-group-with">Chọn nhóm để trò chuyện</h3>
-            </div>
-            <div id="group-chat-messages">
-              <!-- Tin nhắn nhóm -->
-            </div>
-            <div id="group-chat-input-area">
-              <input type="text" id="group-chat-input" placeholder="Nhập tin nhắn nhóm...">
-              <button id="group-chat-send-btn">Gửi</button>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      <!-- Profile -->
-      <section id="profile">
-        <h2>Profile</h2>
-        <div id="profile-info">
-          <!-- Thông tin người dùng cập nhật bởi loadProfile() -->
-        </div>
-      </section>
-      
-      <!-- Settings -->
-      <section id="settings">
-        <h2>Cài đặt</h2>
-        <div id="settings-panel">
-          <button id="toggle-dark-mode">Chế độ ban đêm</button>
-          <div id="update-profile">
-            <h3>Cập nhật Profile</h3>
-            <input type="text" id="new-display-name" placeholder="Tên hiển thị mới">
-            <input type="file" id="new-avatar" accept="image/*">
-            <button id="update-profile-btn">Cập nhật</button>
-          </div>
-        </div>
+
+      <!-- Phòng chat -->
+      <section id="chat-room">
+        <h2>Phòng chat</h2>
+        <div id="chat-messages" class="chat-messages"></div>
+        <form id="chat-form">
+          <input type="text" id="chat-input" placeholder="Nhập tin nhắn..." required />
+          <button type="submit">Gửi</button>
+        </form>
       </section>
     </main>
-  </div>
-  
-  <!-- Tích hợp các file JS (đặt trực tiếp ở gốc) -->
-  <script src="firebase-setup.js" defer></script>
-  <script src="pubnub-setup.js" defer></script>
-  <script src="auth.js" defer></script>
-  <script src="posts.js" defer></script>
-  <script src="friends.js" defer></script>
-  <script src="chat.js" defer></script>
-  <script src="groups.js" defer></script>
-  <script src="notifications.js" defer></script>
-  <script src="search.js" defer></script>
-  <script src="status.js" defer></script>
-  <script src="settings.js" defer></script>
-  <script src="security.js" defer></script>
-  <!-- Các module chat nâng cao -->
-  <script src="reactions.js" defer></script>
-  <script src="messageActions.js" defer></script>
-  <script src="typing.js" defer></script>
-  <script src="main.js" defer></script>
-  
-  <!-- Đăng nhập ẩn danh tự động -->
-  <script defer>
-    firebase.auth().onAuthStateChanged(function(user) {
-      if (!user) {
-        firebase.auth().signInAnonymously()
-          .then(function(result) {
-            console.log("Đăng nhập ẩn danh thành công:", result.user);
-            // Tải thông tin người dùng (Offline user được dữ liệu từ Firebase Anonymous)
-            if (typeof loadProfile === "function") {
-              loadProfile(result.user);
-            }
-          })
-          .catch(function(error) {
-            console.error("Lỗi đăng nhập ẩn danh:", error.message);
-          });
-      } else {
-        console.log("Người dùng đã đăng nhập:", user);
-      }
-    });
-  </script>
-</body>
+
+    <!-- Modal xác thực (Đăng nhập/Đăng ký) -->
+    <div id="auth-modal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2 id="auth-modal-title">Đăng nhập</h2>
+        <form id="auth-form">
+          <input type="email" id="auth-email" placeholder="Email" required />
+          <input type="password" id="auth-password" placeholder="Mật khẩu" required />
+          <button type="submit" id="auth-submit">Đăng nhập</button>
+        </form>
+        <p id="toggle-auth">
+          Chưa có tài khoản? <a href="#" id="toggle-link">Đăng ký ngay</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Khu vực bình luận -->
+    <div id="comments-section" class="comments-section hidden">
+      <h2>Bình luận</h2>
+      <div id="comments-list"></div>
+      <form id="comment-form">
+        <textarea id="comment-input" placeholder="Viết bình luận..." required></textarea>
+        <button type="submit">Gửi Bình Luận</button>
+      </form>
+    </div>
+
+    <!-- Điểm khởi đầu của ES Module -->
+    <script type="module" src="main.js"></script>
+  </body>
 </html>
