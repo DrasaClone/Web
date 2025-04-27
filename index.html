@@ -7,14 +7,14 @@
     <link rel="stylesheet" href="style.css" />
     <!-- PubNub SDK -->
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.2.0.min.js"></script>
-    <!-- (Tùy chọn: Thêm DOMPurify nếu cần bảo vệ đầu vào) -->
+    <!-- (Tùy chọn: DOMPurify để bảo vệ đầu vào) -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script> -->
   </head>
   <body>
     <header>
       <h1>Advanced Community Platform</h1>
       <div id="user-area">
-        <!-- Thông tin người dùng (vừa đăng nhập/vừa đăng ký) -->
+        <!-- Hiển thị thông tin người dùng (login/register) -->
       </div>
       <div id="notification-area">
         <!-- Thông báo realtime hiển thị ở đây -->
@@ -22,7 +22,7 @@
     </header>
 
     <main>
-      <!-- Khu vực tạo bài viết (forum) -->
+      <!-- Phần tạo bài viết (forum) -->
       <section id="create-post">
         <h2>Tạo bài viết mới</h2>
         <form id="post-form">
@@ -35,15 +35,15 @@
             <option value="discussion">Thảo luận</option>
             <option value="help">Trợ giúp</option>
           </select>
-          <!-- Input File cho hình ảnh hoặc video -->
+          <!-- File input cho hình ảnh hoặc video -->
           <input type="file" id="post-file" accept="image/*,video/*" />
-          <!-- Phần xem trước file -->
+          <!-- Xem trước file -->
           <div id="file-preview" class="file-preview hidden">
             <p>Preview:</p>
             <img id="preview-img" src="" alt="Preview ảnh" class="hidden" />
             <video id="preview-video" controls class="hidden"></video>
           </div>
-          <!-- Phần hiển thị tiến trình upload -->
+          <!-- Hiển thị tiến trình upload -->
           <div id="upload-progress" class="upload-progress hidden">
             <progress id="progress-bar" value="0" max="100"></progress>
             <span id="progress-text"></span>
@@ -52,32 +52,36 @@
         </form>
       </section>
 
-      <!-- Khu vực tìm kiếm bài viết -->
+      <!-- Phần tìm kiếm bài viết -->
       <section id="search-post">
         <h2>Tìm kiếm bài viết</h2>
         <input type="text" id="search-input" placeholder="Tìm theo tiêu đề..." />
       </section>
 
-      <!-- Khu vực hiển thị bài viết (forum) -->
+      <!-- Hiển thị bài viết (forum) -->
       <section id="posts">
         <h2>Bảng tin</h2>
         <div id="post-list">
-          <!-- Các bài viết được load từ Firebase -->
+          <!-- Các bài viết sẽ được tải từ Firebase -->
         </div>
       </section>
 
-      <!-- Phòng chat nhóm realtime -->
+      <!-- Phòng chat nhóm realtime + lưu trữ lịch sử chat -->
       <section id="chat-room">
         <h2>Phòng chat chung</h2>
-        <div id="chat-messages" class="chat-messages"></div>
+        <div id="chat-messages" class="chat-messages">
+          <!-- Lịch sử chat được nạp từ Firebase (node: groupChats) -->
+        </div>
         <form id="chat-form">
           <input type="text" id="chat-input" placeholder="Nhập tin nhắn..." required />
           <button type="submit">Gửi</button>
         </form>
+        <!-- Nút để chat với AI Chat Bot -->
+        <button id="chatbot-btn">Chat với AI</button>
       </section>
     </main>
 
-    <!-- Modal xác thực -->
+    <!-- Modal xác thực (Đăng nhập/Đăng ký) -->
     <div id="auth-modal" class="modal hidden">
       <div class="modal-content">
         <span class="close-btn">&times;</span>
@@ -90,15 +94,15 @@
         <p id="toggle-auth">
           Chưa có tài khoản? <a href="#" id="toggle-link">Đăng ký ngay</a>
         </p>
-        <!-- Các nút đăng nhập bổ sung -->
+        <!-- Nút đăng nhập bổ sung -->
         <button id="google-login">Đăng nhập Google</button>
         <button id="phone-login">Đăng nhập Phone</button>
-        <!-- Container cho reCAPTCHA của Phone Auth -->
+        <!-- Container cho reCAPTCHA (Phone Auth) -->
         <div id="recaptcha-container"></div>
       </div>
     </div>
 
-    <!-- Khu vực bình luận -->
+    <!-- Khu vực bình luận cho bài viết -->
     <div id="comments-section" class="comments-section hidden">
       <h2>Bình luận</h2>
       <div id="comments-list"></div>
