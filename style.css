@@ -14,11 +14,9 @@ header {
   text-align: center;
   position: relative;
 }
-
 #user-area {
   margin-top: 10px;
 }
-
 /* Thông báo realtime */
 #notification-area {
   position: absolute;
@@ -30,7 +28,7 @@ header {
   font-weight: bold;
 }
 
-/* Nút bấm */
+/* Button */
 button {
   padding: 10px 15px;
   margin: 5px;
@@ -40,19 +38,17 @@ button {
   cursor: pointer;
   border-radius: 4px;
 }
-
 button:hover {
   background-color: #004a80;
 }
 
-/* Main và Section */
+/* Main & section */
 main {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 20px;
 }
-
 section {
   width: 90%;
   max-width: 700px;
@@ -75,17 +71,12 @@ select {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-textarea {
-  resize: vertical;
-}
+textarea { resize: vertical; }
 
-/* Modal xác thực */
+/* Modal */
 .modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.5);
   display: flex;
   justify-content: center;
@@ -106,60 +97,23 @@ textarea {
   font-size: 24px;
   cursor: pointer;
 }
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 
 /* Bài viết */
-.post-item {
-  border-bottom: 1px solid #ddd;
-  padding: 10px 0;
-}
-.post-item:last-child {
-  border-bottom: none;
-}
-.post-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.post-title {
-  font-weight: bold;
-  color: #0077cc;
-  cursor: pointer;
-}
-.post-meta {
-  color: #666;
-  font-size: 0.9em;
-  margin-bottom: 5px;
-}
+.post-item { border-bottom: 1px solid #ddd; padding: 10px 0; }
+.post-item:last-child { border-bottom: none; }
+.post-header { display: flex; justify-content: space-between; align-items: center; }
+.post-title { font-weight: bold; color: #0077cc; cursor: pointer; }
+.post-meta { color: #666; font-size: 0.9em; margin-bottom: 5px; }
 
-/* Upload file */
-.file-preview {
-  margin: 10px 0;
-}
-.file-preview img,
-.file-preview video {
-  max-width: 100%;
-  height: auto;
-}
-.upload-progress {
-  margin: 10px 0;
-}
+/* File upload */
+.file-preview { margin: 10px 0; }
+.file-preview img, .file-preview video { max-width: 100%; height: auto; }
+.upload-progress { margin: 10px 0; }
 
 /* Chat */
-.chat-messages {
-  max-height: 200px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-bottom: 10px;
-}
-.chat-message {
-  margin-bottom: 5px;
-}
+.chat-messages { max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+.chat-message { margin-bottom: 5px; }
 
-/* Trang Profile */
-#profile-info, #user-posts, #friend-list, #private-chat {
-  margin-bottom: 20px;
-}
+/* Profile page */
+#profile-info, #user-posts, #friend-list, #private-chat { margin-bottom: 20px; }
