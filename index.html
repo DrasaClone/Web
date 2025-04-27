@@ -3,26 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Forum FF Trực Tuyến⭐⭐⭐⭐⭐</title>
+    <title>Advanced Community Platform</title>
     <link rel="stylesheet" href="style.css" />
     <!-- PubNub SDK -->
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.2.0.min.js"></script>
-    <!-- (Nếu sử dụng DOMPurify để bảo vệ đầu vào, bạn có thể thêm thư viện này: -->
+    <!-- (Tùy chọn: Thêm DOMPurify nếu cần bảo vệ đầu vào) -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script> -->
   </head>
   <body>
     <header>
-      <h1>Forum Trực Tuyến</h1>
+      <h1>Advanced Community Platform</h1>
       <div id="user-area">
-        <!-- Thông tin người dùng (đăng nhập/đăng ký) -->
+        <!-- Thông tin người dùng (vừa đăng nhập/vừa đăng ký) -->
       </div>
       <div id="notification-area">
-        <!-- Thông báo realtime -->
+        <!-- Thông báo realtime hiển thị ở đây -->
       </div>
     </header>
 
     <main>
-      <!-- Phần tạo bài viết -->
+      <!-- Khu vực tạo bài viết (forum) -->
       <section id="create-post">
         <h2>Tạo bài viết mới</h2>
         <form id="post-form">
@@ -35,15 +35,15 @@
             <option value="discussion">Thảo luận</option>
             <option value="help">Trợ giúp</option>
           </select>
-          <!-- Chọn file (ảnh/video) -->
+          <!-- Input File cho hình ảnh hoặc video -->
           <input type="file" id="post-file" accept="image/*,video/*" />
-          <!-- Preview file -->
+          <!-- Phần xem trước file -->
           <div id="file-preview" class="file-preview hidden">
             <p>Preview:</p>
             <img id="preview-img" src="" alt="Preview ảnh" class="hidden" />
             <video id="preview-video" controls class="hidden"></video>
           </div>
-          <!-- Hiển thị tiến trình upload -->
+          <!-- Phần hiển thị tiến trình upload -->
           <div id="upload-progress" class="upload-progress hidden">
             <progress id="progress-bar" value="0" max="100"></progress>
             <span id="progress-text"></span>
@@ -52,13 +52,13 @@
         </form>
       </section>
 
-      <!-- Tìm kiếm bài viết -->
+      <!-- Khu vực tìm kiếm bài viết -->
       <section id="search-post">
         <h2>Tìm kiếm bài viết</h2>
         <input type="text" id="search-input" placeholder="Tìm theo tiêu đề..." />
       </section>
 
-      <!-- Danh sách bài viết -->
+      <!-- Khu vực hiển thị bài viết (forum) -->
       <section id="posts">
         <h2>Bảng tin</h2>
         <div id="post-list">
@@ -66,9 +66,9 @@
         </div>
       </section>
 
-      <!-- Phòng chat nhóm -->
+      <!-- Phòng chat nhóm realtime -->
       <section id="chat-room">
-        <h2>Phòng chat</h2>
+        <h2>Phòng chat chung</h2>
         <div id="chat-messages" class="chat-messages"></div>
         <form id="chat-form">
           <input type="text" id="chat-input" placeholder="Nhập tin nhắn..." required />
@@ -93,7 +93,7 @@
         <!-- Các nút đăng nhập bổ sung -->
         <button id="google-login">Đăng nhập Google</button>
         <button id="phone-login">Đăng nhập Phone</button>
-        <!-- Container cho reCAPTCHA (Phone Auth) -->
+        <!-- Container cho reCAPTCHA của Phone Auth -->
         <div id="recaptcha-container"></div>
       </div>
     </div>
@@ -108,7 +108,6 @@
       </form>
     </div>
 
-    <!-- ES Module entry point -->
     <script type="module" src="main.js"></script>
   </body>
 </html>
