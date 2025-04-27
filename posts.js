@@ -1,5 +1,4 @@
 // posts.js
-
 import { database } from "./config.js";
 import { ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 import { pubnub } from "./config.js";
@@ -9,7 +8,6 @@ const postForm = document.getElementById("post-form");
 const postList = document.getElementById("post-list");
 const searchInput = document.getElementById("search-input");
 
-// Xử lý preview file khi chọn file
 const fileInput = document.getElementById("post-file");
 const filePreview = document.getElementById("file-preview");
 const previewImg = document.getElementById("preview-img");
@@ -39,7 +37,6 @@ fileInput.addEventListener("change", () => {
   filePreview.classList.remove("hidden");
 });
 
-// Tạo bài viết mới (bao gồm upload file nếu có)
 export function setupPostCreation(currentUser) {
   postForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -86,22 +83,21 @@ export function setupPostCreation(currentUser) {
       .then(() => {
         postForm.reset();
         filePreview.classList.add("hidden");
-        const uploadProgress = document.getElementById("upload-progress");
-        uploadProgress.classList.add("hidden");
+        document.getElementById("upload-progress").classList.add("hidden");
         pubnub.publish({
           channel: "forum-posts",
           message: { type: "new-post", data: postData }
         });
       })
-      .catch((error) => alert("Lỗi đăng bài: " + error.message));
+      .catch(error => alert("Lỗi đăng bài: " + error.message));
   });
 }
 
 export function loadPosts(currentUser) {
   const postsRef = ref(database, "posts");
-  onValue(postsRef, (snapshot) => {
+  onValue(postsRef, snapshot => {
     postList.innerHTML = "";
-    snapshot.forEach((childSnapshot) => {
+    snapshot.forEach(childSnapshot => {
       const postKey = childSnapshot.key;
       const post = childSnapshot.val();
       const postDiv = document.createElement("div");
@@ -136,7 +132,7 @@ export function loadPosts(currentUser) {
       postDiv.querySelector(".like-btn").addEventListener("click", () => {
         const voteRef = ref(database, "posts/" + postKey);
         update(voteRef, { votes: post.votes + 1 })
-          .catch((err) => alert("Lỗi cập nhật lượt thích: " + err.message));
+          .catch(err => alert("Lỗi cập nhật lượt thích: " + err.message));
       });
 
       if (currentUser && (currentUser.uid === post.authorId || currentUser.isAdmin)) {
@@ -165,7 +161,7 @@ export function setupPostSearch() {
   searchInput.addEventListener("input", () => {
     const keyword = searchInput.value.toLowerCase();
     const posts = document.querySelectorAll(".post-item");
-    posts.forEach((post) => {
+    posts.forEach(post => {
       const title = post.querySelector(".post-title").textContent.toLowerCase();
       post.style.display = title.indexOf(keyword) !== -1 ? "" : "none";
     });
