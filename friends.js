@@ -3,7 +3,6 @@ import { database, auth } from "./config.js";
 import { ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-// Gửi yêu cầu kết bạn đến người nhận (receiverId)
 export function sendFriendRequest(receiverId) {
   const currentUser = auth.currentUser;
   if (!currentUser) {
@@ -18,7 +17,6 @@ export function sendFriendRequest(receiverId) {
   });
 }
 
-// Lắng nghe yêu cầu kết bạn của người dùng hiện hành
 export function listenFriendRequests(callback) {
   const currentUser = auth.currentUser;
   if (!currentUser) return;
@@ -26,7 +24,7 @@ export function listenFriendRequests(callback) {
   onValue(reqRef, snapshot => {
     let requests = [];
     snapshot.forEach(child => {
-      const request = child.val();
+      let request = child.val();
       request.id = child.key;
       requests.push(request);
     });
@@ -34,7 +32,6 @@ export function listenFriendRequests(callback) {
   });
 }
 
-// Chấp nhận yêu cầu kết bạn: requestId là key của yêu cầu, senderId là ID người gửi
 export function acceptFriendRequest(requestId, senderId) {
   const currentUser = auth.currentUser;
   if (!currentUser) return;
@@ -46,7 +43,6 @@ export function acceptFriendRequest(requestId, senderId) {
   remove(reqRef);
 }
 
-// Huỷ bạn (xóa mối quan hệ bạn bè)
 export function removeFriend(friendId) {
   const currentUser = auth.currentUser;
   if (!currentUser) return;
@@ -59,6 +55,7 @@ export function removeFriend(friendId) {
       }
     });
   }, { onlyOnce: true });
+
   const reciprocalRef = ref(database, "friends/" + friendId);
   onValue(reciprocalRef, snapshot => {
     snapshot.forEach(childSnapshot => {
@@ -70,7 +67,6 @@ export function removeFriend(friendId) {
   }, { onlyOnce: true });
 }
 
-// Lắng nghe danh sách bạn bè của người dùng hiện hành
 export function listenFriends(callback) {
   const currentUser = auth.currentUser;
   if (!currentUser) return;
@@ -78,7 +74,7 @@ export function listenFriends(callback) {
   onValue(friendsRef, snapshot => {
     let friendsList = [];
     snapshot.forEach(child => {
-      const friend = child.val();
+      let friend = child.val();
       friend.id = child.key;
       friendsList.push(friend);
     });
@@ -86,7 +82,6 @@ export function listenFriends(callback) {
   });
 }
 
-// Gửi tin nhắn riêng (private message) giữa bạn bè
 export function sendPrivateMessage(friendId, message) {
   const currentUser = auth.currentUser;
   if (!currentUser) {
@@ -105,7 +100,6 @@ export function sendPrivateMessage(friendId, message) {
   });
 }
 
-// Lắng nghe tin nhắn riêng
 export function listenPrivateMessages(friendId, callback) {
   const currentUser = auth.currentUser;
   if (!currentUser) return;
