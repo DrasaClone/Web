@@ -17,12 +17,11 @@ document.addEventListener("DOMContentLoaded", () => {
     setupPostCreation(user);
     setupCommentCreation(user);
     loadPosts(user);
-    // Ví dụ: cập nhật danh sách bạn bè lên giao diện
+    // Cập nhật danh sách bạn bè (ví dụ: hiển thị trên trang profile qua console hoặc giao diện)
     listenFriends(friendsList => {
-      // Cập nhật giao diện cho danh sách bạn bè trên profile hoặc trang riêng nếu có
       console.log("Danh sách bạn bè:", friendsList);
     });
-    // Ví dụ: lắng nghe yêu cầu kết bạn
+    // Lắng nghe yêu cầu kết bạn
     listenFriendRequests(requests => {
       console.log("Yêu cầu kết bạn:", requests);
     });
@@ -31,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupChat();
   setupNotifications();
 
+  // Lắng nghe sự kiện mở phần bình luận khi nhấp vào tiêu đề bài viết
   document.addEventListener("openComments", e => {
     import("./comments.js").then(module => {
       module.openComments(e.detail);
