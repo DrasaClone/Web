@@ -25,19 +25,15 @@ const passwordInput = document.getElementById("auth-password");
 export function googleSignIn() {
   const provider = new GoogleAuthProvider();
   signInWithPopup(auth, provider)
-    .then(result => {
-      closeAuthModal();
-    })
-    .catch(error => {
-      alert("Google đăng nhập lỗi: " + error.message);
-    });
+    .then(result => closeAuthModal())
+    .catch(error => alert("Google đăng nhập lỗi: " + error.message));
 }
 
-// Đăng nhập Số điện thoại
+// Đăng nhập Phone
 export function setupPhoneAuth(containerId) {
   window.recaptchaVerifier = new RecaptchaVerifier(containerId, {
     size: 'invisible',
-    callback: (response) => { /* reCAPTCHA đã xác nhận */ }
+    callback: (response) => {}
   }, auth);
 }
 
@@ -48,12 +44,8 @@ export function phoneSignIn(phoneNumber) {
       const code = prompt("Nhập mã OTP gửi đến số điện thoại của bạn:");
       return confirmationResult.confirm(code);
     })
-    .then(result => {
-      closeAuthModal();
-    })
-    .catch(error => {
-      alert("Phone đăng nhập lỗi: " + error.message);
-    });
+    .then(result => closeAuthModal())
+    .catch(error => alert("Phone đăng nhập lỗi: " + error.message));
 }
 
 export function openAuthModal() {
@@ -65,7 +57,6 @@ export function closeAuthModal() {
 }
 
 export function setupAuthListeners() {
-  // Chuyển đổi giữa Đăng nhập và Đăng ký
   document.getElementById("toggle-link").addEventListener("click", (e) => {
     e.preventDefault();
     isLoginMode = !isLoginMode;
@@ -79,9 +70,9 @@ export function setupAuthListeners() {
       toggleAuth.innerHTML = 'Đã có tài khoản? <a href="#" id="toggle-link">Đăng nhập ngay</a>';
     }
   });
-
+  
   document.querySelector(".close-btn").addEventListener("click", closeAuthModal);
-
+  
   authForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const email = emailInput.value;
@@ -96,11 +87,10 @@ export function setupAuthListeners() {
         .catch(error => alert("Lỗi đăng ký: " + error.message));
     }
   });
-
-  // Gán sự kiện cho nút Google và Phone
+  
   document.getElementById("google-login").addEventListener("click", googleSignIn);
   document.getElementById("phone-login").addEventListener("click", () => {
-    const phone = prompt("Nhập số điện thoại của bạn (bao gồm mã quốc gia):");
+    const phone = prompt("Nhập số điện thoại (bao gồm mã quốc gia):");
     if (phone) phoneSignIn(phone);
   });
 }
@@ -132,7 +122,5 @@ export function updateUserArea(currentUser) {
 }
 
 export function monitorAuthState() {
-  onAuthStateChanged(auth, (user) => {
-    updateUserArea(user);
-  });
+  onAuthStateChanged(auth, user => updateUserArea(user));
 }
