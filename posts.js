@@ -3,6 +3,7 @@ import { database } from "./config.js";
 import { ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 import { pubnub } from "./config.js";
 import { uploadFile } from "./cloudinary.js";
+import { sanitizeInput } from "./security.js";
 
 const postForm = document.getElementById("post-form");
 const postList = document.getElementById("post-list");
@@ -44,8 +45,9 @@ export function setupPostCreation(currentUser) {
       alert("Vui lòng đăng nhập để đăng bài");
       return;
     }
-    const title = document.getElementById("post-title").value;
-    const content = document.getElementById("post-content").value;
+    // Sanitize đầu vào để chống XSS
+    const title = sanitizeInput(document.getElementById("post-title").value);
+    const content = sanitizeInput(document.getElementById("post-content").value);
     const category = document.getElementById("post-category").value || "general";
     
     let imageUrl = "";
@@ -144,7 +146,7 @@ export function loadPosts(currentUser) {
         controls.querySelector(".edit-btn").addEventListener("click", () => {
           const newContent = prompt("Nhập nội dung mới", post.content);
           if (newContent !== null) {
-            update(ref(database, "posts/" + postKey), { content: newContent });
+            update(ref(database, "posts/" + postKey), { content: sanitizeInput(newContent) });
           }
         });
         controls.querySelector(".delete-btn").addEventListener("click", () => {
