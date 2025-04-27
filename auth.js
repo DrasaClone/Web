@@ -33,7 +33,7 @@ export function googleSignIn() {
 export function setupPhoneAuth(containerId) {
   window.recaptchaVerifier = new RecaptchaVerifier(containerId, {
     size: 'invisible',
-    callback: (response) => {}
+    callback: response => {}
   }, auth);
 }
 
@@ -57,7 +57,7 @@ export function closeAuthModal() {
 }
 
 export function setupAuthListeners() {
-  document.getElementById("toggle-link").addEventListener("click", (e) => {
+  document.getElementById("toggle-link").addEventListener("click", e => {
     e.preventDefault();
     isLoginMode = !isLoginMode;
     if (isLoginMode) {
@@ -73,7 +73,7 @@ export function setupAuthListeners() {
   
   document.querySelector(".close-btn").addEventListener("click", closeAuthModal);
   
-  authForm.addEventListener("submit", (e) => {
+  authForm.addEventListener("submit", e => {
     e.preventDefault();
     const email = emailInput.value;
     const password = passwordInput.value;
