@@ -7,11 +7,7 @@ export function sendFriendRequest(receiverId) {
   const currentUser = auth.currentUser;
   if (!currentUser) { alert("Vui lòng đăng nhập để gửi yêu cầu kết bạn"); return; }
   const reqRef = ref(database, "friendRequests/" + receiverId);
-  push(reqRef, {
-    senderId: currentUser.uid,
-    senderEmail: currentUser.email,
-    timestamp: Date.now()
-  });
+  push(reqRef, { senderId: currentUser.uid, senderEmail: currentUser.email, timestamp: Date.now() });
 }
 
 export function listenFriendRequests(callback) {
@@ -85,12 +81,7 @@ export function sendPrivateMessage(friendId, message) {
     ? currentUser.uid + "_" + friendId 
     : friendId + "_" + currentUser.uid;
   const privateChatRef = ref(database, "privateChats/" + convId);
-  push(privateChatRef, {
-    senderId: currentUser.uid,
-    senderEmail: currentUser.email,
-    message: message,
-    timestamp: Date.now()
-  });
+  push(privateChatRef, { senderId: currentUser.uid, senderEmail: currentUser.email, message: message, timestamp: Date.now() });
 }
 
 export function listenPrivateMessages(friendId, callback) {
