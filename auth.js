@@ -21,7 +21,6 @@ const authSubmit = document.getElementById("auth-submit");
 const toggleAuth = document.getElementById("toggle-auth");
 let isLoginMode = true;
 
-// Thêm trường username trong modal đăng ký
 const usernameInput = document.getElementById("auth-username");
 const emailInput = document.getElementById("auth-email");
 const passwordInput = document.getElementById("auth-password");
@@ -62,7 +61,6 @@ export function closeAuthModal() {
 }
 
 export function setupAuthListeners() {
-  // Thêm sự kiện chuyển giữa đăng nhập và đăng ký
   document.getElementById("toggle-link").addEventListener("click", e => {
     e.preventDefault();
     isLoginMode = !isLoginMode;
@@ -80,7 +78,7 @@ export function setupAuthListeners() {
   });
   
   document.querySelector(".close-btn").addEventListener("click", closeAuthModal);
-
+  
   authForm.addEventListener("submit", e => {
     e.preventDefault();
     const email = emailInput.value;
@@ -97,9 +95,7 @@ export function setupAuthListeners() {
       }
       createUserWithEmailAndPassword(auth, email, password)
         .then(result => {
-          // Cập nhật profile Firebase với username
           updateProfile(result.user, { displayName: username });
-          // Lưu thông tin người dùng vào node "users" trong Firebase Database
           set(ref(database, "users/" + result.user.uid), {
             username: username,
             email: email,
@@ -121,7 +117,6 @@ export function setupAuthListeners() {
 export function updateUserArea(currentUser) {
   const userArea = document.getElementById("user-area");
   if (currentUser) {
-    // Nếu đã cập nhật displayName (username) thì hiển thị username
     const name = currentUser.displayName ? currentUser.displayName : currentUser.email;
     userArea.innerHTML = `<span>Chào, ${name}</span>
                           <button id="logout-btn">Đăng xuất</button>
