@@ -8,8 +8,11 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   RecaptchaVerifier,
-  signInWithPhoneNumber
+  signInWithPhoneNumber,
+  updateProfile
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { ref, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+import { database } from "./config.js";
 
 const authModal = document.getElementById("auth-modal");
 const authForm = document.getElementById("auth-form");
@@ -18,6 +21,8 @@ const authSubmit = document.getElementById("auth-submit");
 const toggleAuth = document.getElementById("toggle-auth");
 let isLoginMode = true;
 
+// Thêm trường username trong modal đăng ký
+const usernameInput = document.getElementById("auth-username");
 const emailInput = document.getElementById("auth-email");
 const passwordInput = document.getElementById("auth-password");
 
@@ -57,22 +62,25 @@ export function closeAuthModal() {
 }
 
 export function setupAuthListeners() {
+  // Thêm sự kiện chuyển giữa đăng nhập và đăng ký
   document.getElementById("toggle-link").addEventListener("click", e => {
     e.preventDefault();
     isLoginMode = !isLoginMode;
     if (isLoginMode) {
       authModalTitle.textContent = "Đăng nhập";
       authSubmit.textContent = "Đăng nhập";
+      usernameInput.classList.add("hidden");
       toggleAuth.innerHTML = 'Chưa có tài khoản? <a href="#" id="toggle-link">Đăng ký ngay</a>';
     } else {
       authModalTitle.textContent = "Đăng ký";
       authSubmit.textContent = "Đăng ký";
+      usernameInput.classList.remove("hidden");
       toggleAuth.innerHTML = 'Đã có tài khoản? <a href="#" id="toggle-link">Đăng nhập ngay</a>';
     }
   });
   
   document.querySelector(".close-btn").addEventListener("click", closeAuthModal);
-  
+
   authForm.addEventListener("submit", e => {
     e.preventDefault();
     const email = emailInput.value;
@@ -82,8 +90,23 @@ export function setupAuthListeners() {
         .then(() => closeAuthModal())
         .catch(error => alert("Lỗi đăng nhập: " + error.message));
     } else {
+      const username = usernameInput.value.trim();
+      if (!username) {
+        alert("Vui lòng nhập username!");
+        return;
+      }
       createUserWithEmailAndPassword(auth, email, password)
-        .then(() => closeAuthModal())
+        .then(result => {
+          // Cập nhật profile Firebase với username
+          updateProfile(result.user, { displayName: username });
+          // Lưu thông tin người dùng vào node "users" trong Firebase Database
+          set(ref(database, "users/" + result.user.uid), {
+            username: username,
+            email: email,
+            createdAt: Date.now()
+          });
+          closeAuthModal();
+        })
         .catch(error => alert("Lỗi đăng ký: " + error.message));
     }
   });
@@ -98,7 +121,9 @@ export function setupAuthListeners() {
 export function updateUserArea(currentUser) {
   const userArea = document.getElementById("user-area");
   if (currentUser) {
-    userArea.innerHTML = `<span>Chào, ${currentUser.email}</span>
+    // Nếu đã cập nhật displayName (username) thì hiển thị username
+    const name = currentUser.displayName ? currentUser.displayName : currentUser.email;
+    userArea.innerHTML = `<span>Chào, ${name}</span>
                           <button id="logout-btn">Đăng xuất</button>
                           <a href="profile.html">Trang Cá Nhân</a>`;
     document.getElementById("logout-btn").addEventListener("click", () => {
@@ -110,12 +135,14 @@ export function updateUserArea(currentUser) {
       isLoginMode = true;
       authModalTitle.textContent = "Đăng nhập";
       authSubmit.textContent = "Đăng nhập";
+      usernameInput.classList.add("hidden");
       openAuthModal();
     });
     document.getElementById("signup-btn").addEventListener("click", () => {
       isLoginMode = false;
       authModalTitle.textContent = "Đăng ký";
       authSubmit.textContent = "Đăng ký";
+      usernameInput.classList.remove("hidden");
       openAuthModal();
     });
   }
