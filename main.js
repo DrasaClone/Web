@@ -16,22 +16,37 @@ document.addEventListener("DOMContentLoaded", () => {
   monitorAuthState();
   setupThemeToggle();
   setupPostSearch();
-  
+
   onAuthStateChanged(auth, user => {
     setupPostCreation(user);
     setupCommentCreation(user);
     loadPosts(user);
-    // Lắng nghe và cập nhật danh sách bạn bè
-    listenFriends(friendsList => {
-      console.log("Danh sách bạn bè:", friendsList);
-    });
-    listenFriendRequests(requests => {
-      console.log("Yêu cầu kết bạn:", requests);
-    });
-    // Tải danh sách người dùng cho chức năng tìm kiếm và kết bạn
+    // Cập nhật danh sách bạn bè
+    listenFriends(friendsList => { console.log("Danh sách bạn bè:", friendsList); });
+    listenFriendRequests(requests => { console.log("Yêu cầu kết bạn:", requests); });
+    // Tải danh sách người dùng
     loadUsers(usersList => {
       console.log("Danh sách người dùng:", usersList);
-      // Bạn có thể cập nhật giao diện danh sách người dùng ở trang profile
+      const usersContainer = document.getElementById("users-container");
+      usersContainer.innerHTML = "";
+      usersList.forEach(user => {
+        const div = document.createElement("div");
+        div.className = "user-card";
+        // Hiển thị username và trạng thái (online/offline)
+        div.innerHTML = `<strong>${user.username}</strong> - 
+                         ${user.status ? `<span class="status online">Online</span>` : `<span class="status offline">Offline</span>`}`;
+        // Khi nhấp vào thẻ người dùng, mở giao diện chat riêng (sử dụng module friends.js)
+        div.addEventListener("click", () => {
+          // Ví dụ: bạn có thể gửi tin nhắn riêng hoặc mở hộp thoại chat riêng với người đó
+          const confirmChat = confirm(`Bạn có muốn trò chuyện riêng với ${user.username}?`);
+          if (confirmChat) {
+            // Gọi hàm từ friends.js để mở tin nhắn riêng tại trang profile (hoặc chuyển hướng)
+            // Ví dụ: window.location.href = `privateChat.html?uid=${user.uid}`;
+            alert(`Chức năng trò chuyện riêng với ${user.username} sẽ được triển khai.`);
+          }
+        });
+        usersContainer.appendChild(div);
+      });
     });
   });
 
