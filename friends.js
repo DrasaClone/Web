@@ -16,7 +16,7 @@ export function listenFriendRequests(callback) {
   const reqRef = ref(database, "friendRequests/" + currentUser.uid);
   onValue(reqRef, snapshot => {
     let requests = [];
-    snapshot.forEach(child => {
+    snapshot.forEach(child => { 
       let request = child.val();
       request.id = child.key;
       requests.push(request);
@@ -48,6 +48,7 @@ export function removeFriend(friendId) {
       }
     });
   }, { onlyOnce: true });
+  
   const reciprocalRef = ref(database, "friends/" + friendId);
   onValue(reciprocalRef, snapshot => {
     snapshot.forEach(childSnapshot => {
