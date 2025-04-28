@@ -10,7 +10,7 @@
     <header>
       <h1>Hồ Sơ Người Dùng</h1>
       <div id="user-area">
-        <!-- Thông tin người dùng -->
+        <!-- Hiển thị thông tin người dùng -->
       </div>
     </header>
 
@@ -18,14 +18,14 @@
       <section id="profile-info">
         <h2>Thông tin cá nhân</h2>
         <div id="user-details">
-          <!-- Hiển thị thông tin người dùng -->
+          <!-- Email, username, và thông tin khác -->
         </div>
       </section>
 
       <section id="user-posts">
         <h2>Bài viết của tôi</h2>
         <div id="user-post-list">
-          <!-- Bài viết người dùng đã đăng -->
+          <!-- Các bài viết người dùng đăng -->
         </div>
       </section>
 
@@ -36,10 +36,17 @@
         </div>
       </section>
 
+      <section id="user-list">
+        <h2>Danh sách người dùng</h2>
+        <div id="users-container">
+          <!-- Hiển thị danh sách tất cả người dùng cho việc tìm kiếm và kết bạn -->
+        </div>
+      </section>
+
       <section id="private-chat">
         <h2>Trò chuyện riêng</h2>
         <div id="private-chat-messages" class="chat-messages">
-          <!-- Lịch sử tin nhắn riêng -->
+          <!-- Lịch sử tin nhắn riêng từ Firebase (privateChats) -->
         </div>
         <form id="private-chat-form">
           <input type="text" id="private-chat-input" placeholder="Nhập tin nhắn..." required />
