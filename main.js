@@ -8,6 +8,7 @@ import { setupNotifications } from "./notifications.js";
 import { listenFriends, listenFriendRequests } from "./friends.js";
 import { setupAIChatBot } from "./aiChatBot.js";
 import { setupThemeToggle } from "./theme.js";
+import { loadUsers } from "./users.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -15,18 +16,22 @@ document.addEventListener("DOMContentLoaded", () => {
   monitorAuthState();
   setupThemeToggle();
   setupPostSearch();
-
+  
   onAuthStateChanged(auth, user => {
     setupPostCreation(user);
     setupCommentCreation(user);
     loadPosts(user);
+    // Lắng nghe và cập nhật danh sách bạn bè
     listenFriends(friendsList => {
       console.log("Danh sách bạn bè:", friendsList);
-      // Cập nhật giao diện danh sách bạn bè nếu cần
     });
     listenFriendRequests(requests => {
       console.log("Yêu cầu kết bạn:", requests);
-      // Cập nhật giao diện yêu cầu kết bạn nếu cần
+    });
+    // Tải danh sách người dùng cho chức năng tìm kiếm và kết bạn
+    loadUsers(usersList => {
+      console.log("Danh sách người dùng:", usersList);
+      // Bạn có thể cập nhật giao diện danh sách người dùng ở trang profile
     });
   });
 
