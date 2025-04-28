@@ -3,16 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Community Platform</title>
+    <title>Advanced Community Platform</title>
     <link rel="stylesheet" href="style.css" />
     <!-- PubNub SDK -->
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.2.0.min.js"></script>
-    <!-- (Nếu sử dụng DOMPurify, thêm script sau đây) -->
+    <!-- (Nếu dùng DOMPurify để bảo vệ đầu vào, thêm script sau) -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script> -->
   </head>
   <body>
     <header>
-      <h1>Community Platform</h1>
+      <h1>Advanced Community Platform</h1>
       <div id="user-area">
         <!-- Thông tin người dùng (login/register, hiển thị username) -->
       </div>
@@ -23,7 +23,7 @@
     </header>
 
     <main>
-      <!-- Tạo bài viết (forum) -->
+      <!-- Phần tạo bài viết (forum) -->
       <section id="create-post">
         <h2>Tạo bài viết mới</h2>
         <form id="post-form">
@@ -36,7 +36,7 @@
             <option value="discussion">Thảo luận</option>
             <option value="help">Trợ giúp</option>
           </select>
-          <!-- File input cho ảnh/video -->
+          <!-- File input cho đính kèm -->
           <input type="file" id="post-file" accept="image/*,video/*" />
           <!-- Xem trước file -->
           <div id="file-preview" class="file-preview hidden">
@@ -44,7 +44,7 @@
             <img id="preview-img" src="" alt="Preview ảnh" class="hidden" />
             <video id="preview-video" controls class="hidden"></video>
           </div>
-          <!-- Tiến trình upload -->
+          <!-- Hiển thị tiến trình upload -->
           <div id="upload-progress" class="upload-progress hidden">
             <progress id="progress-bar" value="0" max="100"></progress>
             <span id="progress-text"></span>
@@ -53,42 +53,51 @@
         </form>
       </section>
 
-      <!-- Tìm kiếm bài viết -->
+      <!-- Phần tìm kiếm bài viết -->
       <section id="search-post">
         <h2>Tìm kiếm bài viết</h2>
         <input type="text" id="search-input" placeholder="Tìm theo tiêu đề..." />
       </section>
 
-      <!-- Bảng tin bài viết -->
+      <!-- Danh sách bài viết (forum) -->
       <section id="posts">
         <h2>Bảng tin</h2>
         <div id="post-list">
-          <!-- Các bài viết sẽ được tải từ Firebase -->
+          <!-- Các bài viết được tải từ Firebase -->
         </div>
       </section>
 
-      <!-- Phòng chat nhóm realtime với lưu trữ lịch sử -->
+      <!-- Phòng chat nhóm realtime -->
       <section id="chat-room">
         <h2>Phòng chat chung</h2>
         <div id="chat-messages" class="chat-messages">
-          <!-- Tin nhắn chat được lưu trong Firebase (groupChats) -->
+          <!-- Lịch sử chat nhóm được lưu trong Firebase (groupChats) -->
         </div>
         <form id="chat-form">
           <input type="text" id="chat-input" placeholder="Nhập tin nhắn..." required />
           <button type="submit">Gửi</button>
         </form>
-        <!-- Nút gọi AI Chat Bot -->
+        <!-- Nút Chat với AI Chat Bot -->
         <button id="chatbot-btn">Chat với AI</button>
+      </section>
+
+      <!-- Danh sách người dùng: hiển thị username, trạng thái (online/offline) -->
+      <section id="users">
+        <h2>Danh sách người dùng</h2>
+        <input type="text" id="user-search-input" placeholder="Tìm theo tên người dùng..." />
+        <div id="users-container">
+          <!-- Danh sách người dùng được tải từ Firebase (node "users" và "status") -->
+        </div>
       </section>
     </main>
 
-    <!-- Modal xác thực: dùng chung cho đăng nhập và đăng ký -->
+    <!-- Modal xác thực -->
     <div id="auth-modal" class="modal hidden">
       <div class="modal-content">
         <span class="close-btn">&times;</span>
         <h2 id="auth-modal-title">Đăng nhập</h2>
         <form id="auth-form">
-          <!-- Khi đăng ký, hiển thị trường Username -->
+          <!-- Trường Username xuất hiện khi đăng ký -->
           <input type="text" id="auth-username" placeholder="Username" class="hidden" />
           <input type="email" id="auth-email" placeholder="Email" required />
           <input type="password" id="auth-password" placeholder="Mật khẩu" required />
@@ -97,10 +106,10 @@
         <p id="toggle-auth">
           Chưa có tài khoản? <a href="#" id="toggle-link">Đăng ký ngay</a>
         </p>
-        <!-- Nút đăng nhập bổ sung -->
+        <!-- Các nút đăng nhập bổ sung -->
         <button id="google-login">Đăng nhập Google</button>
         <button id="phone-login">Đăng nhập Phone</button>
-        <!-- Container cho reCAPTCHA của Phone Auth -->
+        <!-- Container cho reCAPTCHA (Thông tin cần cho Phone Auth) -->
         <div id="recaptcha-container"></div>
       </div>
     </div>
