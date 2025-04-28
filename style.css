@@ -174,3 +174,34 @@ textarea {
 #private-chat {
   margin-bottom: 20px;
 }
+
+/* Định nghĩa biến CSS */
+:root {
+  --bg-color: #f5f5f5;
+  --text-color: #333;
+  --header-bg: #0077cc;
+  --button-bg: #005fa3;
+  --button-hover: #004a80;
+}
+body.darkmode {
+  --bg-color: #121212;
+  --text-color: #e0e0e0;
+  --header-bg: #1e1e1e;
+  --button-bg: #333;
+  --button-hover: #444;
+}
+body { background-color: var(--bg-color); color: var(--text-color); }
+/* ... phần khác tương tự ... */
+
+/* Phong cách cho thẻ người dùng trong danh sách */
+.user-card {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 8px;
+  margin: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.status.online { color: limegreen; }
+.status.offline { color: gray; }
