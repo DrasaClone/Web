@@ -7,17 +7,18 @@
     <link rel="stylesheet" href="style.css" />
     <!-- PubNub SDK -->
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.2.0.min.js"></script>
-    <!-- (Tùy chọn: DOMPurify để bảo vệ đầu vào) -->
+    <!-- (Nếu muốn dùng DOMPurify, thêm script bên dưới) -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script> -->
   </head>
   <body>
     <header>
       <h1>Advanced Community Platform</h1>
       <div id="user-area">
-        <!-- Hiển thị thông tin người dùng (login/register) -->
+        <!-- Thông tin người dùng (login/register) -->
       </div>
+      <button id="theme-toggle-btn">Toggle Dark Mode</button>
       <div id="notification-area">
-        <!-- Thông báo realtime hiển thị ở đây -->
+        <!-- Thông báo realtime -->
       </div>
     </header>
 
@@ -35,15 +36,15 @@
             <option value="discussion">Thảo luận</option>
             <option value="help">Trợ giúp</option>
           </select>
-          <!-- File input cho hình ảnh hoặc video -->
+          <!-- File input -->
           <input type="file" id="post-file" accept="image/*,video/*" />
-          <!-- Xem trước file -->
+          <!-- Preview -->
           <div id="file-preview" class="file-preview hidden">
             <p>Preview:</p>
             <img id="preview-img" src="" alt="Preview ảnh" class="hidden" />
             <video id="preview-video" controls class="hidden"></video>
           </div>
-          <!-- Hiển thị tiến trình upload -->
+          <!-- Upload progress -->
           <div id="upload-progress" class="upload-progress hidden">
             <progress id="progress-bar" value="0" max="100"></progress>
             <span id="progress-text"></span>
@@ -52,36 +53,36 @@
         </form>
       </section>
 
-      <!-- Phần tìm kiếm bài viết -->
+      <!-- Tìm kiếm bài viết -->
       <section id="search-post">
         <h2>Tìm kiếm bài viết</h2>
         <input type="text" id="search-input" placeholder="Tìm theo tiêu đề..." />
       </section>
 
-      <!-- Hiển thị bài viết (forum) -->
+      <!-- Bảng tin -->
       <section id="posts">
         <h2>Bảng tin</h2>
         <div id="post-list">
-          <!-- Các bài viết sẽ được tải từ Firebase -->
+          <!-- Các bài viết được tải từ Firebase -->
         </div>
       </section>
 
-      <!-- Phòng chat nhóm realtime + lưu trữ lịch sử chat -->
+      <!-- Phòng chat nhóm, với lưu lịch sử chat -->
       <section id="chat-room">
         <h2>Phòng chat chung</h2>
         <div id="chat-messages" class="chat-messages">
-          <!-- Lịch sử chat được nạp từ Firebase (node: groupChats) -->
+          <!-- Lịch sử chat được tải từ Firebase (groupChats) -->
         </div>
         <form id="chat-form">
           <input type="text" id="chat-input" placeholder="Nhập tin nhắn..." required />
           <button type="submit">Gửi</button>
         </form>
-        <!-- Nút để chat với AI Chat Bot -->
+        <!-- Nút Chat với AI -->
         <button id="chatbot-btn">Chat với AI</button>
       </section>
     </main>
 
-    <!-- Modal xác thực (Đăng nhập/Đăng ký) -->
+    <!-- Modal xác thực -->
     <div id="auth-modal" class="modal hidden">
       <div class="modal-content">
         <span class="close-btn">&times;</span>
@@ -94,7 +95,7 @@
         <p id="toggle-auth">
           Chưa có tài khoản? <a href="#" id="toggle-link">Đăng ký ngay</a>
         </p>
-        <!-- Nút đăng nhập bổ sung -->
+        <!-- Các nút đăng nhập bổ sung -->
         <button id="google-login">Đăng nhập Google</button>
         <button id="phone-login">Đăng nhập Phone</button>
         <!-- Container cho reCAPTCHA (Phone Auth) -->
@@ -102,7 +103,7 @@
       </div>
     </div>
 
-    <!-- Khu vực bình luận cho bài viết -->
+    <!-- Khu vực bình luận -->
     <div id="comments-section" class="comments-section hidden">
       <h2>Bình luận</h2>
       <div id="comments-list"></div>
