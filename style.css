@@ -30,9 +30,7 @@ header {
   position: relative;
 }
 
-#user-area {
-  margin-top: 10px;
-}
+#user-area { margin-top: 10px; }
 
 #notification-area {
   position: absolute;
@@ -53,9 +51,7 @@ button {
   cursor: pointer;
   border-radius: 4px;
 }
-button:hover {
-  background-color: var(--button-hover);
-}
+button:hover { background-color: var(--button-hover); }
 
 main {
   display: flex;
@@ -74,6 +70,7 @@ section {
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
+/* Các input, textarea, select */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -85,22 +82,17 @@ select {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-textarea {
-  resize: vertical;
-}
+textarea { resize: vertical; }
 
+/* Modal */
 .modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.5);
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
 .modal-content {
   background: #fff;
   padding: 20px;
@@ -109,7 +101,6 @@ textarea {
   border-radius: 5px;
   position: relative;
 }
-
 .close-btn {
   position: absolute;
   top: 10px;
@@ -117,46 +108,21 @@ textarea {
   font-size: 24px;
   cursor: pointer;
 }
+.hidden { display: none; }
 
-.hidden {
-  display: none;
-}
+/* Bài viết */
+.post-item { border-bottom: 1px solid #ddd; padding: 10px 0; }
+.post-item:last-child { border-bottom: none; }
+.post-header { display: flex; justify-content: space-between; align-items: center; }
+.post-title { font-weight: bold; color: var(--header-bg); cursor: pointer; }
+.post-meta { color: #666; font-size: 0.9em; margin-bottom: 5px; }
 
-.post-item {
-  border-bottom: 1px solid #ddd;
-  padding: 10px 0;
-}
-.post-item:last-child {
-  border-bottom: none;
-}
-.post-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.post-title {
-  font-weight: bold;
-  color: var(--header-bg);
-  cursor: pointer;
-}
-.post-meta {
-  color: #666;
-  font-size: 0.9em;
-  margin-bottom: 5px;
-}
+/* Upload file */
+.file-preview { margin: 10px 0; }
+.file-preview img, .file-preview video { max-width: 100%; height: auto; }
+.upload-progress { margin: 10px 0; }
 
-.file-preview {
-  margin: 10px 0;
-}
-.file-preview img,
-.file-preview video {
-  max-width: 100%;
-  height: auto;
-}
-.upload-progress {
-  margin: 10px 0;
-}
-
+/* Chat */
 .chat-messages {
   max-height: 200px;
   overflow-y: auto;
@@ -164,36 +130,9 @@ textarea {
   padding: 10px;
   margin-bottom: 10px;
 }
-.chat-message {
-  margin-bottom: 5px;
-}
+.chat-message { margin-bottom: 5px; }
 
-#profile-info,
-#user-posts,
-#friend-list,
-#private-chat {
-  margin-bottom: 20px;
-}
-
-/* Định nghĩa biến CSS */
-:root {
-  --bg-color: #f5f5f5;
-  --text-color: #333;
-  --header-bg: #0077cc;
-  --button-bg: #005fa3;
-  --button-hover: #004a80;
-}
-body.darkmode {
-  --bg-color: #121212;
-  --text-color: #e0e0e0;
-  --header-bg: #1e1e1e;
-  --button-bg: #333;
-  --button-hover: #444;
-}
-body { background-color: var(--bg-color); color: var(--text-color); }
-/* ... phần khác tương tự ... */
-
-/* Phong cách cho thẻ người dùng trong danh sách */
+/* Danh sách người dùng */
 .user-card {
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -205,3 +144,8 @@ body { background-color: var(--bg-color); color: var(--text-color); }
 }
 .status.online { color: limegreen; }
 .status.offline { color: gray; }
+
+/* Trang profile */
+#profile-info, #user-posts, #friend-list, #private-chat {
+  margin-bottom: 20px;
+}
