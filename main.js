@@ -18,8 +18,12 @@ document.addEventListener("DOMContentLoaded", () => {
   monitorAuthState();
   setupThemeToggle();
   setupPostSearch();
+  
+  // Khởi chạy presence để báo cáo online/offline
   setupPresence();
-  setupVoiceVideo(); // Khởi chạy module gọi voice/video
+  
+  // Khởi chạy Voice/Video Call module
+  setupVoiceVideo();
 
   onAuthStateChanged(auth, user => {
     setupPostCreation(user);
@@ -27,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadPosts(user);
     listenFriends(friendsList => {
       console.log("Danh sách bạn bè:", friendsList);
-      // Cập nhật giao diện danh sách bạn bè nếu cần
+      // Cập nhật giao diện danh sách bạn bè tại trang index hoặc profile
     });
     listenFriendRequests(requests => {
       console.log("Yêu cầu kết bạn:", requests);
@@ -40,14 +44,15 @@ document.addEventListener("DOMContentLoaded", () => {
         usersList.forEach(user => {
           const div = document.createElement("div");
           div.className = "user-card";
-          div.innerHTML = `<strong>${user.username}</strong> - ${user.status === "online"
-            ? `<span class="status online">Online</span>`
-            : `<span class="status offline">Offline</span>`}`;
+          div.innerHTML = `<strong>${user.username}</strong> - 
+                           ${user.status === "online" 
+                           ? `<span class="status online">Online</span>` 
+                           : `<span class="status offline">Offline</span>`}`;
           div.addEventListener("click", () => {
-            const confirmChat = confirm(`Bạn có muốn bắt đầu trò chuyện riêng với ${user.username}?`);
+            const confirmChat = confirm(`Bạn có muốn trò chuyện riêng với ${user.username}?`);
             if (confirmChat) {
-              // Ví dụ: bạn có thể chuyển đến trang private chat hoặc mở modal chat riêng
-              alert(`Chức năng private chat với ${user.username} cần được xây dựng trong module Friends.`);
+              // Chuyển hướng hoặc mở modal private chat, có thể sử dụng module friends.js
+              alert(`Chức năng private chat với ${user.username} được xây dựng trong module Friends.`);
             }
           });
           usersContainer.appendChild(div);
