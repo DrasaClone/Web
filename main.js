@@ -94,55 +94,131 @@ themeSelect.addEventListener('change', (e) => {
 // -----------------------------------
 // 2. CHỨC NĂNG ĐĂNG NHẬP & ĐĂNG KÝ
 // -----------------------------------
+// THIẾT LẬP PHẦN TÍNH NĂNG và DOM Elements
+// --------------------
+const loginSection = document.getElementById('login-section');
+const chatSection = document.getElementById('chat-section');
+const socialSection = document.getElementById('social-section');
+const profileSection = document.getElementById('profile-section');
+const musicSection = document.getElementById('music-section');
+const callSection = document.getElementById('call-section');
 
-// Đăng nhập bằng SĐT (Firebase Phone Auth - đơn giản minh họa)
+const nicknameInput = document.getElementById('nickname');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const phoneInput = document.getElementById('phone');
+
+const emailLoginBtn = document.getElementById('email-login');
+const emailSignupBtn = document.getElementById('email-signup');
+const phoneLoginBtn = document.getElementById('phone-login');
+const googleLoginBtn = document.getElementById('google-login');
+
+const displayNickname = document.getElementById('display-nickname');
+const userStatusSpan = document.getElementById('user-status');
+
+// -----------------------------------
+// 1. CÁC HÀM XỬ LÝ ĐĂNG NHẬP & ĐĂNG KÝ
+// -----------------------------------
+
+// Hỗ trợ đăng nhập bằng Email
+emailLoginBtn.addEventListener('click', () => {
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
+  const nickname = nicknameInput.value || (email.split('@')[0] || "User");
+
+  if (email === "" || password === "") {
+    alert("Email và Mật khẩu không được để trống!");
+    return;
+  }
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .then((result) => {
+      handleLogin(nickname);
+    })
+    .catch((error) => {
+      alert("Lỗi đăng nhập: " + error.message);
+      console.error("Email login error:", error);
+    });
+});
+
+// Hỗ trợ đăng ký bằng Email
+emailSignupBtn.addEventListener('click', () => {
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
+  const nickname = nicknameInput.value || (email.split('@')[0] || "User");
+
+  if (email === "" || password === "") {
+    alert("Email và Mật khẩu không được để trống!");
+    return;
+  }
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then((result) => {
+      handleLogin(nickname);
+    })
+    .catch((error) => {
+      alert("Lỗi đăng ký: " + error.message);
+      console.error("Email signup error:", error);
+    });
+});
+
+// Đăng nhập bằng SĐT
 phoneLoginBtn.addEventListener('click', () => {
-  let nickname = nicknameInput.value || "Guest";
-  // Lưu ý: Trước khi gọi signInWithPhoneNumber bạn cần khởi tạo reCAPTCHA (không dùng thư viện ngoài):
-  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(phoneLoginBtn, {
-    'size': 'invisible',
-    'callback': (response) => {
+  const nickname = nicknameInput.value || "Guest";
+  
+  // Sử dụng container có id "recaptcha-container" để khởi tạo reCAPTCHA
+  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+    size: 'invisible',
+    callback: (response) => {
       console.log("Recaptcha solved");
     }
   });
   
-  firebase.auth().signInWithPhoneNumber('+84' + phoneInput.value, window.recaptchaVerifier)
+  const phone = phoneInput.value.trim();
+  if (phone === "") {
+    alert("Số điện thoại không được để trống!");
+    return;
+  }
+  firebase.auth().signInWithPhoneNumber('+84' + phone, window.recaptchaVerifier)
     .then((confirmationResult) => {
-      let code = prompt("Nhập mã xác nhận SMS:");
+      const code = prompt("Nhập mã xác nhận SMS:");
       return confirmationResult.confirm(code);
     })
     .then((result) => {
       handleLogin(nickname);
     })
-    .catch(error => {
-      console.error("Lỗi đăng nhập số điện thoại:", error);
+    .catch((error) => {
+      alert("Lỗi đăng nhập SĐT: " + error.message);
+      console.error("Phone login error:", error);
     });
 });
 
-// Đăng nhập bằng Google (Firebase GoogleAuthProvider)
+// Đăng nhập bằng Google (giữ nguyên như mẫu ban đầu)
 googleLoginBtn.addEventListener('click', () => {
-  let provider = new firebase.auth.GoogleAuthProvider();
+  const provider = new firebase.auth.GoogleAuthProvider();
   firebase.auth().signInWithPopup(provider)
     .then((result) => {
-      handleLogin(result.user.displayName || nicknameInput.value || "Guest");
+      handleLogin(result.user.displayName || nicknameInput.value || "User");
     })
-    .catch(error => {
-      console.error("Lỗi đăng nhập Google:", error);
+    .catch((error) => {
+      alert("Lỗi đăng nhập Google: " + error.message);
+      console.error("Google login error:", error);
     });
 });
 
+// Hàm xử lý sau khi đăng nhập thành công
 function handleLogin(nickname) {
-  // Sau khi đăng nhập thành công, ẩn form đăng nhập và hiển thị các phần còn lại
+  // Ẩn phần đăng nhập, hiện các phần chức năng khác
   loginSection.style.display = 'none';
   chatSection.style.display = 'block';
   socialSection.style.display = 'block';
   profileSection.style.display = 'block';
   musicSection.style.display = 'block';
   callSection.style.display = 'block';
-  
-  displayNickname.textContent = nickname;
-  userStatusSpan.textContent = 'Online';
-  // Có thể lưu thông tin người dùng lên Firebase Database hoặc localStorage
+
+  // Cập nhật thông tin hiển thị người dùng
+  displayNickname && (displayNickname.textContent = nickname);
+  userStatusSpan && (userStatusSpan.textContent = 'Online');
+
+  // Bạn có thể lưu thông tin người dùng vào Firebase Database hoặc localStorage tại đây.
 }
 
 // --------------------------------
