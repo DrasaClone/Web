@@ -8,7 +8,7 @@ const FIREBASE_CONFIG = {
   appId: "YOUR_APP_ID"
 };
 // PubNub
-const PUBNUB_KEYS = { publishKey: "YOUR_PUB", subscribeKey: "YOUR_SUB" };
+const PUBNUB_KEYS = { publishKey: "pub-c-9ad32978-37b1-4f15-bc57-bac1884507a4", subscribeKey: "YOUR_SUB" };
 const CHANNEL = "global_chat";
 // Cloudinary
 const CLOUDINARY = { cloudName: "dgbux4wzo", uploadPreset: "okeqfdx4" };
