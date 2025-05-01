@@ -68,3 +68,83 @@ section {
   gap: 10px;
 }
 
+/* Các style cơ bản đã có */
+
+:root {
+  --primary-color: #2196F3;
+  --background-color: #fff;
+  --text-color: #000;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+/* Chế độ dark (sẽ được active qua JS) */
+body.dark-mode {
+  --background-color: #121212;
+  --text-color: #eee;
+}
+
+/* Container chính của ứng dụng */
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Phong cách header, section ... (nếu cần) */
+
+/* Login Card - giao diện đăng nhập */
+.login-card {
+  margin: 5% auto;
+  padding: 2em;
+  max-width: 400px;
+  background: var(--background-color);
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-card h2 {
+  text-align: center;
+  margin-bottom: 1em;
+}
+
+.login-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.login-card input {
+  padding: 0.8em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+}
+
+.login-card button {
+  padding: 0.8em;
+  border: none;
+  background-color: var(--primary-color);
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+  flex: 1;
+}
+
+.login-card button:hover {
+  background-color: #1976D2;
+}
+
+/* Các style khác cho các phần Chat, Social,...  */
