@@ -70,35 +70,6 @@ section {
 
 /* Các style cơ bản đã có */
 
-:root {
-  --primary-color: #2196F3;
-  --background-color: #fff;
-  --text-color: #000;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  background-color: var(--background-color);
-  color: var(--text-color);
-}
-
-/* Chế độ dark (sẽ được active qua JS) */
-body.dark-mode {
-  --background-color: #121212;
-  --text-color: #eee;
-}
-
-/* Container chính của ứng dụng */
-#app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-/* Phong cách header, section ... (nếu cần) */
-
 /* Login Card - giao diện đăng nhập */
 .login-card {
   margin: 5% auto;
