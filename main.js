@@ -24,7 +24,7 @@ const pubnub = new PubNub({
 });
 
 // Agora configuration
-const agoraAppId = "YOUR_AGORA_APP_ID";
+const agoraAppId = "a0b62867bee543fe828e23b4888eb3ae";
 let agoraClient; // Sẽ khởi tạo khi bắt đầu cuộc gọi
 
 // --------------------
