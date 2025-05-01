@@ -13,7 +13,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <!-- PubNub -->
   <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.34.0.js"></script>
-  <!-- UI libs -->
+  <!-- UI libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/css/splide.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/js/splide.min.js"></script>
@@ -21,6 +21,7 @@
   <script src="https://unpkg.com/@popperjs/core@2"></script>
   <script src="https://unpkg.com/tippy.js@6"></script>
   <script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
+  <!-- App scripts -->
   <script src="auth.js" defer></script>
   <script src="app.js" defer></script>
 </head>
@@ -29,7 +30,11 @@
     <h1>Danh bạ</h1>
     <button id="btn-logout" class="button" data-tippy-content="Đăng xuất">⏏️</button>
   </header>
-  <section id="contacts" class="card-list"></section>
+
+  <section id="contacts" class="card-list">
+    <!-- Danh sách bạn bè với trạng thái online/offline -->
+  </section>
+
   <a href="chat.html" class="fab" id="new-chat" data-tippy-content="Nhắn tin mới">✉️</a>
 </body>
 </html>
