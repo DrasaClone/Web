@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Hồ Sơ</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
+  <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
+  <script src="theme.js" defer></script>
+  <script src="profile.js" defer></script>
+</head>
+<body>
+  <header class="header"><h1>Hồ Sơ</h1></header>
+  <form id="profile-form" class="card">
+    <button id="btn-upload-avatar" class="button">Chọn ảnh đại diện</button>
+    <label>Họ & Tên</label>
+    <input id="fullName" type="text" placeholder="Họ và tên" required>
+    <label>Nickname</label>
+    <input id="nickname" type="text" maxlength="20" required>
+    <label>Ngày sinh</label>
+    <input id="birthdate" type="date">
+    <label>Tình trạng</label>
+    <input id="statusMsg" type="text" placeholder="Bạn đang nghĩ gì?">
+    <label>Bio</label>
+    <textarea id="bio"></textarea>
+    <label>Theme</label>
+    <select id="theme-selector"></select>
+    <fieldset><legend>Custom RGB</legend>
+      <input id="rgb-r" type="range" min="0" max="255">
+      <input id="rgb-g" type="range" min="0" max="255">
+      <input id="rgb-b" type="range" min="0" max="255">
+    </fieldset>
+    <button type="submit" class="button">Lưu</button>
+  </form>
+</body>
+</html>
