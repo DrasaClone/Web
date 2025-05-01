@@ -9,8 +9,9 @@
   <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.34.0.js"></script>
   <!-- UI libs -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-  <script src="chat.js" defer></script>
+  <!-- App scripts -->
   <script src="utils.js" defer></script>
+  <script src="chat.js" defer></script>
 </head>
 <body>
   <header class="header">
@@ -21,16 +22,29 @@
     </div>
     <button id="btn-call" class="button" data-tippy-content="Gọi video">📹</button>
   </header>
+
   <div id="messages" class="message-list"></div>
+
   <div class="chat-input">
     <button id="btn-attach" class="button" data-tippy-content="Đính kèm">📎</button>
     <input id="msg-input" placeholder="Gõ tin nhắn...">
     <button id="btn-send" class="button" data-tippy-content="Gửi">➡️</button>
   </div>
+
   <script>
-    // Initialize tooltips & wake lock
-    document.addEventListener('DOMContentLoaded',()=>{ tippy('[data-tippy-content]'); Micromodal.init();
-      if ('wakeLock' in navigator) { let wake; navigator.wakeLock.request('screen').then(l=> wake=l); document.addEventListener('visibilitychange',()=>{ if (!wake && document.visibilityState==='visible') navigator.wakeLock.request('screen').then(l=> wake=l); }); }
+    // Tooltips + Wake Lock
+    document.addEventListener('DOMContentLoaded', () => {
+      tippy('[data-tippy-content]');
+      Micromodal.init();
+      if ('wakeLock' in navigator) {
+        let wake;
+        navigator.wakeLock.request('screen').then(l => wake = l);
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible' && !wake) {
+            navigator.wakeLock.request('screen').then(l => wake = l);
+          }
+        });
+      }
     });
   </script>
 </body>
