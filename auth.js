@@ -1,6 +1,9 @@
 firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth();
 
+// Google provider
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+
 document.addEventListener('DOMContentLoaded', () => {
   // Email login/signup
   const btnEmail = document.getElementById('btn-email');
@@ -29,9 +32,18 @@ document.addEventListener('DOMContentLoaded', () => {
       window.confirmationResult.confirm(codeEl.value);
     };
   }
-  // Redirect & presence
+  // Google sign-in button
+  if (document.getElementById('btn-google')) {
+    document.getElementById('btn-google').onclick = () =>
+      auth.signInWithPopup(googleProvider);
+  }
+  // Redirect after login
   auth.onAuthStateChanged(user => {
-    if (user && location.pathname.endsWith('index.html')) loadContacts();
-    if (!user) location = 'index.html';
+    if (user) {
+      if (location.pathname.endsWith('index.html')) loadContacts();
+      initPresence();
+    } else {
+      location = 'index.html';
+    }
   });
 });
