@@ -1,130 +1,35 @@
 <!DOCTYPE html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Advanced Community Platform</title>
-    <link rel="stylesheet" href="style.css" />
-    <!-- PubNub SDK -->
-    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.2.0.min.js"></script>
-    <script src="https://cdn.peerjs.com/1.3.1/peerjs.min.js"></script>
-    <!-- FB SDK cho Plugin Bình luận -->
-    <div id="fb-root"></div>
-    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v22.0&appId=1215727446866018"></script>
-    <!-- (Nếu dùng DOMPurify, uncomment dòng dưới) -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script> -->
-  </head>
-  <body>
-    <header>
-      <h1>Advanced Community Platform</h1>
-      <div id="user-area">
-        <!-- Thông tin user (login/register, hiển thị username) -->
-      </div>
-      <button id="theme-toggle-btn">Toggle Dark Mode</button>
-      <div id="notification-area">
-        <!-- Thông báo realtime -->
-      </div>
-    </header>
-
-    <main>
-      <!-- PHẦN FORUM: Tạo bài viết -->
-      <section id="create-post">
-        <h2>Tạo bài viết mới</h2>
-        <form id="post-form">
-          <input type="text" id="post-title" placeholder="Tiêu đề" required />
-          <textarea id="post-content" placeholder="Nội dung (Markdown hỗ trợ)" required></textarea>
-          <select id="post-category">
-            <option value="">Chọn chủ đề</option>
-            <option value="general">Chung</option>
-            <option value="news">Tin tức</option>
-            <option value="discussion">Thảo luận</option>
-            <option value="help">Trợ giúp</option>
-          </select>
-          <input type="file" id="post-file" accept="image/*,video/*" />
-          <div id="file-preview" class="file-preview hidden">
-            <p>Preview:</p>
-            <img id="preview-img" src="" alt="Preview ảnh" class="hidden" />
-            <video id="preview-video" controls class="hidden"></video>
-          </div>
-          <div id="upload-progress" class="upload-progress hidden">
-            <progress id="progress-bar" value="0" max="100"></progress>
-            <span id="progress-text"></span>
-          </div>
-          <button type="submit">Đăng bài</button>
-        </form>
-      </section>
-
-      <!-- PHẦN TÌM KIẾM BÀI VIẾT -->
-      <section id="search-post">
-        <h2>Tìm kiếm bài viết</h2>
-        <input type="text" id="search-input" placeholder="Tìm theo tiêu đề..." />
-      </section>
-
-      <!-- PHẦN BẢNG TIN -->
-      <section id="posts">
-        <h2>Bảng tin</h2>
-        <div id="post-list">
-          <!-- Các bài viết được nạp từ Firebase -->
-        </div>
-        <!-- Plugin bình luận của Facebook -->
-        <div class="fb-comments" data-href="https://drasaclone.github.io/Web" data-width="400" data-numposts="10000"></div>
-      </section>
-
-      <!-- PHẦN CHAT NHÓM REALTIME -->
-      <section id="chat-room">
-        <h2>Phòng chat chung</h2>
-        <div id="chat-messages" class="chat-messages">
-          <!-- Lịch sử chat nhóm (groupChats) -->
-        </div>
-        <form id="chat-form">
-          <input type="text" id="chat-input" placeholder="Nhập tin nhắn..." required />
-          <button type="submit">Gửi</button>
-        </form>
-        <!-- Nút kích hoạt AI Chat Bot -->
-        <button id="chatbot-btn">Chat với AI</button>
-      </section>
-
-      <!-- PHẦN DANH SÁCH NGƯỜI DÙNG -->
-      <section id="users">
-        <h2>Danh sách người dùng</h2>
-        <input type="text" id="user-search-input" placeholder="Tìm theo username..." />
-        <div id="users-container">
-          <!-- Danh sách người dùng (username, avatar, trạng thái online/offline) -->
-        </div>
-      </section>
-    </main>
-
-    <!-- MODAL XÁC THỰC -->
-    <div id="auth-modal" class="modal hidden">
-      <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h2 id="auth-modal-title">Đăng nhập</h2>
-        <form id="auth-form">
-          <!-- Username chỉ hiển thị ở chế độ đăng ký -->
-          <input type="text" id="auth-username" placeholder="Username" class="hidden" />
-          <input type="email" id="auth-email" placeholder="Email" required />
-          <input type="password" id="auth-password" placeholder="Mật khẩu" required />
-          <button type="submit" id="auth-submit">Đăng nhập</button>
-        </form>
-        <p id="toggle-auth">
-          Chưa có tài khoản? <a href="#" id="toggle-link">Đăng ký ngay</a>
-        </p>
-        <button id="google-login">Đăng nhập Google</button>
-        <button id="phone-login">Đăng nhập Phone</button>
-        <div id="recaptcha-container"></div>
-      </div>
-    </div>
-
-    <!-- PHẦN BÌNH LUẬN -->
-    <div id="comments-section" class="comments-section hidden">
-      <h2>Bình luận</h2>
-      <div id="comments-list"></div>
-      <form id="comment-form">
-        <textarea id="comment-input" placeholder="Viết bình luận..." required></textarea>
-        <button type="submit">Gửi Bình Luận</button>
-      </form>
-    </div>
-
-    <script type="module" src="main.js"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <!-- PubNub -->
+  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.34.0.js"></script>
+  <!-- UI libs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/css/splide.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/js/splide.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
+  <script src="https://unpkg.com/@popperjs/core@2"></script>
+  <script src="https://unpkg.com/tippy.js@6"></script>
+  <script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
+  <script src="auth.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="header">
+    <h1>Danh bạ</h1>
+    <button id="btn-logout" class="button" data-tippy-content="Đăng xuất">⏏️</button>
+  </header>
+  <section id="contacts" class="card-list"></section>
+  <a href="chat.html" class="fab" id="new-chat" data-tippy-content="Nhắn tin mới">✉️</a>
+</body>
 </html>
