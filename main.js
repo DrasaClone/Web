@@ -196,7 +196,7 @@ if (uploadBtn) {
 }
 
 // --------------------------------
-// 5. TÍNH NĂNG NGHE NHẠC (Deezer)
+// 5. TÍNH NĂNG NGHE NHẠC (Deezer) (😑 Don't create app sucess)
 // --------------------------------
 DZ.init({
   appId  : 'YOUR_DEEZER_APP_ID',
