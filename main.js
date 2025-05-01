@@ -115,7 +115,6 @@ const googleLoginBtn = document.getElementById('google-login');
 
 const displayNickname = document.getElementById('display-nickname');
 const userStatusSpan = document.getElementById('user-status');
-
 // -----------------------------------
 // 1. CÁC HÀM XỬ LÝ ĐĂNG NHẬP & ĐĂNG KÝ
 // -----------------------------------
