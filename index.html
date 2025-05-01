@@ -39,13 +39,31 @@
   <div id="app">
     <!-- Phần Đăng nhập / Đăng ký -->
     <section id="login-section">
-      <h2>Đăng nhập / Đăng ký</h2>
-      <form id="login-form">
-        <input type="text" id="nickname" placeholder="Nickname" required>
-        <input type="text" id="phone" placeholder="Số điện thoại (tùy chọn)">
-        <button type="button" id="phone-login">Đăng nhập bằng SĐT</button>
-        <button type="button" id="google-login">Đăng nhập bằng Google</button>
-      </form>
+      <div class="login-card">
+        <h2>Đăng nhập / Đăng ký</h2>
+        <form id="login-form">
+          <input type="text" id="nickname" placeholder="Nickname" required>
+          <!-- Đăng nhập qua Email -->
+          <input type="email" id="email" placeholder="Email" required>
+          <input type="password" id="password" placeholder="Mật khẩu" required>
+          <div class="btn-group">
+            <button type="button" id="email-login">Đăng nhập bằng Email</button>
+            <button type="button" id="email-signup">Đăng ký bằng Email</button>
+          </div>
+
+          <hr/>
+
+          <!-- Đăng nhập qua SĐT -->
+          <input type="text" id="phone" placeholder="Số điện thoại (vd: 912345678)">
+          <button type="button" id="phone-login">Đăng nhập bằng SĐT</button>
+
+          <!-- Đăng nhập qua Google -->
+          <button type="button" id="google-login">Đăng nhập bằng Google</button>
+
+          <!-- Container cho reCAPTCHA (Firebase Phone Auth) -->
+          <div id="recaptcha-container"></div>
+        </form>
+      </div>
     </section>
 
     <!-- Phần Chat -->
