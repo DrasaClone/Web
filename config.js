@@ -11,7 +11,7 @@ const FIREBASE_CONFIG = {
 const PUBNUB_KEYS = { publishKey: "YOUR_PUB", subscribeKey: "YOUR_SUB" };
 const CHANNEL = "global_chat";
 // Cloudinary
-const CLOUDINARY = { cloudName: "YOUR_CLOUD", uploadPreset: "YOUR_UPLOAD_PRESET" };
+const CLOUDINARY = { cloudName: "dgbux4wzo", uploadPreset: "YOUR_UPLOAD_PRESET" };
 // Jitsi
 const JITSI_DOMAIN = "meet.jit.si";
-const JITSI_ROOM = "YourRoomName";
+const JITSI_ROOM = "WebUIroom";
