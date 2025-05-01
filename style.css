@@ -1,1 +1,70 @@
+/* style.css - Các style cơ bản */
+
+:root {
+  --primary-color: #2196F3;
+  --background-color: #fff;
+  --text-color: #000;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+/* Chế độ dark (sẽ được active qua JS) */
+body.dark-mode {
+  --background-color: #121212;
+  --text-color: #eee;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 1em;
+  text-align: center;
+}
+
+section {
+  padding: 1em;
+  flex: 1;
+  border-bottom: 1px solid #ccc;
+}
+
+#chat-window {
+  background: #f1f1f1;
+  padding: 1em;
+  height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  margin-bottom: 1em;
+}
+
+.message {
+  margin-bottom: 10px;
+}
+
+.video-stream {
+  width: 300px;
+  height: 200px;
+  background: #000;
+  display: inline-block;
+  margin: 10px;
+}
+
+/* Style cho theme-switcher */
+.theme-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
 
