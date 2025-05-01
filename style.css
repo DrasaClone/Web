@@ -1,0 +1,32 @@
+:root {
+  --bg: #fff; --text: #000; --primary: #006aff; --secondary: #f1f0f0;
+}
+[data-theme="dark"] {
+  --bg: #18191A; --text: #E4E6EB; --primary: #2D88FF; --secondary: #242526;
+}
+/* Tiếp tục định nghĩa 20 theme khác... */
+
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:Arial,sans-serif; transition:.3s; }
+.header { display:flex; justify-content:space-between; align-items:center; padding:1rem; background:var(--secondary); }
+.button { background:var(--primary); color:#fff; border:none; padding:.6rem 1rem; border-radius:.3rem; cursor:pointer; }
+.card-list, .posts-list, .message-list { margin:1rem auto; max-width:600px; padding:1rem; background:var(--secondary); border-radius:.5rem; }
+.fab { position:fixed; right:1.5rem; bottom:1.5rem; background:var(--primary); color:#fff; width:3rem; height:3rem; border-radius:50%; font-size:2rem; text-align:center; line-height:3rem; }
+.chat-header-info { display:flex; align-items:center; gap:.5rem; }
+.status-dot { width:.8rem; height:.8rem; border-radius:50%; display:inline-block; }
+.status-dot.online { background:#4CAF50; }
+.status-dot.offline { background:#ccc; }
+.message-list .message { margin-bottom:.5rem; }
+.bubble { max-width:60%; padding:.6rem 1rem; border-radius:1rem; position:relative; line-height:1.4; }
+.incoming .bubble { background:#f1f0f0; } .outgoing .bubble { background:var(--primary); color:#fff; }
+.bubble::after { content:''; position:absolute; width:.8rem; height:.8rem; background:inherit; bottom:0; }
+.incoming .bubble::after { left:-.4rem; border-bottom-right-radius:.8rem; }
+.outgoing .bubble::after { right:-.4rem; border-bottom-left-radius:.8rem; }
+.chat-input { position:fixed; bottom:0; left:0; right:0; display:flex; padding:1rem; background:var(--secondary); }
+.chat-input input { flex:1; padding:.6rem 1rem; margin:0 .5rem; border-radius:2rem; border:1px solid #ccc; }
+.stories { margin:1rem auto; max-width:600px; }
+.splide__slide img { width:60px; height:60px; border-radius:50%; border:2px solid #ddd; }
+.splide__slide.is-active img { border-color:var(--primary); }
+.new-post { margin:1rem auto; max-width:600px; background:var(--secondary); padding:1rem; border-radius:.5rem; }
+.new-post textarea { width:100%; padding:.6rem; border-radius:.3rem; border:1px solid #ccc; resize:vertical; }
+.call-iframe, #jitsi-container { width:100%; height:calc(100vh - 4rem); }
