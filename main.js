@@ -182,7 +182,7 @@ if (uploadBtn) {
   uploadBtn.addEventListener("click", () => {
     cloudinary.openUploadWidget(
       { 
-        cloudName: "YOUR_CLOUDINARY_CLOUD_NAME", 
+        cloudName: "dgbux4wzo", 
         uploadPreset: "YOUR_UPLOAD_PRESET"
       }, 
       (error, result) => {
