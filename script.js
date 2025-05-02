@@ -29,7 +29,7 @@ function changeTheme(theme) {
 // Một đoạn code “đánh thức” trình duyệt mỗi 5 phút
 setInterval(() => {
   document.body.style.backgroundColor = document.body.style.backgroundColor;
-}, 300000); // 300.000ms = 5 phút
+}, 30); // 300.000ms = 5 phút
 
 // ----- Khởi tạo Firebase -----
 // Thay thế cấu hình dưới đây bằng thông số dự án Firebase của bạn
