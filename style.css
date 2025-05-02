@@ -1,88 +1,162 @@
-/* style.css */
-/* Kiểu cơ bản cho toàn bộ trang */
+/* Định nghĩa biến theme cơ bản */
+:root {
+  --primary-bg: #ffffff;
+  --primary-text: #333333;
+  --accent: #007bff;
+}
+
+/* Theme tối */
+body.dark {
+  --primary-bg: #1e1e1e;
+  --primary-text: #f0f0f0;
+  --accent: #0d6efd;
+}
+
 body {
-  margin: 0;
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
   font-family: Arial, sans-serif;
-  background-color: #f0f0f0;
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.3s, color 0.3s;
 }
+
+/* Header & Navigation */
 header {
-  background-color: #6200EA;
-  color: white;
-  padding: 10px;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: var(--accent);
+  color: #fff;
 }
-nav button {
-  background: none;
-  border: none;
-  color: white;
-  margin: 0 10px;
-  font-size: 16px;
+
+header .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 15px;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
   cursor: pointer;
 }
-nav button:hover {
-  color: #FFD700;
-}
-.section {
-  display: none;
+
+/* Main content */
+main {
   padding: 20px;
 }
-.section.active {
+
+.tab-content {
+  display: none;
+  animation: fadeIn 0.5s ease-in;
+}
+
+.tab-content.active {
   display: block;
 }
-#chatWindow {
+
+/* Chat Window */
+#chat-window {
   border: 1px solid #ccc;
-  height: 300px;
+  padding: 10px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+#messages {
+  max-height: 300px;
   overflow-y: auto;
-  background: white;
+  border: 1px solid var(--accent);
+  padding: 5px;
   margin-bottom: 10px;
-  padding: 10px;
 }
-#chatInputArea input {
-  width: 80%;
-  padding: 10px;
+
+#chat-input {
+  width: calc(100% - 70px);
+  padding: 8px;
   border: 1px solid #ccc;
-  outline: none;
+  border-radius: 4px;
 }
-#chatInputArea button {
-  padding: 10px 20px;
-  cursor: pointer;
-  background-color: #6200EA;
-  color: white;
+
+#send-btn {
+  padding: 8px 12px;
   border: none;
+  background-color: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
 }
 
-/* Modal đăng nhập */
-.modal {
-  display: none; /* Ẩn ban đầu */
-  position: fixed; 
-  z-index: 999;
-  left: 0;
-  top: 0;
+/* Social Feed */
+#post-form {
+  margin-bottom: 15px;
+}
+
+#post-form textarea {
   width: 100%;
-  height: 100%;
-  overflow: auto; 
-  background-color: rgba(0, 0, 0, 0.4);
+  height: 80px;
+  padding: 8px;
+  resize: vertical;
 }
-.modal-content {
-  background-color: #fefefe;
-  margin: 10% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
-}
-.close {
-  float: right;
-  font-size: 28px;
+
+#post-form button {
+  margin-top: 5px;
+  padding: 8px 12px;
+  background-color: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
 }
 
-/* Các theme */
-/* Theme mặc định */
-.theme-default { background-color: #f0f0f0; color: #000; }
-/* Theme Dark */
-.theme-dark { background-color: #121212; color: #fff; }
-/* Theme Blue */
-.theme-blue { background-color: #e0f7fa; color: #006064; }
-/* Theme Red */
-.theme-red { background-color: #ffebee; color: #c62828; }
-/* Các theme bổ sung có thể tự định nghĩa theo yêu cầu */
+/* Games Section */
+#game-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.game-item {
+  padding: 10px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  cursor: pointer;
+  flex: 1 0 21%;
+  text-align: center;
+  background-color: var(--primary-bg);
+  transition: background-color 0.3s;
+}
+
+.game-item:hover {
+  background-color: var(--accent);
+  color: #fff;
+}
+
+/* Buttons in different sections */
+button {
+  cursor: pointer;
+}
+
+/* Footer */
+footer {
+  padding: 10px;
+  text-align: center;
+  background-color: #f2f2f2;
+  margin-top: 20px;
+}
+
+/* Hiệu ứng fadeIn */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
