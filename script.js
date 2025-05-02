@@ -1,284 +1,181 @@
 /* script.js */
 
-document.addEventListener('DOMContentLoaded', function() {
-  /* Khởi tạo Firebase – hãy thay thế các thông số bên dưới bằng cấu hình của dự án Firebase của bạn */
-  const firebaseConfig = {
-  apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
-  authDomain: "webai-7642b.firebaseapp.com",
-  databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "webai-7642b",
-  storageBucket: "webai-7642b.firebasestorage.app",
-  messagingSenderId: "967881370128",
-  appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
-  measurementId: "G-61XJ390Q30"
-  };
-  firebase.initializeApp(firebaseConfig);
-  
-  /* Khởi tạo PubNub – thay thế các khóa tương ứng */
-  window.pubnub = new PubNub({
-      publishKey: "pub-c-9ad32978-37b1-4f15-bc57-bac1884507a4",
-      subscribeKey: "sub-c-0269ec54-430f-41b1-8a33-4200f566fcbb",
-      uuid: generateUUID()
-  });
-  
-  // Đăng ký kênh chat
-  pubnub.subscribe({ channels: ['chat-channel'] });
-  pubnub.addListener({
-     message: function(event) {
-        displayMessage(event.message);
-     },
-     presence: function(event) {
-        // Cập nhật trạng thái online/offline (cần xử lý chi tiết hơn trong sản phẩm thực tế)
-        document.getElementById('online-status').innerText = event.action === 'join' ? "Online" : "Offline";
-     }
-  });
+// ----- Biến toàn cục và khởi tạo -----
+let currentSection = 'chat';
+let pubnub;
+let userAuth = null;  // Lưu trạng thái người dùng sau khi đăng nhập
+let agoraClient;
 
-  // Yêu cầu không cho màn hình tắt (Wake Lock API)
-  if ('wakeLock' in navigator) {
-     requestWakeLock();
-  }
-  
-  // Khởi tạo danh sách theme (ví dụ 3 theme, mở rộng lên đến 20 theo yêu cầu)
-  initThemes();
-  
-  // Theo dõi trạng thái đăng nhập trên Firebase
-  firebase.auth().onAuthStateChanged(function(user) {
-     if (user) {
-        // Người dùng đã đăng nhập
-        document.getElementById('user-email').innerText = user.email ? user.email : "Chưa có email";
-        document.getElementById('user-nickname').innerText = user.displayName ? user.displayName : "Nickname";
-        closeAuthModal();
-     } else {
-        // Chưa đăng nhập – hiển thị modal đăng nhập
-        openAuthModal();
-     }
+// ----- Điều hướng các phần (sections) -----
+function showSection(section) {
+  const sections = document.querySelectorAll('.section');
+  sections.forEach(sec => sec.classList.remove('active'));
+  document.getElementById(section + 'Section').classList.add('active');
+  currentSection = section;
+}
+
+// ----- Hàm thay đổi theme (có sử dụng anime.js cho hiệu ứng mượt) -----
+function changeTheme(theme) {
+  document.body.className = 'theme-' + theme;
+  anime({
+    targets: 'body',
+    backgroundColor: theme === 'dark' ? '#121212' : (theme === 'blue' ? '#e0f7fa' : (theme === 'red' ? '#ffebee' : '#f0f0f0')),
+    duration: 800,
+    easing: 'easeInOutQuad'
   });
+}
+
+// ----- Tính năng chống tắt màn hình -----
+// Một đoạn code “đánh thức” trình duyệt mỗi 5 phút
+setInterval(() => {
+  document.body.style.backgroundColor = document.body.style.backgroundColor;
+}, 300000); // 300.000ms = 5 phút
+
+// ----- Khởi tạo Firebase -----
+// Thay thế cấu hình dưới đây bằng thông số dự án Firebase của bạn
+const firebaseConfig = {
+  apiKey: "YOUR_FIREBASE_API_KEY",
+  authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
+  projectId: "YOUR_FIREBASE_PROJECT_ID",
+  storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_FIREBASE_SENDER_ID",
+  appId: "YOUR_FIREBASE_APP_ID"
+};
+firebase.initializeApp(firebaseConfig);
+
+// ----- Khởi tạo PubNub -----
+// Thay thế bằng publishKey và subscribeKey của bạn
+pubnub = new PubNub({
+  publishKey: "YOUR_PUBNUB_PUBLISH_KEY",
+  subscribeKey: "YOUR_PUBNUB_SUBSCRIBE_KEY",
+  uuid: "user-" + Math.floor(Math.random() * 10000)
+});
+pubnub.subscribe({channels: ['chat']});
+pubnub.addListener({
+  message: function(event) {
+    displayMessage(event.message);
+  }
 });
 
-/* Hàm tạo UUID đơn giản */
-function generateUUID() {
-  return 'xxxx-xxxx-xxxx-xxxx'.replace(/[x]/g, function(c) {
-      var r = Math.random() * 16 | 0;
-      return r.toString(16);
+// ----- Hiển thị tin nhắn chat -----
+function displayMessage(msg) {
+  const chatWindow = document.getElementById('chatWindow');
+  const msgDiv = document.createElement('div');
+  msgDiv.textContent = msg.nickname + ': ' + msg.text;
+  chatWindow.appendChild(msgDiv);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+// ----- Gửi tin nhắn chat -----
+function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (text === "") return;
+  const messageData = {
+    nickname: localStorage.getItem('nickname') || 'Anonymous',
+    text: text,
+    timestamp: Date.now()
+  };
+  
+  pubnub.publish({
+    channel: 'chat',
+    message: messageData
+  }, function(status, response) {
+    if (!status.error) input.value = "";
   });
 }
 
-/* Hiển thị tin nhắn trong khung chat */
-function displayMessage(message) {
-   const messagesContainer = document.getElementById('messages');
-   const messageElement = document.createElement('div');
-   messageElement.className = 'message';
-   // Nếu tin nhắn có hình ảnh
-   if(message.imageUrl) {
-      messageElement.innerHTML = `<strong>${message.sender}:</strong> <br><img src="${message.imageUrl}" alt="Hình ảnh" style="max-width:200px;">`;
-   } else {
-      messageElement.innerHTML = `<strong>${message.sender}:</strong> ${message.text}`;
-   }
-   messagesContainer.appendChild(messageElement);
-   messagesContainer.scrollTop = messagesContainer.scrollHeight;
-}
-
-/* Gửi tin nhắn qua PubNub */
-function sendMessage() {
-    const input = document.getElementById('message-input');
-    const messageText = input.value;
-    if(messageText.trim() === "") return;
-    pubnub.publish({
-         channel: 'chat-channel',
-         message: {
-            sender: firebase.auth().currentUser ? firebase.auth().currentUser.displayName || "Anonymous" : "Anonymous",
-            text: messageText,
-            timestamp: Date.now()
-         }
-    }, function(status, response) {
-         if(status.error) {
-             console.error("Lỗi gửi tin:", status);
-         } else {
-             console.log("Tin nhắn đã gửi với timetoken", response.timetoken);
-         }
-    });
-    input.value = "";
-}
-
-/* Upload ảnh sử dụng Cloudinary Upload Widget */
-function uploadImage() {
-    cloudinary.openUploadWidget({
-        cloudName: 'dgbux4wzo', 
-        uploadPreset: 'okeqfdx4'
-    }, function(error, result) {
-       if (!error && result && result.event === "success") {
-           const imageUrl = result.info.secure_url;
-           // Gửi tin nhắn chứa URL ảnh
-           pubnub.publish({
-             channel: 'chat-channel',
-             message: {
-                 sender: firebase.auth().currentUser ? firebase.auth().currentUser.displayName || "Anonymous" : "Anonymous",
-                 imageUrl: imageUrl,
-                 timestamp: Date.now()
-             }
-           }, function(status, response) {
-               if(status.error) {
-                   console.error("Lỗi gửi tin:", status);
-               } else {
-                   console.log("Tin nhắn hình ảnh được gửi với timetoken", response.timetoken);
-               }
-           });
-       }
-    });
-}
-
-/* Bắt đầu cuộc gọi sử dụng Agora.io */
-function startCall() {
-   console.log("Bắt đầu cuộc gọi...");
-   // Khởi tạo Agora client – thay thế YOUR_AGORA_APP_ID với App ID của bạn
-   var client = AgoraRTC.createClient({mode: "rtc", codec: "vp8"});
-   client.init("a0b62867bee543fe828e23b4888eb3ae", function() {
-      console.log("AgoraRTC client đã khởi tạo");
-      client.join(null, "demoChannel", null, function(uid) {
-          console.log("User " + uid + " đã tham gia phòng");
-          // Tạo stream cục bộ và phát video lên container
-          var localStream = AgoraRTC.createStream({audio: true, video: true});
-          localStream.init(function() {
-              localStream.play('agora-container');
-              client.publish(localStream, function(err) {
-                  console.error("Lỗi gửi stream cục bộ: " + err);
-              });
-          }, function(err) {
-              console.error("Lỗi truy cập media: ", err);
-          });
-      }, function(err) {
-          console.error("Lỗi tham gia phòng: ", err);
-      });
-   }, function(err) {
-      console.error("Lỗi khởi tạo AgoraRTC client: ", err);
-   });
-}
-
-/* Kết thúc cuộc gọi */
-function endCall() {
-   console.log("Kết thúc cuộc gọi...");
-   // Ở sản phẩm thực, lưu tham chiếu client và các stream để gọi client.leave() và dọn dẹp.
-}
-
-/* Yêu cầu Wake Lock để chống tắt màn hình */
-async function requestWakeLock() {
-  try {
-    let wakeLock = await navigator.wakeLock.request('screen');
-    wakeLock.addEventListener('release', () => {
-      console.log('Screen Wake Lock đã được giải phóng');
-    });
-    console.log('Screen Wake Lock đang hoạt động');
-  } catch (err) {
-    console.error('Lỗi Wake Lock: ', err.name, err.message);
+// ----- Cập nhật thông tin cá nhân (nickname) -----
+function updateProfile() {
+  const nickname = document.getElementById('nickname').value.trim();
+  if (nickname !== '') {
+    localStorage.setItem('nickname', nickname);
+    alert('Nickname đã được cập nhật!');
   }
 }
 
-/* Khởi tạo các theme cho việc chuyển đổi giao diện */
-function initThemes() {
-    const themeSelector = document.getElementById('theme-selector');
-    const themes = ["default", "dark", "red"]; // Mở rộng mảng này tới khoảng 20 theme nếu cần
-    themes.forEach(theme => {
-        let opt = document.createElement('option');
-        opt.value = theme;
-        opt.text = theme.charAt(0).toUpperCase() + theme.slice(1);
-        themeSelector.appendChild(opt);
+// ----- Modal đăng nhập/đăng ký -----
+function openAuthModal() {
+  document.getElementById('authModal').style.display = 'block';
+}
+function closeAuthModal() {
+  document.getElementById('authModal').style.display = 'none';
+}
+
+// ----- Các hàm xác thực dùng Firebase ----- 
+function loginWithEmail() {
+  // Thêm logic xác thực email (firebase.auth().signInWithEmailAndPassword)
+  document.getElementById('authForm').style.display = 'block';
+}
+function loginWithPhone() {
+  // Thêm logic cho xác thực số điện thoại (firebase.auth().signInWithPhoneNumber)
+  document.getElementById('authForm').style.display = 'block';
+}
+function loginWithGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider)
+    .then(result => {
+      userAuth = result.user;
+      alert("Đăng nhập thành công: " + userAuth.displayName);
+    })
+    .catch(error => {
+      console.error(error);
     });
 }
-
-/* Hàm chuyển đổi theme */
-function switchTheme(theme) {
-   document.documentElement.className = 'theme-' + theme;
+function submitAuth() {
+  // Xử lý form đăng nhập/đăng ký chung (sử dụng createUserWithEmailAndPassword hoặc signInWithEmailAndPassword)
+  closeAuthModal();
 }
 
-/* Hàm chuyển đổi chế độ sáng/tối bằng cách toggle class */
-function toggleDarkMode() {
-   document.body.classList.toggle('dark-mode');
+// ----- Tích hợp Agora.io cho cuộc gọi (video, audio và group call) -----
+function initiateCall() {
+  // Ví dụ sử dụng Agora.io: khởi tạo và tham gia kênh "demoChannel"
+  agoraClient = AgoraRTC.createClient({mode: "rtc", codec: "vp8"});
+  agoraClient.init("YOUR_AGORA_APP_ID", function() {
+    console.log("AgoraRTC client initialized");
+    agoraClient.join(null, "demoChannel", null, function(uid) {
+      console.log("User " + uid + " joined channel");
+      startLocalStream(uid);
+    }, function(err) {
+      console.error("AgoraRTC join failed", err);
+    });
+  });
+}
+function startLocalStream(uid) {
+  let localStream = AgoraRTC.createStream({
+    streamID: uid,
+    audio: true,
+    video: true,
+    screen: false
+  });
+  localStream.init(function() {
+    localStream.play('videoContainer');
+    agoraClient.publish(localStream, function(err) {
+      console.error("Publish error: " + err);
+    });
+  }, function(err) {
+    console.error("Local stream init failed", err);
+  });
 }
 
-/* Hàm hiển thị trang được chọn */
-function showPage(pageId) {
-   const pages = document.getElementsByClassName('page');
-   for (let i = 0; i < pages.length; i++) {
-      pages[i].style.display = 'none';
-   }
-   document.getElementById(pageId).style.display = 'block';
-}
+// ----- Ví dụ game đơn giản (đã khởi chạy ở gameSection) -----
+// Phần code game có thể được mở rộng hoặc thay thế bởi nhiều trò chơi hơn
 
-/* Các điều khiển của modal đăng nhập */
-function openAuthModal() {
-   document.getElementById('auth-modal').style.display = 'block';
-}
+// ----- Hiệu ứng giao diện bổ sung -----
+// Các hiệu ứng phụ có thể được thêm vào ở đây bằng anime.js
 
-function closeAuthModal() {
-   document.getElementById('auth-modal').style.display = 'none';
-}
+// ----- Tích hợp Audio (Audiomack) -----
+// Bạn có thể nâng cấp audio player hoặc thêm API tùy thuộc vào nguồn stream Audiomack
 
-/* Đăng nhập qua Email/Password với Firebase */
-function signInWithEmail() {
-   const email = document.getElementById('email').value;
-   const password = document.getElementById('password').value;
-   firebase.auth().signInWithEmailAndPassword(email, password)
-      .then((userCredential) => {
-         console.log("Đăng nhập qua Email thành công");
-      })
-      .catch((error) => {
-         console.error(error.code, error.message);
-      });
-}
+// ----- Online/Offline Tracking -----
+window.addEventListener('online', () => {
+  document.getElementById('onlineStatus').textContent = "Online";
+});
+window.addEventListener('offline', () => {
+  document.getElementById('onlineStatus').textContent = "Offline";
+});
 
-/* Đăng nhập qua Google với Firebase */
-function signInWithGoogle() {
-   var provider = new firebase.auth.GoogleAuthProvider();
-   firebase.auth().signInWithPopup(provider)
-      .then((result) => {
-         console.log("Đăng nhập bằng Google thành công");
-      }).catch((error) => {
-         console.error(error);
-      });
-}
-
-/* Đăng nhập bằng Số điện thoại (lưu ý: cần thiết lập Firebase Recaptcha) */
-function signInWithPhone() {
-   let phoneNumber = prompt("Nhập số điện thoại của bạn:");
-   if (!phoneNumber) return;
-   let appVerifier = new firebase.auth.RecaptchaVerifier('auth-modal', {
-          'size': 'invisible'
-   });
-   firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
-       .then(function (confirmationResult) {
-           let code = prompt("Nhập mã OTP được gửi về điện thoại của bạn:");
-           return confirmationResult.confirm(code);
-       })
-       .then((result) => {
-           console.log("Đăng nhập bằng Số điện thoại thành công");
-       })
-       .catch((error) => {
-           console.error(error);
-       });
-}
-
-/* Hàm đăng status (bài viết) trên trang Mạng xã hội */
-function postStatus() {
-    const content = document.getElementById('post-content').value;
-    if(content.trim() === "") return;
-    const postsContainer = document.getElementById('posts');
-    const postElement = document.createElement('div');
-    postElement.className = 'post';
-    postElement.innerHTML = `<p><strong>${firebase.auth().currentUser ? firebase.auth().currentUser.displayName || "Anonymous" : "Anonymous"}</strong>: ${content}</p>`;
-    postsContainer.insertBefore(postElement, postsContainer.firstChild);
-    document.getElementById('post-content').value = "";
-}
-
-/* Hàm chỉnh sửa thông tin cá nhân (ví dụ thay đổi nickname) */
-function editProfile() {
-   let newNickname = prompt("Nhập nickname mới:");
-   if(newNickname && firebase.auth().currentUser) {
-       firebase.auth().currentUser.updateProfile({
-            displayName: newNickname
-       }).then(() => {
-            document.getElementById('user-nickname').innerText = newNickname;
-       }).catch((error) => {
-            console.error("Lỗi cập nhật nickname:", error);
-       });
-   }
+// Nếu người dùng chưa xác thực, mở modal đăng nhập
+if (!userAuth) {
+  openAuthModal();
 }
