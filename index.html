@@ -2,124 +2,154 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nền tảng Trò chuyện & Mạng xã hội</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nền tảng Chat & Mạng xã hội</title>
   <link rel="stylesheet" href="style.css">
-  
-  <!-- Firebase: bao gồm các module cần thiết -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-  
+  <!-- External Libraries & SDKs -->
+  <!-- anime.js cho hiệu ứng chuyển động -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <!-- Firebase SDK (thay đổi theo phiên bản mới nhất nếu cần) -->
+  <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-firestore.js"></script>
   <!-- PubNub SDK -->
   <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.9.min.js"></script>
-  
-  <!-- Cloudinary Upload Widget -->
-  <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
-  
-  <!-- Agora.io SDK cho video/voice call -->
-  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
-  
-  <!-- Anime.js cho hiệu ứng giao diện -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <!-- Agora.io SDK -->
+  <script src="https://download.agora.io/sdk/release/AgoraRTCSDK-4.10.0.js"></script>
+  <!-- Facebook SDK sẽ được khởi tạo sau -->
 </head>
-<body>
-  <!-- Facebook SDK để sử dụng plugin bình luận -->
-  <div id="fb-root"></div>
-  <script async defer crossorigin="anonymous" 
-          src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v12.0" nonce="XYZ"></script>
-  
-  <!-- Navigation Bar chung -->
+<body class="theme-default">
   <header>
-    <nav>
-      <ul>
-        <li><a href="#" onclick="showPage('chat-page')">Trò chuyện</a></li>
-        <li><a href="#" onclick="showPage('social-page')">Mạng xã hội</a></li>
-        <li><a href="#" onclick="showPage('profile-page')">Cá nhân</a></li>
-        <li>
-          <select id="theme-selector" onchange="switchTheme(this.value)">
-              <!-- Các theme sẽ được khởi tạo động trong script.js -->
-          </select>
-        </li>
-        <li>
-          <button id="toggle-dark" onclick="toggleDarkMode()">Chế độ Sáng/Tối</button>
-        </li>
-      </ul>
+    <h1>Nền tảng Chat & Mạng xã hội</h1>
+    <!-- Menu: gồm các trang và thay đổi theme -->
+    <nav id="navbar">
+      <button onclick="showSection('chat')">Chat</button>
+      <button onclick="showSection('social')">Mạng xã hội</button>
+      <button onclick="showSection('profile')">Tài khoản</button>
+      <button onclick="showSection('call')">Cuộc gọi</button>
+      <button onclick="showSection('game')">Trò chơi</button>
+      <select id="themeSelector" onchange="changeTheme(this.value)">
+         <option value="default">Default</option>
+         <option value="dark">Dark</option>
+         <!-- Thêm các theme khác (RGB): bạn có thể copy-đổi với màu khác -->
+         <option value="blue">Blue</option>
+         <option value="red">Red</option>
+         <!-- ... cho tới 20 theme -->
+      </select>
     </nav>
   </header>
   
-  <!-- Trang Trò chuyện -->
-  <section id="chat-page" class="page">
-    <div class="chat-container">
-      <div class="chat-header">
-          <h2>Trò chuyện trực tuyến</h2>
-          <span id="online-status">Offline</span>
+  <main>
+    <!-- Chat Section -->
+    <section id="chatSection" class="section active">
+      <div id="chatWindow">
+         <!-- Tin nhắn sẽ được hiển thị ở đây -->
       </div>
-      <div id="messages" class="messages"></div>
-      <div class="chat-input">
-          <input type="text" id="message-input" placeholder="Nhập tin nhắn...">
-          <button onclick="sendMessage()">Gửi</button>
-          <button onclick="uploadImage()">Ảnh</button>
+      <div id="chatInputArea">
+         <input type="text" id="chatInput" placeholder="Nhập tin nhắn...">
+         <button onclick="sendMessage()">Gửi</button>
       </div>
-      <!-- Các nút điều khiển cuộc gọi -->
-      <div class="call-controls">
-          <button onclick="startCall()">Bắt đầu cuộc gọi</button>
-          <button onclick="endCall()">Kết thúc cuộc gọi</button>
+    </section>
+    
+    <!-- Social Network Section -->
+    <section id="socialSection" class="section">
+      <h2>Bảng tin</h2>
+      <div id="socialFeed">
+         <!-- Bài đăng và feed mạng xã hội -->
       </div>
-      <!-- Container hiển thị video gọi từ Agora.io -->
-      <div id="agora-container"></div>
-    </div>
-  </section>
-  
-  <!-- Trang Mạng xã hội -->
-  <section id="social-page" class="page" style="display:none;">
-    <div class="social-container">
-      <h2>Mạng xã hội</h2>
-      <div class="post-input">
-        <textarea id="post-content" placeholder="Chia sẻ cảm nghĩ của bạn..."></textarea>
-        <button onclick="postStatus()">Đăng</button>
+      <!-- Plugin bình luận Facebook -->
+      <div id="fb-comments">
+         <div class="fb-comments" data-href="YOUR_PAGE_URL" data-width="100%" data-numposts="5"></div>
       </div>
-      <div id="posts" class="posts"></div>
-      <!-- Plugin bình luận của Facebook -->
-      <div class="fb-comments" data-href="https://yourdomain.github.io" data-width="100%" data-numposts="5"></div>
-    </div>
-  </section>
-  
-  <!-- Trang Cá nhân -->
-  <section id="profile-page" class="page" style="display:none;">
-    <div class="profile-container">
-      <h2>Trang cá nhân</h2>
-      <div id="user-info">
-         <p>Nickname: <span id="user-nickname">Chưa cập nhật</span></p>
-         <p>Email: <span id="user-email">Chưa đăng nhập</span></p>
-         <button onclick="editProfile()">Chỉnh sửa thông tin</button>
+    </section>
+    
+    <!-- Profile Section -->
+    <section id="profileSection" class="section">
+      <h2>Thông tin cá nhân</h2>
+      <div id="profileInfo">
+         <label>Nickname:</label>
+         <input type="text" id="nickname" placeholder="Nhập nickname của bạn">
+         <button onclick="updateProfile()">Cập nhật</button>
       </div>
-      <!-- Bộ phát nhạc tích hợp: ví dụ phát từ Audiomack, bạn có thể thay đổi nguồn phát -->
-      <div class="music-player">
-         <audio id="audio-player" controls>
-           <source src="https://sample-videos.com/audio/mp3/crowd-cheering.mp3" type="audio/mpeg">
-           Trình duyệt của bạn không hỗ trợ audio.
+      <div id="statusIndicator">
+         <span id="onlineStatus">Offline</span>
+      </div>
+    </section>
+    
+    <!-- Call Section (gọi điện/video call qua Agora.io) -->
+    <section id="callSection" class="section">
+      <h2>Gọi điện và Video Call</h2>
+      <div id="callArea">
+         <button onclick="initiateCall()">Bắt đầu cuộc gọi</button>
+         <div id="videoContainer">
+           <!-- Các luồng video sẽ được render tại đây -->
+         </div>
+      </div>
+    </section>
+    
+    <!-- Game Section - Trò chơi giải trí -->
+    <section id="gameSection" class="section">
+      <h2>Trò chơi & Giải trí</h2>
+      <div id="gameArea">
+         <!-- Ví dụ nhúng canvas cho game đơn giản (bóng nảy) -->
+         <canvas id="gameCanvas" width="400" height="300"></canvas>
+         <script>
+            // Ví dụ: game bóng nảy đơn giản
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            let x = canvas.width/2, y = canvas.height-30, dx = 2, dy = -2, ballRadius = 10;
+            function drawBall() {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              ctx.beginPath();
+              ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+              ctx.fillStyle = "#0095DD";
+              ctx.fill();
+              ctx.closePath();
+              if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) { dx = -dx; }
+              if(y + dy > canvas.height-ballRadius || y + dy < ballRadius) { dy = -dy; }
+              x += dx; y += dy;
+              requestAnimationFrame(drawBall);
+            }
+            drawBall();
+         </script>
+      </div>
+    </section>
+    
+    <!-- Audio Section: Nhạc từ Audiomack -->
+    <section id="audioSection" class="section">
+      <h2>Nghe nhạc từ Audiomack</h2>
+      <div id="audioPlayer">
+         <!-- Thẻ audio với source của Audiomack (cần xác thực nguồn âm thanh hợp lệ) -->
+         <audio controls>
+            <source src="https://audiomack.com/sample-stream.mp3" type="audio/mpeg">
+            Trình duyệt của bạn không hỗ trợ phát audio.
          </audio>
       </div>
-    </div>
-  </section>
+    </section>
+  </main>
   
-  <!-- Modal Đăng nhập/Đăng ký (sử dụng nickname, email, mật khẩu, tích hợp Google và Phone) -->
-  <div id="auth-modal" class="modal">
-     <div class="modal-content">
-         <span class="close" onclick="closeAuthModal()">&times;</span>
-         <div id="auth-form">
-             <h2>Đăng nhập / Đăng ký</h2>
-             <input type="text" id="nickname" placeholder="Nickname">
-             <input type="email" id="email" placeholder="Email">
-             <input type="password" id="password" placeholder="Mật khẩu">
-             <button onclick="signInWithEmail()">Đăng nhập bằng Email</button>
-             <button onclick="signInWithGoogle()">Đăng nhập bằng Google</button>
-             <button onclick="signInWithPhone()">Đăng nhập bằng Số điện thoại</button>
-         </div>
-     </div>
+  <!-- Modal đăng nhập/đăng ký -->
+  <div id="authModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeAuthModal()">&times;</span>
+      <h2>Đăng nhập / Đăng ký</h2>
+      <div id="authOptions">
+         <button onclick="loginWithEmail()">Đăng nhập với Email</button>
+         <button onclick="loginWithPhone()">Đăng nhập với SĐT</button>
+         <button onclick="loginWithGoogle()">Đăng nhập với Google</button>
+      </div>
+      <div id="authForm" style="display:none;">
+         <!-- Form nhập thông tin dùng cho đăng ký/đăng nhập -->
+         <input type="text" id="authInput" placeholder="Nhập thông tin">
+         <button onclick="submitAuth()">Xác nhận</button>
+      </div>
+    </div>
   </div>
   
   <script src="script.js"></script>
+  <!-- Facebook SDK (cần cập nhật data-href ở fb-comments) -->
+  <div id="fb-root"></div>
+  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v15.0"></script>
 </body>
 </html>
