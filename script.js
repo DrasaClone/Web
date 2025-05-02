@@ -103,7 +103,7 @@ function sendMessage() {
 /* Upload ảnh sử dụng Cloudinary Upload Widget */
 function uploadImage() {
     cloudinary.openUploadWidget({
-        cloudName: 'YOUR_CLOUD_NAME', 
+        cloudName: 'dgbux4wzo', 
         uploadPreset: 'YOUR_UPLOAD_PRESET'
     }, function(error, result) {
        if (!error && result && result.event === "success") {
