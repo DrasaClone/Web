@@ -1,121 +1,124 @@
-/* style.css - Các style cơ bản */
+/* style.css */
 
-:root {
-  --primary-color: #2196F3;
-  --background-color: #fff;
-  --text-color: #000;
+/* Đặt lại các style mặc định */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
+/* Style cơ bản cho body và navigation */
 body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  background-color: var(--background-color);
-  color: var(--text-color);
-}
-
-/* Chế độ dark (sẽ được active qua JS) */
-body.dark-mode {
-  --background-color: #121212;
-  --text-color: #eee;
-}
-
-#app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: var(--bg-color, #f0f0f0);
+    color: var(--text-color, #333);
 }
 
 header {
-  background-color: var(--primary-color);
-  color: white;
-  padding: 1em;
-  text-align: center;
+    background-color: var(--header-bg, #007bff);
+    padding: 10px;
 }
 
-section {
-  padding: 1em;
-  flex: 1;
-  border-bottom: 1px solid #ccc;
+nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
 }
 
-#chat-window {
-  background: #f1f1f1;
-  padding: 1em;
-  height: 300px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  margin-bottom: 1em;
+nav ul li a, nav ul li button, nav ul li select {
+    color: #fff;
+    text-decoration: none;
+    padding: 5px 10px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+/* Các section (trang) */
+.page {
+    padding: 20px;
+}
+
+/* Container của các nội dung */
+.chat-container, .social-container, .profile-container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    animation: fadeIn 1s ease;
+}
+
+/* Style cho khung chat */
+.messages {
+    border: 1px solid #ccc;
+    height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    margin-bottom: 10px;
 }
 
 .message {
-  margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
-.video-stream {
-  width: 300px;
-  height: 200px;
-  background: #000;
-  display: inline-block;
-  margin: 10px;
+/* Style cho khung input chat */
+.chat-input {
+    display: flex;
+    gap: 5px;
 }
 
-/* Style cho theme-switcher */
-.theme-switcher {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
+/* Style cho modal đăng nhập */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
 }
 
-/* Các style cơ bản đã có */
-
-/* Login Card - giao diện đăng nhập */
-.login-card {
-  margin: 5% auto;
-  padding: 2em;
-  max-width: 400px;
-  background: var(--background-color);
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    width: 80%;
+    border-radius: 5px;
+    position: relative;
 }
 
-.login-card h2 {
-  text-align: center;
-  margin-bottom: 1em;
+.close {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    font-size: 24px;
+    cursor: pointer;
 }
 
-.login-card form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+/* Hiệu ứng fade in */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.login-card input {
-  padding: 0.8em;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1em;
+/* Ví dụ sử dụng biến CSS cho các theme; bạn có thể định nghĩa tới 20 theme khác nhau */
+:root.theme-default {
+    --bg-color: #f0f0f0;
+    --text-color: #333;
+    --header-bg: #007bff;
 }
 
-.btn-group {
-  display: flex;
-  gap: 10px;
+:root.theme-dark {
+    --bg-color: #1e1e1e;
+    --text-color: #fff;
+    --header-bg: #333;
 }
 
-.login-card button {
-  padding: 0.8em;
-  border: none;
-  background-color: var(--primary-color);
-  color: #fff;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1em;
-  flex: 1;
+:root.theme-red {
+    --bg-color: #ffe6e6;
+    --text-color: #660000;
+    --header-bg: #ff4d4d;
 }
 
-.login-card button:hover {
-  background-color: #1976D2;
-}
-
-/* Các style khác cho các phần Chat, Social,...  */
+/* Các theme bổ sung khác có thể thêm tại đây */
