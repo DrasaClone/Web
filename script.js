@@ -133,7 +133,7 @@ function submitAuth() {
 function initiateCall() {
   // Ví dụ sử dụng Agora.io: khởi tạo và tham gia kênh "demoChannel"
   agoraClient = AgoraRTC.createClient({mode: "rtc", codec: "vp8"});
-  agoraClient.init("YOUR_AGORA_APP_ID", function() {
+  agoraClient.init("a0b62867bee543fe828e23b4888eb3ae", function() {
     console.log("AgoraRTC client initialized");
     agoraClient.join(null, "demoChannel", null, function(uid) {
       console.log("User " + uid + " joined channel");
