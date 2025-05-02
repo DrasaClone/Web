@@ -3,142 +3,123 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nền tảng Trò chuyện Trực tuyến</title>
-  
-  <!-- Liên kết CSS của riêng bạn -->
+  <title>Nền tảng Trò chuyện & Mạng xã hội</title>
   <link rel="stylesheet" href="style.css">
-
-  <!-- Firebase (chế độ compat để dễ sử dụng) -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
   
-  <!-- PubNub -->
-  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.34.0.min.js"></script>
+  <!-- Firebase: bao gồm các module cần thiết -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
   
-  <!-- Cloudinary Widget -->
-  <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
+  <!-- PubNub SDK -->
+  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.9.min.js"></script>
   
-  <!-- Agora.io SDK -->
-  <script src="https://download.agora.io/sdk/release/AgoraRTCSDK-4.10.2.js"></script>
+  <!-- Cloudinary Upload Widget -->
+  <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
   
-  <!-- Deezer API -->
-  <script src="https://e-cdns-files.dzcdn.net/js/min/dz.js"></script>
+  <!-- Agora.io SDK cho video/voice call -->
+  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
   
-  <!-- Google API for Login -->
-  <script src="https://apis.google.com/js/platform.js" async defer></script>
-  
-  <!-- Facebook SDK cho Comment Plugin -->
-  <div id="fb-root"></div>
-  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v12.0"></script>
-  
-  <!-- Anime.js cho hiệu ứng động -->
+  <!-- Anime.js cho hiệu ứng giao diện -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 </head>
 <body>
-  <div id="app">
-    <!-- Phần Đăng nhập / Đăng ký -->
-    <section id="login-section">
-      <div class="login-card">
-        <h2>Đăng nhập / Đăng ký</h2>
-        <form id="login-form">
-          <input type="text" id="nickname" placeholder="Nickname" required>
-          <!-- Đăng nhập qua Email -->
-          <input type="email" id="email" placeholder="Email" required>
-          <input type="password" id="password" placeholder="Mật khẩu" required>
-          <div class="btn-group">
-            <button type="button" id="email-login">Đăng nhập bằng Email</button>
-            <button type="button" id="email-signup">Đăng ký bằng Email</button>
-          </div>
-
-          <hr/>
-
-          <!-- Đăng nhập qua SĐT -->
-          <input type="text" id="phone" placeholder="Số điện thoại (vd: 912345678)">
-          <button type="button" id="phone-login">Đăng nhập bằng SĐT</button>
-
-          <!-- Đăng nhập qua Google -->
-          <button type="button" id="google-login">Đăng nhập bằng Google</button>
-
-          <!-- Container cho reCAPTCHA (Firebase Phone Auth) -->
-          <div id="recaptcha-container"></div>
-        </form>
-      </div>
-    </section>
-
-    <!-- Phần Chat -->
-    <section id="chat-section" style="display:none;">
-      <header>
-        <h2>Trò chuyện trực tuyến</h2>
-        <div class="theme-switcher">
-          <button id="toggle-dark-light">Chế độ Sáng/Tối</button>
-          <select id="theme-select">
-            <!-- Các option theme sẽ được khởi tạo bởi main.js -->
+  <!-- Facebook SDK để sử dụng plugin bình luận -->
+  <div id="fb-root"></div>
+  <script async defer crossorigin="anonymous" 
+          src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v12.0" nonce="XYZ"></script>
+  
+  <!-- Navigation Bar chung -->
+  <header>
+    <nav>
+      <ul>
+        <li><a href="#" onclick="showPage('chat-page')">Trò chuyện</a></li>
+        <li><a href="#" onclick="showPage('social-page')">Mạng xã hội</a></li>
+        <li><a href="#" onclick="showPage('profile-page')">Cá nhân</a></li>
+        <li>
+          <select id="theme-selector" onchange="switchTheme(this.value)">
+              <!-- Các theme sẽ được khởi tạo động trong script.js -->
           </select>
-        </div>
-      </header>
-      <div id="chat-window">
-        <div id="messages"></div>
-        <input type="text" id="message-input" placeholder="Nhập tin nhắn...">
-        <button id="send-message">Gửi</button>
+        </li>
+        <li>
+          <button id="toggle-dark" onclick="toggleDarkMode()">Chế độ Sáng/Tối</button>
+        </li>
+      </ul>
+    </nav>
+  </header>
+  
+  <!-- Trang Trò chuyện -->
+  <section id="chat-page" class="page">
+    <div class="chat-container">
+      <div class="chat-header">
+          <h2>Trò chuyện trực tuyến</h2>
+          <span id="online-status">Offline</span>
       </div>
-      <div id="online-status">
-        Trạng thái: <span id="user-status">Offline</span>
+      <div id="messages" class="messages"></div>
+      <div class="chat-input">
+          <input type="text" id="message-input" placeholder="Nhập tin nhắn...">
+          <button onclick="sendMessage()">Gửi</button>
+          <button onclick="uploadImage()">Ảnh</button>
       </div>
-    </section>
-
-    <!-- Phần Mạng xã hội -->
-    <section id="social-section" style="display:none;">
-      <header>
-        <h2>Mạng xã hội</h2>
-      </header>
-      <div id="posts">
-        <!-- Các bài đăng được load động -->
-        <!-- Ví dụ: Nút upload ảnh với Cloudinary -->
-        <button id="upload-image">Upload Ảnh</button>
+      <!-- Các nút điều khiển cuộc gọi -->
+      <div class="call-controls">
+          <button onclick="startCall()">Bắt đầu cuộc gọi</button>
+          <button onclick="endCall()">Kết thúc cuộc gọi</button>
       </div>
-      <!-- Tích hợp Facebook Comments Plugin -->
-      <div class="fb-comments" data-href="drasaclone.github.io/Web" data-width="100%" data-numposts="100"></div>
-    </section>
-
-    <!-- Phần Thông tin cá nhân / Cài đặt -->
-    <section id="profile-section" style="display:none;">
-      <header>
-        <h2>Thông tin cá nhân</h2>
-      </header>
-      <div id="profile-info">
-        <p>Nickname: <span id="display-nickname"></span></p>
-        <p>Trạng thái: <span id="display-status">Offline</span></p>
-        <button id="edit-profile">Chỉnh sửa thông tin</button>
+      <!-- Container hiển thị video gọi từ Agora.io -->
+      <div id="agora-container"></div>
+    </div>
+  </section>
+  
+  <!-- Trang Mạng xã hội -->
+  <section id="social-page" class="page" style="display:none;">
+    <div class="social-container">
+      <h2>Mạng xã hội</h2>
+      <div class="post-input">
+        <textarea id="post-content" placeholder="Chia sẻ cảm nghĩ của bạn..."></textarea>
+        <button onclick="postStatus()">Đăng</button>
       </div>
-    </section>
-
-    <!-- Phần Nghe nhạc -->
-    <section id="music-section" style="display:none;">
-      <header>
-        <h2>Nghe nhạc</h2>
-      </header>
-      <div id="deezer-player">
-        <!-- Container cho Deezer Player -->
-        <div id="player"></div>
+      <div id="posts" class="posts"></div>
+      <!-- Plugin bình luận của Facebook -->
+      <div class="fb-comments" data-href="https://yourdomain.github.io" data-width="100%" data-numposts="5"></div>
+    </div>
+  </section>
+  
+  <!-- Trang Cá nhân -->
+  <section id="profile-page" class="page" style="display:none;">
+    <div class="profile-container">
+      <h2>Trang cá nhân</h2>
+      <div id="user-info">
+         <p>Nickname: <span id="user-nickname">Chưa cập nhật</span></p>
+         <p>Email: <span id="user-email">Chưa đăng nhập</span></p>
+         <button onclick="editProfile()">Chỉnh sửa thông tin</button>
       </div>
-    </section>
-
-    <!-- Phần Gọi điện / Video call -->
-    <section id="call-section" style="display:none;">
-      <header>
-        <h2>Gọi điện và Video</h2>
-      </header>
-      <div id="call-container">
-        <button id="start-call">Bắt đầu cuộc gọi</button>
-        <button id="end-call" style="display:none;">Kết thúc cuộc gọi</button>
-        <div id="local-stream" class="video-stream"></div>
-        <div id="remote-streams"></div>
+      <!-- Bộ phát nhạc tích hợp: ví dụ phát từ Audiomack, bạn có thể thay đổi nguồn phát -->
+      <div class="music-player">
+         <audio id="audio-player" controls>
+           <source src="https://sample-videos.com/audio/mp3/crowd-cheering.mp3" type="audio/mpeg">
+           Trình duyệt của bạn không hỗ trợ audio.
+         </audio>
       </div>
-    </section>
+    </div>
+  </section>
+  
+  <!-- Modal Đăng nhập/Đăng ký (sử dụng nickname, email, mật khẩu, tích hợp Google và Phone) -->
+  <div id="auth-modal" class="modal">
+     <div class="modal-content">
+         <span class="close" onclick="closeAuthModal()">&times;</span>
+         <div id="auth-form">
+             <h2>Đăng nhập / Đăng ký</h2>
+             <input type="text" id="nickname" placeholder="Nickname">
+             <input type="email" id="email" placeholder="Email">
+             <input type="password" id="password" placeholder="Mật khẩu">
+             <button onclick="signInWithEmail()">Đăng nhập bằng Email</button>
+             <button onclick="signInWithGoogle()">Đăng nhập bằng Google</button>
+             <button onclick="signInWithPhone()">Đăng nhập bằng Số điện thoại</button>
+         </div>
+     </div>
   </div>
-
-  <!-- Include file JS chính -->
-  <script src="main.js"></script>
+  
+  <script src="script.js"></script>
 </body>
 </html>
