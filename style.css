@@ -1,124 +1,88 @@
 /* style.css */
-
-/* Đặt lại các style mặc định */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* Style cơ bản cho body và navigation */
+/* Kiểu cơ bản cho toàn bộ trang */
 body {
-    font-family: Arial, sans-serif;
-    background-color: var(--bg-color, #f0f0f0);
-    color: var(--text-color, #333);
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
 }
-
 header {
-    background-color: var(--header-bg, #007bff);
-    padding: 10px;
+  background-color: #6200EA;
+  color: white;
+  padding: 10px;
+  text-align: center;
+}
+nav button {
+  background: none;
+  border: none;
+  color: white;
+  margin: 0 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+nav button:hover {
+  color: #FFD700;
+}
+.section {
+  display: none;
+  padding: 20px;
+}
+.section.active {
+  display: block;
+}
+#chatWindow {
+  border: 1px solid #ccc;
+  height: 300px;
+  overflow-y: auto;
+  background: white;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+#chatInputArea input {
+  width: 80%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+#chatInputArea button {
+  padding: 10px 20px;
+  cursor: pointer;
+  background-color: #6200EA;
+  color: white;
+  border: none;
 }
 
-nav ul {
-    list-style: none;
-    display: flex;
-    justify-content: space-around;
-}
-
-nav ul li a, nav ul li button, nav ul li select {
-    color: #fff;
-    text-decoration: none;
-    padding: 5px 10px;
-    border: none;
-    background: none;
-    cursor: pointer;
-}
-
-/* Các section (trang) */
-.page {
-    padding: 20px;
-}
-
-/* Container của các nội dung */
-.chat-container, .social-container, .profile-container {
-    background: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    animation: fadeIn 1s ease;
-}
-
-/* Style cho khung chat */
-.messages {
-    border: 1px solid #ccc;
-    height: 300px;
-    overflow-y: auto;
-    padding: 10px;
-    margin-bottom: 10px;
-}
-
-.message {
-    margin-bottom: 8px;
-}
-
-/* Style cho khung input chat */
-.chat-input {
-    display: flex;
-    gap: 5px;
-}
-
-/* Style cho modal đăng nhập */
+/* Modal đăng nhập */
 .modal {
-    display: none;
-    position: fixed;
-    z-index: 999;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.5);
+  display: none; /* Ẩn ban đầu */
+  position: fixed; 
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto; 
+  background-color: rgba(0, 0, 0, 0.4);
 }
-
 .modal-content {
-    background-color: #fff;
-    margin: 10% auto;
-    padding: 20px;
-    width: 80%;
-    border-radius: 5px;
-    position: relative;
+  background-color: #fefefe;
+  margin: 10% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
 }
-
 .close {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    font-size: 24px;
-    cursor: pointer;
+  float: right;
+  font-size: 28px;
+  cursor: pointer;
 }
 
-/* Hiệu ứng fade in */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Ví dụ sử dụng biến CSS cho các theme; bạn có thể định nghĩa tới 20 theme khác nhau */
-:root.theme-default {
-    --bg-color: #f0f0f0;
-    --text-color: #333;
-    --header-bg: #007bff;
-}
-
-:root.theme-dark {
-    --bg-color: #1e1e1e;
-    --text-color: #fff;
-    --header-bg: #333;
-}
-
-:root.theme-red {
-    --bg-color: #ffe6e6;
-    --text-color: #660000;
-    --header-bg: #ff4d4d;
-}
-
-/* Các theme bổ sung khác có thể thêm tại đây */
+/* Các theme */
+/* Theme mặc định */
+.theme-default { background-color: #f0f0f0; color: #000; }
+/* Theme Dark */
+.theme-dark { background-color: #121212; color: #fff; }
+/* Theme Blue */
+.theme-blue { background-color: #e0f7fa; color: #006064; }
+/* Theme Red */
+.theme-red { background-color: #ffebee; color: #c62828; }
+/* Các theme bổ sung có thể tự định nghĩa theo yêu cầu */
