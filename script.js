@@ -104,7 +104,7 @@ function sendMessage() {
 function uploadImage() {
     cloudinary.openUploadWidget({
         cloudName: 'dgbux4wzo', 
-        uploadPreset: 'YOUR_UPLOAD_PRESET'
+        uploadPreset: 'okeqfdx4'
     }, function(error, result) {
        if (!error && result && result.event === "success") {
            const imageUrl = result.info.secure_url;
