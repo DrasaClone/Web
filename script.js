@@ -132,7 +132,7 @@ function startCall() {
    console.log("Bắt đầu cuộc gọi...");
    // Khởi tạo Agora client – thay thế YOUR_AGORA_APP_ID với App ID của bạn
    var client = AgoraRTC.createClient({mode: "rtc", codec: "vp8"});
-   client.init("YOUR_AGORA_APP_ID", function() {
+   client.init("a0b62867bee543fe828e23b4888eb3ae", function() {
       console.log("AgoraRTC client đã khởi tạo");
       client.join(null, "demoChannel", null, function(uid) {
           console.log("User " + uid + " đã tham gia phòng");
