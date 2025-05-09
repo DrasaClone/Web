@@ -652,7 +652,7 @@
        VIDEO CALL VỚI AGORA.IO
     ========================================= */
     function startVideoCall() {
-      agoraClient.init("YOUR_AGORA_APP_ID", function() {
+      agoraClient.init("a0b62867bee543fe828e23b4888eb3ae", function() {
         agoraClient.join(null, "videoChannel", null, function(uid) {
           let localStream = AgoraRTC.createStream({audio: true, video: true});
           localStream.init(function() {
