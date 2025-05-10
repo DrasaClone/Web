@@ -601,7 +601,7 @@
     }
 
     function changeCoverPhoto() {
-      cloudinary.openUploadWidget({ cloudName: 'YOUR_CLOUDINARY_CLOUD_NAME', uploadPreset: 'YOUR_UPLOAD_PRESET' },
+      cloudinary.openUploadWidget({ cloudName: 'dgbux4wzo', uploadPreset: 'YOUR_UPLOAD_PRESET' },
         function(error, result) {
           if (!error && result && result.event === "success") {
             document.getElementById("coverPhoto").style.backgroundImage = "url(" + result.info.secure_url + ")";
