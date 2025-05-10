@@ -2,587 +2,752 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Ultimate Chat & Social Platform</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Các thư viện animation & hiệu ứng -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-  <!-- PubNub dùng cho chat realtime -->
-  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.9.min.js"></script>
-  <!-- Firebase cho xác thực và realtime database -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <!-- Cloudinary Upload Widget cho upload ảnh/video -->
-  <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
-  <!-- Agora.io cho gọi điện & video call -->
-  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
-  <!-- Tùy chỉnh CSS nội bộ – hỗ trợ các chế độ sáng/tối, themes, hiệu ứng -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nền tảng Trò chuyện & Mạng xã hội Đỉnh cao</title>
+  <!--  
+    Các kiểu CSS nội bộ – đảm bảo giao diện đẹp, hiệu ứng mượt và tùy biến 100%.
+    Lưu ý: Bạn có thể thêm hoặc điều chỉnh các biến CSS để hỗ trợ theme, màu sắc (RGB) và chuyển đổi dark/light.
+  -->
   <style>
-    /* Reset và định dạng cơ bản */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Arial', sans-serif; transition: background-color 0.3s, color 0.3s; }
-    body.light { background-color: #f5f5f5; color: #333; }
-    body.dark { background-color: #121212; color: #eee; }
-    header {
-      width: 100%;
-      padding: 10px 20px;
-      background: #0d6efd;
-      color: #fff;
+    :root {
+      --primary-color: #ff0000;
+      --bg-color: #f0f0f0;
+      --text-color: #333;
+      /* Các biến khác cho theme, dark/light và nhiều chủ đề (20+) */
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      overflow-x: hidden;
+    }
+    /* Reset và style toàn cục */
+    h2, h3, h4, p, span, label, button {
+      margin: 0;
+      padding: 5px;
+    }
+    a { text-decoration: none; color: inherit; }
+    
+    /* Navigation Bar */
+    #navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: var(--primary-color);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 10px 20px;
+      z-index: 1000;
     }
-    /* Sidebar hiển thị danh sách người dùng, bạn bè, thông báo */
-    #sidebar { 
-      width: 250px; background: #ffffff; border-right: 1px solid #ddd; 
-      height: calc(100vh - 50px); overflow-y: auto; float: left; 
+    #navbar ul {
+      list-style: none;
+      display: flex;
+      gap: 15px;
     }
-    /* Khu vực chat */
-    #chat-container { 
-      margin-left: 250px; height: calc(100vh - 50px);
-      overflow-y: auto; padding: 20px; 
+    #navbar ul li {
+      cursor: pointer;
+      color: #fff;
+      font-weight: bold;
     }
-    /* Trang mạng xã hội – ẩn mặc định */
-    #social-container { 
-      margin-left: 250px; height: calc(100vh - 50px); 
-      overflow-y: auto; padding: 20px; display: none; 
+    #user-options select {
+      margin-left: 10px;
+      padding: 3px;
     }
-    /* Giao diện đăng nhập đơn giản */
-    #login-page {
-      width: 100vw; height: 100vh; display: flex; align-items: center;
-      justify-content: center; background: #0d6efd; color: #fff;
+    /* Container cho toàn ứng dụng */
+    #app { margin-top: 60px; }
+    
+    /* Section định dạng mẫu cho mỗi trang: chat, social, profile, settings, games */
+    .page {
+      padding: 20px;
+      animation: fadeIn 1s;
     }
-    /* Chat bubble style */
-    .chat-bubble {
-      padding: 10px; margin: 5px 0; border-radius: 10px; max-width: 70%;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .chat-bubble.sent { background: #0d6efd; color: #fff; align-self: flex-end; }
-    .chat-bubble.received { background: #e9ecef; color: #333; align-self: flex-start; }
-    /* Style cho danh sách bạn bè & người dùng online */
-    .friend-item, .user-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #ddd; }
-    .friend-item:hover, .user-item:hover { background: #f5f5f5; }
-    /* Button, input style */
-    button, input { padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
-    input:focus { outline: none; border-color: #0d6efd; }
-    /* Modal chung cho settings, emoji, games, video call */
+    
+    /* Login/Đăng ký section */
+    #login-section {
+      width: 100%;
+      max-width: 400px;
+      margin: 50px auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+      padding: 20px;
+    }
+    #login-section h2 { text-align: center; margin-bottom: 10px; }
+    #login-form input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #login-form button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: none;
+      border-radius: 4px;
+      background: var(--primary-color);
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    /* Các khu vực con: chat, social feed, profile, settings, games, friend system,... */
+    #chat-page, #social-page, #profile-page, #settings-page, #games-page {
+      display: none;
+    }
+    /* Môn chat, tin nhắn, post, friends */
+    #world-chat-messages, #posts-container {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      background: #fff;
+      border-radius: 4px;
+    }
+    .chat-message { margin-bottom: 5px; }
+    .friend-item, .suggestion-item, .game-item {
+      margin: 10px 0;
+      padding: 5px;
+      border-bottom: 1px dashed #ccc;
+    }
+    
+    /* Modal cho trò chơi hoặc cuộc gọi (nếu cần) */
     .modal {
-      position: fixed; top: 50%; left: 50%;
-      transform: translate(-50%, -50%); background: #fff;
-      z-index: 300; padding: 20px; border: 1px solid #ddd; display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 2000;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
     }
-    .theme-picker { margin: 10px; }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 800px;
+    }
+    
+    /* Các lớp tùy chỉnh cho theme – ví dụ dark mode */
+    .theme-dark {
+      --bg-color: #1e1e1e;
+      --text-color: #ccc;
+    }
+    
+    /* Thêm hiệu ứng động qua anime.js sẽ được gọi trong JS */
   </style>
+  
+  <!-- Thêm các thư viện JS cần thiết từ CDN -->
+  <!-- Anime.js cho hiệu ứng -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <!-- PubNub để chat realtime -->
+  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.9.min.js"></script>
+  <!-- Firebase cho tác vụ xác thực và realtime database -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+  <!-- Parse SDK cho Back4App -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/parse/3.4.0/parse.min.js"></script>
+  <!-- Cloudinary widget -->
+  <script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>
+  <!-- Agora Web SDK -->
+  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+  <!-- Nếu cần tích hợp Google Sign-In, Audiomack … bạn có thể thêm script tương ứng từ CDN -->
+  
 </head>
-
-<body class="light">
-  <!-- Trang đăng nhập -->
-  <div id="login-page">
-    <div id="login-box">
-      <h2>Đăng nhập / Đăng ký</h2>
-      <input type="text" id="login-nickname" placeholder="Nickname">
-      <input type="email" id="login-email" placeholder="Email (nếu có)">
-      <input type="password" id="login-password" placeholder="Mật khẩu">
-      <input type="text" id="login-phone" placeholder="Số điện thoại (nếu có)">
-      <button id="login-btn">Đăng nhập/Đăng ký</button>
-      <p>Hoặc đăng nhập bằng Google</p>
-      <button id="google-login-btn">Google Login</button>
+<body>
+  <div id="app">
+    <!-- Màn hình đăng nhập/đăng ký -->
+    <div id="login-section">
+      <h2 data-lang="welcome">Chào mừng đến với Nền tảng</h2>
+      <form id="login-form">
+        <input type="text" id="nickname" placeholder="Nickname" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Mật khẩu" required>
+        <input type="text" id="phone" placeholder="Số điện thoại (nếu dùng)">
+        <button type="button" id="login-btn" data-lang="login">Đăng nhập</button>
+        <button type="button" id="register-btn" data-lang="register">Đăng ký</button>
+        <button type="button" id="google-login-btn">Đăng nhập với Google</button>
+      </form>
+    </div>
+    
+    <!-- Nền tảng chính (ẩn khi chưa đăng nhập) -->
+    <div id="main-platform" style="display:none;">
+      <!-- Thanh điều hướng chính -->
+      <nav id="navbar">
+        <ul>
+          <li data-page="chat" data-lang="chat">Chat</li>
+          <li data-page="social" data-lang="social">Mạng xã hội</li>
+          <li data-page="profile" data-lang="profile">Hồ sơ</li>
+          <li data-page="settings" data-lang="settings">Cài đặt</li>
+          <li data-page="games" data-lang="games">Trò chơi</li>
+        </ul>
+        <div id="user-options">
+          <select id="language-select">
+            <option value="vi">Tiếng Việt</option>
+            <option value="en">English</option>
+            <!-- Thêm các ngôn ngữ khác -->
+          </select>
+          <select id="theme-select">
+            <option value="default">Default</option>
+            <option value="dark">Dark</option>
+            <!-- Thêm đến 20 theme theo yêu cầu -->
+          </select>
+        </div>
+      </nav>
+      
+      <!-- Các trang nội dung chính -->
+      <div id="content">
+        <!-- 1. Trang Chat -->
+        <div id="chat-page" class="page">
+          <h2>Chat</h2>
+          <div id="chat-list">
+            <!-- Chat kênh thế giới -->
+            <div id="world-chat">
+              <h3>Kênh Chat Thế Giới</h3>
+              <div id="world-chat-messages"></div>
+              <input type="text" id="world-chat-input" placeholder="Nhập tin nhắn...">
+              <button id="send-world-chat">Gửi</button>
+            </div>
+            <!-- Chat riêng tư (hiển thị danh sách trò chuyện với bạn bè) -->
+            <div id="private-chats">
+              <h3>Trò chuyện riêng tư</h3>
+              <div id="friend-chat-list"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 2. Trang Mạng xã hội -->
+        <div id="social-page" class="page">
+          <h2>Mạng xã hội</h2>
+          <div id="social-feed">
+            <div id="post-creation">
+              <textarea id="post-text" rows="3" placeholder="Chia sẻ cảm xúc..."></textarea>
+              <!-- Cho phép tải ảnh, chụp ảnh trực tiếp… -->
+              <input type="file" id="post-image">
+              <button id="create-post">Đăng bài</button>
+              <!-- Chọn ai xem được bài: công khai, bạn bè -->
+              <select id="post-privacy">
+                <option value="public">Công khai</option>
+                <option value="friends">Bạn bè</option>
+              </select>
+            </div>
+            <div id="posts-container">
+              <!-- Các bài đăng hiện ra realtime từ Firebase -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- 3. Trang Hồ sơ -->
+        <div id="profile-page" class="page">
+          <h2>Hồ sơ của tôi</h2>
+          <div id="profile-info">
+            <img id="profile-avatar" src="https://via.placeholder.com/150" alt="Ảnh đại diện" style="cursor:pointer;">
+            <img id="profile-cover" src="https://via.placeholder.com/600x200" alt="Ảnh bìa" style="cursor:pointer;">
+            <h3 id="profile-nickname"></h3>
+            <p id="profile-details"></p>
+            <!-- Phần liên kết nhạc (link từ Audiomack) -->
+            <div id="profile-music">
+              <input type="text" id="music-link" placeholder="Dán link nhạc từ Audiomack">
+              <button id="set-music">Thiết lập âm nhạc</button>
+              <div id="music-player"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 4. Trang Cài đặt -->
+        <div id="settings-page" class="page">
+          <h2>Cài đặt</h2>
+          <div id="settings-options">
+            <label>Màu chủ đạo:</label>
+            <input type="color" id="primary-color" value="#ff0000">
+            <label>Hình nền:</label>
+            <input type="file" id="background-upload">
+            <button id="save-settings">Lưu cài đặt</button>
+          </div>
+        </div>
+        
+        <!-- 5. Trang Trò chơi -->
+        <div id="games-page" class="page">
+          <h2>Trò chơi giải trí</h2>
+          <div id="games-list">
+            <!-- Mỗi trò chơi được liệt kê – dưới đây là ví dụ, hãy mở rộng thêm ít nhất 30 trò chơi -->
+            <div class="game-item" data-game="game1">
+              <h4>Game 1: Puzzle</h4>
+              <button class="play-game-btn">Chơi</button>
+            </div>
+            <div class="game-item" data-game="game2">
+              <h4>Game 2: Arcade</h4>
+              <button class="play-game-btn">Chơi</button>
+            </div>
+            <!-- ... Thêm các mục game ở đây -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- Khu vực hệ thống bạn bè -->
+      <div id="friends-section" class="page">
+        <h2>Bạn bè</h2>
+        <div id="friend-suggestions">
+          <!-- Gợi ý kết bạn sẽ được hiển thị tại đây -->
+        </div>
+        <div id="friend-list">
+          <!-- Danh sách bạn bè đã kết nối -->
+        </div>
+        <div id="user-search">
+          <input type="text" id="search-query" placeholder="Tìm bạn (email, nickname, số điện thoại)">
+          <button id="search-friend-btn">Tìm kiếm</button>
+        </div>
+      </div>
+      
+      <!-- Khu vực thông báo và báo cáo -->
+      <div id="notification-section" class="page">
+        <h2>Thông báo & Báo cáo</h2>
+        <ul id="notifications-list">
+          <!-- Danh sách thông báo realtime -->
+        </ul>
+        <div id="report-section">
+          <input type="text" id="report-user" placeholder="Nickname người cần báo cáo">
+          <button id="report-btn">Báo cáo</button>
+        </div>
+      </div>
+      
+      <!-- Khu vực gọi điện / video call -->
+      <div id="call-section" class="page">
+        <h2>Cuộc gọi & Video Call</h2>
+        <div id="call-status">Chưa có cuộc gọi</div>
+        <button id="start-call-btn">Bắt đầu cuộc gọi</button>
+        <button id="end-call-btn">Kết thúc cuộc gọi</button>
+        <div id="video-container">
+          <!-- Video stream của Agora sẽ hiển thị tại đây -->
+        </div>
+      </div>
+      
     </div>
   </div>
-
-  <!-- Ứng dụng chính -->
-  <div id="main-app" style="display:none;">
-    <header>
-      <div>
-        <span id="app-logo">ChatSocial Platform</span>
-      </div>
-      <div>
-        <button id="switch-theme-btn">Chuyển Đổi Giao Diện</button>
-        <button id="switch-page-btn">Chuyển Trang</button>
-        <button id="logout-btn">Đăng xuất</button>
-      </div>
-    </header>
-    <!-- Sidebar chứa thông tin cá nhân, danh sách bạn bè, người dùng -->
-    <div id="sidebar">
-      <div id="user-profile">
-        <img src="default-avatar.png" alt="Avatar" id="profile-avatar" style="width:50px;height:50px;border-radius:50%;">
-        <h3 id="profile-nickname">Nickname</h3>
-        <p id="profile-status">Trực tuyến</p>
-        <button id="open-settings-btn">Cài Đặt</button>
-      </div>
-      <hr>
-      <div id="friend-list">
-        <h4>Danh sách bạn bè</h4>
-        <div id="friend-items">
-          <!-- Các mục bạn bè sẽ được thêm vào đây -->
-        </div>
-        <button id="add-friend-btn">Thêm bạn bè</button>
-      </div>
-      <hr>
-      <div id="global-users">
-        <h4>Người dùng trực tuyến</h4>
-        <div id="user-items">
-          <!-- Danh sách người dùng online -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Khu vực Chat -->
-    <div id="chat-container">
-      <div id="chat-toolbar">
-        <select id="chat-channel-select">
-          <option value="global">Kênh Chat Thế Giới</option>
-          <option value="private">Trò chuyện riêng</option>
-        </select>
-        <input type="text" id="chat-message-input" placeholder="Nhập tin nhắn">
-        <button id="send-message-btn">Gửi</button>
-        <button id="open-emoji-btn">😊</button>
-        <button id="upload-media-btn">Tải ảnh/Video</button>
-        <button id="call-btn">Gọi điện/Video Call</button>
-      </div>
-      <div id="chat-messages" style="display:flex; flex-direction: column;">
-        <!-- Chat messages được hiển thị tại đây -->
-      </div>
-    </div>
-
-    <!-- Khu vực Mạng xã hội -->
-    <div id="social-container">
-      <div id="post-creation">
-        <textarea id="post-content" placeholder="Bạn đang nghĩ gì thế?"></textarea>
-        <br>
-        <button id="post-btn">Đăng bài</button>
-        <button id="upload-post-media-btn">Tải ảnh/video</button>
-        <select id="post-privacy-select">
-          <option value="public">Công khai</option>
-          <option value="friends">Bạn bè</option>
-          <option value="private">Riêng tư</option>
-        </select>
-      </div>
-      <hr>
-      <div id="posts-container">
-        <!-- Các bài post sẽ được load từ realtime database -->
-      </div>
-    </div>
-
-    <!-- Modal Cài Đặt -->
-    <div id="settings-modal" class="modal">
-      <h3>Cài Đặt</h3>
-      <label>Chọn màu chủ đề (RGB): </label>
-      <input type="color" id="theme-color-picker">
-      <label>Chọn font: </label>
-      <select id="font-selector">
-        <option value="Arial">Arial</option>
-        <option value="Times New Roman">Times New Roman</option>
-        <option value="Courier New">Courier New</option>
-        <!-- Thêm font nếu cần -->
-      </select>
-      <br>
-      <button id="save-settings-btn">Lưu cài đặt</button>
-      <button id="close-settings-btn">Đóng</button>
-    </div>
-
-    <!-- Panel Emoji -->
-    <div id="emoji-panel" class="modal">
-      <span class="emoji-item">😀</span>
-      <span class="emoji-item">😂</span>
-      <span class="emoji-item">😍</span>
-      <span class="emoji-item">😎</span>
-      <!-- Thêm emoji khác -->
-      <button id="close-emoji-btn">Đóng</button>
-    </div>
-
-    <!-- Modal Trò chơi (ít nhất 30 game) -->
-    <div id="games-modal" class="modal">
-      <h3>Trò chơi giải trí</h3>
-      <div id="games-list">
-        <!-- Ví dụ cho một số game -->
-        <button class="game-btn" data-game="game1">Trò chơi 1</button>
-        <button class="game-btn" data-game="game2">Trò chơi 2</button>
-        <button class="game-btn" data-game="game3">Trò chơi 3</button>
-        <!-- ... thêm đến 30 game -->
-      </div>
-      <div id="game-canvas">
-        <!-- Game sẽ load vào đây -->
-      </div>
-      <button id="close-games-btn">Đóng</button>
-    </div>
-
-    <!-- Modal Video Call -->
-    <div id="video-call-modal" class="modal">
-      <h3>Cuộc gọi video</h3>
-      <div id="video-container">
-        <!-- Stream của Agora sẽ xuất hiện tại đây -->
-      </div>
-      <button id="end-call-btn">Kết thúc cuộc gọi</button>
-    </div>
-  </div>
-
-  <!-- JavaScript tích hợp các module chức năng -->
+  
+  <!-- Mã JS tích hợp mọi chức năng, logic xử lý realtime và hiệu ứng UI -->
   <script>
-    // -----------------------
-    // Cấu hình & Khởi tạo
-    // -----------------------
-
-    // Firebase configuration – THAY THÔNG TIN CỦA BẠN VÀO ĐÂY
+    /********************************************************************
+     * Phần bảo vệ – chống sao chép mã (ngăn chuột phải, tắt chức năng copy)
+     ********************************************************************/
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.addEventListener('selectstart', event => event.preventDefault());
+    
+    /********************************************************************
+     * Hỗ trợ đa ngôn ngữ – mẫu đơn giản với 2 ngôn ngữ, mở rộng dễ dàng
+     ********************************************************************/
+    const languages = {
+      "vi": {
+        "welcome": "Chào mừng đến với Nền tảng",
+        "login": "Đăng nhập",
+        "register": "Đăng ký",
+        "chat": "Chat",
+        "social": "Mạng xã hội",
+        "profile": "Hồ sơ",
+        "settings": "Cài đặt",
+        "games": "Trò chơi"
+      },
+      "en": {
+        "welcome": "Welcome to Our Platform",
+        "login": "Login",
+        "register": "Register",
+        "chat": "Chat",
+        "social": "Social",
+        "profile": "Profile",
+        "settings": "Settings",
+        "games": "Games"
+      }
+    };
+    
+    // Áp dụng ngôn ngữ cho các phần tử có thuộc tính data-lang
+    function setLanguage(lang) {
+      document.querySelectorAll('[data-lang]').forEach(el => {
+        let key = el.getAttribute('data-lang');
+        if (languages[lang] && languages[lang][key]) {
+          el.innerText = languages[lang][key];
+        }
+      });
+    }
+    // Gọi mặc định là tiếng Việt
+    setLanguage('vi');
+    
+    document.getElementById('language-select').addEventListener('change', function() {
+      setLanguage(this.value);
+      // Cập nhật cấu hình người dùng trong realtime database nếu cần
+    });
+    
+    /********************************************************************
+     * Xử lý chuyển đổi theme – dark mode, nhiều chủ đề (mã mẫu, mở rộng theo yêu cầu)
+     ********************************************************************/
+    const themeSelect = document.getElementById('theme-select');
+    themeSelect.addEventListener('change', function() {
+      const theme = this.value;
+      document.body.className = '';
+      if(theme === 'dark'){
+        document.body.classList.add('theme-dark');
+      } // else apply theme-default hoặc các theme khác
+      // Lưu theme vào cấu hình người dùng
+      if(firebase.auth().currentUser){
+        firebase.database().ref('users/' + firebase.auth().currentUser.uid).update({
+          theme: theme
+        });
+      }
+    });
+    
+    /********************************************************************
+     * Navigation – Chuyển đổi giữa các trang (chat, social, profile, settings, games)
+     ********************************************************************/
+    document.querySelectorAll('#navbar ul li').forEach(item => {
+      item.addEventListener('click', function() {
+        const page = this.getAttribute('data-page');
+        document.querySelectorAll('.page').forEach(pg => pg.style.display = 'none');
+        // Hiển thị trang chính theo tên (ví dụ: chat-page, social-page, ...)
+        document.getElementById(page + '-page').style.display = 'block';
+      });
+    });
+    
+    /********************************************************************
+     * Khởi tạo Firebase – Đừng quên thay thế YOUR_... bằng thông tin cấu hình thật của bạn
+     ********************************************************************/
     const firebaseConfig = {
-      apiKey: "YOUR_FIREBASE_API_KEY",
-      authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
-      databaseURL: "YOUR_FIREBASE_DATABASE_URL",
-      projectId: "YOUR_FIREBASE_PROJECT_ID",
-      storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
-      appId: "YOUR_FIREBASE_APP_ID"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DATABASE_URL",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
     firebase.initializeApp(firebaseConfig);
-
-    // PubNub config – THAY PUBNUB KEYS của bạn
+    const auth = firebase.auth();
+    const database = firebase.database();
+    const storage = firebase.storage();
+    
+    /********************************************************************
+     * Khởi tạo PubNub – dùng cho xử lý tin nhắn realtime
+     ********************************************************************/
     const pubnub = new PubNub({
       publishKey: "YOUR_PUBNUB_PUBLISH_KEY",
       subscribeKey: "YOUR_PUBNUB_SUBSCRIBE_KEY",
-      uuid: "unique_user_id" // Sẽ cập nhật sau khi đăng nhập.
+      uuid: "user-" + Math.random().toString(36).substr(2, 5)
     });
-
-    // Agora config – THAY Agora App ID của bạn
-    const agoraConfig = {
-      appId: "YOUR_AGORA_APP_ID"
-      // Thêm cấu hình token nếu cần.
-    };
-
-    // -----------------------
-    // Khai báo biến toàn cục
-    // -----------------------
-    let currentUser = null;
-    const database = firebase.database();
-
-    // -----------------------
-    // Hàm trợ giúp & chức năng chính
-    // -----------------------
-
-    // Hàm chuyển giao diện sáng/tối
-    function switchTheme() {
-      if(document.body.classList.contains('light')){
-        document.body.classList.replace('light','dark');
-      } else {
-        document.body.classList.replace('dark','light');
-      }
-      if(currentUser) {
-        database.ref('users/' + currentUser.uid + '/settings').update({ theme: document.body.className });
-      }
+    
+    /********************************************************************
+     * Khởi tạo Parse (Back4App)
+     ********************************************************************/
+    Parse.initialize("YOUR_PARSE_APP_ID", "YOUR_PARSE_JAVASCRIPT_KEY");
+    Parse.serverURL = 'https://YOUR_PARSE_SERVER_URL/parse';
+    
+    /********************************************************************
+     * Khởi tạo Agora – dùng cho gọi điện và video call
+     ********************************************************************/
+    let agoraClient;
+    function initAgora() {
+      agoraClient = AgoraRTC.createClient({mode: 'rtc', codec: 'vp8'});
+      // Thêm hàm xử lý stream, join channel… (tham khảo tài liệu Agora)
     }
-
-    // Hàm chuyển đổi giữa trang chat và social
-    function switchPage() {
-      let chatContainer = document.getElementById('chat-container');
-      let socialContainer = document.getElementById('social-container');
-      if(chatContainer.style.display !== 'none'){
-        chatContainer.style.display = 'none';
-        socialContainer.style.display = 'block';
-      } else {
-        socialContainer.style.display = 'none';
-        chatContainer.style.display = 'block';
-      }
-    }
-
-    // Hàm hiển thị tin nhắn chat
-    function renderChatMessage(message, type) {
-      let chatMessages = document.getElementById('chat-messages');
-      let div = document.createElement('div');
-      div.classList.add('chat-bubble', type);
-      div.textContent = message;
-      chatMessages.appendChild(div);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    // Gửi tin nhắn qua PubNub
-    function sendMessage() {
-      let input = document.getElementById('chat-message-input');
-      let message = input.value.trim();
-      if(message === "") return;
-      let channel = document.getElementById('chat-channel-select').value;
-      pubnub.publish({
-        channel: channel,
-        message: {
-          text: message,
-          sender: currentUser.nickname || "anonymous",
-          timestamp: Date.now()
-        }
-      });
-      renderChatMessage("Bạn: " + message, 'sent');
-      input.value = "";
-    }
-
-    // Lắng nghe tin nhắn mới từ PubNub
-    pubnub.addListener({
-      message: function(event) {
-        renderChatMessage(event.message.sender + ": " + event.message.text, 'received');
-      }
+    
+    /********************************************************************
+     * Khởi tạo Cloudinary cho tải ảnh/phóng sự
+     ********************************************************************/
+    const cloudName = 'YOUR_CLOUDINARY_CLOUD_NAME';
+    const uploadPreset = 'YOUR_UPLOAD_PRESET';
+    // Bạn có thể thiết lập Cloudinary widget và gọi qua sự kiện khi người dùng tải ảnh
+    
+    /********************************************************************
+     * Xử lý đăng nhập & đăng ký (email/password, sdt, Google)
+     ********************************************************************/
+    document.getElementById('login-btn').addEventListener('click', function(){
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(cred => {
+          document.getElementById('login-section').style.display = 'none';
+          document.getElementById('main-platform').style.display = 'block';
+          initAppAfterLogin();
+        })
+        .catch(err => { console.error("Login error:", err); });
     });
-
-    // Đăng ký kênh chat toàn cầu và cá nhân
-    function subscribeChannels() {
-      pubnub.subscribe({
-        channels: ['global']
-      });
-    }
-
-    // -----------------------
-    // Xử lý login cơ bản (không production – cần bổ sung xác thực tốt hơn)
-    // -----------------------
-    document.getElementById('login-btn').addEventListener('click', function() {
-      let nickname = document.getElementById('login-nickname').value.trim();
-      let email = document.getElementById('login-email').value.trim();
-      let password = document.getElementById('login-password').value;
-      let phone = document.getElementById('login-phone').value.trim();
-
-      if(nickname === ""){
-        alert("Vui lòng nhập nickname!");
-        return;
-      }
-      currentUser = {
-        uid: "user_" + Date.now(),
-        nickname: nickname,
-        email: email,
-        phone: phone,
-        settings: { theme: document.body.className }
-      };
-      database.ref('users/' + currentUser.uid).set(currentUser);
-      pubnub.setUUID(currentUser.uid);
-      document.getElementById('login-page').style.display = 'none';
-      document.getElementById('main-app').style.display = 'block';
-      subscribeChannels();
+    
+    document.getElementById('register-btn').addEventListener('click', function(){
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const nickname = document.getElementById('nickname').value;
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(cred => {
+          let userId = cred.user.uid;
+          // Lưu thêm thông tin người dùng vào Firebase
+          database.ref('users/' + userId).set({
+            nickname: nickname,
+            email: email,
+            phone: document.getElementById('phone').value,
+            theme: 'default',
+            language: 'vi'
+            // Thêm các thông số mặc định khác
+          });
+          document.getElementById('login-section').style.display = 'none';
+          document.getElementById('main-platform').style.display = 'block';
+          initAppAfterLogin();
+        })
+        .catch(err => { console.error("Registration error:", err); });
     });
-
-    // Đăng nhập bằng Google qua Firebase (mã mẫu đơn giản)
-    document.getElementById('google-login-btn').addEventListener('click', function() {
-      let provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithPopup(provider).then(result => {
-        currentUser = {
-          uid: result.user.uid,
-          nickname: result.user.displayName,
-          email: result.user.email,
-          photoURL: result.user.photoURL,
-          settings: { theme: document.body.className }
-        };
-        database.ref('users/' + currentUser.uid).set(currentUser);
-        pubnub.setUUID(currentUser.uid);
-        document.getElementById('login-page').style.display = 'none';
-        document.getElementById('main-app').style.display = 'block';
-        subscribeChannels();
-      }).catch(error => {
-        console.error("Google Login Error", error);
-      });
+    
+    // Đăng nhập Google
+    document.getElementById('google-login-btn').addEventListener('click', function(){
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(result => {
+          document.getElementById('login-section').style.display = 'none';
+          document.getElementById('main-platform').style.display = 'block';
+          initAppAfterLogin();
+        })
+        .catch(err => { console.error("Google login error:", err); });
     });
-
-    // Đăng xuất
-    document.getElementById('logout-btn').addEventListener('click', function() {
-      currentUser = null;
-      document.getElementById('main-app').style.display = 'none';
-      document.getElementById('login-page').style.display = 'flex';
-    });
-
-    // Gửi tin nhắn khi bấm nút
-    document.getElementById('send-message-btn').addEventListener('click', sendMessage);
-
-    // Nút chuyển giao diện sáng/tối
-    document.getElementById('switch-theme-btn').addEventListener('click', switchTheme);
-    // Nút chuyển trang giữa Chat & Social
-    document.getElementById('switch-page-btn').addEventListener('click', switchPage);
-
-    // -----------------------
-    // Xử lý Settings Modal
-    // -----------------------
-    document.getElementById('open-settings-btn').addEventListener('click', function() {
-      document.getElementById('settings-modal').style.display = 'block';
-    });
-    document.getElementById('close-settings-btn').addEventListener('click', function() {
-      document.getElementById('settings-modal').style.display = 'none';
-    });
-    document.getElementById('save-settings-btn').addEventListener('click', function() {
-      let themeColor = document.getElementById('theme-color-picker').value;
-      let font = document.getElementById('font-selector').value;
-      document.body.style.backgroundColor = themeColor;
-      document.body.style.fontFamily = font;
-      if(currentUser){
-        database.ref('users/' + currentUser.uid + '/settings').update({
-          themeColor: themeColor,
-          font: font
+    
+    /********************************************************************
+     * Hàm khởi tạo sau khi đăng nhập thành công
+     ********************************************************************/
+    function initAppAfterLogin(){
+      // Lấy và áp dụng cài đặt người dùng (theme, language, avatar, …)
+      let user = auth.currentUser;
+      if(user){
+        database.ref('users/' + user.uid).once('value').then(snapshot => {
+          let userData = snapshot.val();
+          if(userData){
+            // Thiết lập theme
+            if(userData.theme) {
+              themeSelect.value = userData.theme;
+              if(userData.theme === 'dark') document.body.classList.add('theme-dark');
+              // Cập nhật các biến CSS nếu cần
+            }
+            // Thiết lập ngôn ngữ
+            if(userData.language) setLanguage(userData.language);
+            // Hiển thị nickname trong trang hồ sơ
+            document.getElementById('profile-nickname').innerText = userData.nickname;
+          }
         });
       }
-      document.getElementById('settings-modal').style.display = 'none';
-    });
-
-    // -----------------------
-    // Xử lý Emoji Panel
-    // -----------------------
-    document.getElementById('open-emoji-btn').addEventListener('click', function() {
-      document.getElementById('emoji-panel').style.display = 'block';
-    });
-    document.getElementById('close-emoji-btn').addEventListener('click', function() {
-      document.getElementById('emoji-panel').style.display = 'none';
-    });
-    document.querySelectorAll('.emoji-item').forEach(item => {
-      item.addEventListener('click', function(){
-        document.getElementById('chat-message-input').value += this.textContent;
-        document.getElementById('emoji-panel').style.display = 'none';
+      // Khởi tạo chat thế giới
+      initWorldChat();
+      // Khởi tạo danh sách bạn bè
+      loadFriendList();
+      // Khởi tạo thông báo
+      initNotifications();
+      // Khởi tạo Agora cho cuộc gọi
+      initAgora();
+      
+      // Hiệu ứng load trang với anime.js
+      anime({
+        targets: '.page',
+        opacity: [0, 1],
+        translateY: [-10, 0],
+        duration: 1000,
+        easing: 'easeOutQuad'
       });
-    });
-
-    // -----------------------
-    // Upload media sử dụng Cloudinary
-    // -----------------------
-    document.getElementById('upload-media-btn').addEventListener('click', function() {
-      cloudinary.openUploadWidget({
-        cloudName: 'YOUR_CLOUDINARY_CLOUD_NAME',
-        uploadPreset: 'YOUR_UPLOAD_PRESET'
-      }, (error, result) => {
-        if (!error && result && result.event === "success") {
-          console.log("Uploaded file info: ", result.info);
-          // Gửi URL media dưới dạng tin nhắn chat.
-          renderChatMessage("Bạn đã gửi media: " + result.info.secure_url, 'sent');
+    }
+    
+    /********************************************************************
+     * Xử lý Chat – kênh “World Chat” sử dụng PubNub và Firebase cho lưu trữ
+     ********************************************************************/
+    function initWorldChat(){
+      // Đăng ký kênh chat dùng PubNub
+      pubnub.subscribe({ channels: ['world-chat'] });
+      pubnub.addListener({
+        message: function(event) {
+          displayWorldChatMessage(event.message);
         }
       });
-    });
-    document.getElementById('upload-post-media-btn').addEventListener('click', function() {
-      cloudinary.openUploadWidget({
-        cloudName: 'YOUR_CLOUDINARY_CLOUD_NAME',
-        uploadPreset: 'YOUR_UPLOAD_PRESET'
-      }, (error, result) => {
-        if (!error && result && result.event === "success") {
-          createPost("Bài đăng có media", result.info.secure_url);
+      // Lấy tin nhắn cũ từ Firebase (ví dụ 50 tin cuối)
+      database.ref('world-chat').limitToLast(50).on('child_added', snapshot => {
+        displayWorldChatMessage(snapshot.val());
+      });
+      
+      // Gửi tin nhắn
+      document.getElementById('send-world-chat').addEventListener('click', function(){
+        let input = document.getElementById('world-chat-input');
+        let text = input.value;
+        if(text.trim() !== ""){
+          let messageData = {
+            sender: auth.currentUser.uid,
+            text: text,
+            timestamp: Date.now()
+          };
+          pubnub.publish({ channel: 'world-chat', message: messageData });
+          database.ref('world-chat').push(messageData);
+          input.value = "";
         }
       });
+    }
+    
+    function displayWorldChatMessage(message){
+      let container = document.getElementById('world-chat-messages');
+      let msgDiv = document.createElement('div');
+      msgDiv.classList.add('chat-message');
+      // Có thể mở rộng: Lấy nickname người gửi từ Firebase cache
+      msgDiv.innerText = message.sender + ": " + message.text;
+      container.appendChild(msgDiv);
+      container.scrollTop = container.scrollHeight;
+    }
+    
+    /********************************************************************
+     * Hệ thống bạn bè: Load danh sách bạn bè và gợi ý kết bạn
+     ********************************************************************/
+    function loadFriendList(){
+      let user = auth.currentUser;
+      if(!user) return;
+      database.ref('friends/' + user.uid).on('value', snapshot => {
+        let friendList = snapshot.val();
+        let friendListContainer = document.getElementById('friend-list');
+        friendListContainer.innerHTML = "";
+        for(let friendId in friendList){
+          let friendItem = document.createElement('div');
+          friendItem.classList.add('friend-item');
+          friendItem.innerText = friendList[friendId].nickname;
+          friendListContainer.appendChild(friendItem);
+        }
+      });
+    }
+    
+    document.getElementById('search-friend-btn').addEventListener('click', function(){
+      let query = document.getElementById('search-query').value;
+      if(query.trim() !== ""){
+        // Tìm kiếm người dùng trong Firebase theo nickname, email hoặc phone
+        database.ref('users').orderByChild('nickname').equalTo(query).once('value').then(snapshot => {
+          let suggestions = snapshot.val();
+          let suggestionContainer = document.getElementById('friend-suggestions');
+          suggestionContainer.innerHTML = "";
+          for(let uid in suggestions){
+            let userData = suggestions[uid];
+            let suggestionItem = document.createElement('div');
+            suggestionItem.classList.add('suggestion-item');
+            suggestionItem.innerText = userData.nickname + " - " + userData.email;
+            let addBtn = document.createElement('button');
+            addBtn.innerText = "Kết bạn";
+            addBtn.onclick = function(){
+              // Gửi yêu cầu kết bạn hoặc thêm bạn trực tiếp
+              database.ref('friends/' + auth.currentUser.uid).child(uid).set({
+                nickname: userData.nickname,
+                email: userData.email
+              });
+            };
+            suggestionItem.appendChild(addBtn);
+            suggestionContainer.appendChild(suggestionItem);
+          }
+        });
+      }
     });
-
-    // -----------------------
-    // Xử lý bài đăng mạng xã hội
-    // -----------------------
-    function createPost(content, mediaUrl = "") {
-      let post = {
-        content: content,
-        media: mediaUrl,
-        author: currentUser ? currentUser.nickname : "anonymous",
-        timestamp: Date.now(),
-        privacy: document.getElementById('post-privacy-select').value
+    
+    /********************************************************************
+     * Chức năng đăng bài, lưu chế độ công khai/riêng tư của post
+     ********************************************************************/
+    document.getElementById('create-post').addEventListener('click', function(){
+      let text = document.getElementById('post-text').value;
+      let privacy = document.getElementById('post-privacy').value;
+      // Nếu có ảnh, xử lý upload lên Cloudinary (sử dụng widget hoặc API)
+      // Sau đó lưu bài viết vào Firebase
+      let postData = {
+        sender: auth.currentUser.uid,
+        text: text,
+        privacy: privacy,
+        timestamp: Date.now()
       };
-      let newPostKey = database.ref().child('posts').push().key;
-      let updates = {};
-      updates['/posts/' + newPostKey] = post;
-      database.ref().update(updates);
-      renderPost(post);
-    }
-    function renderPost(post) {
-      let container = document.getElementById('posts-container');
-      let postDiv = document.createElement('div');
-      postDiv.classList.add('post');
-      postDiv.style.border = "1px solid #ddd";
-      postDiv.style.marginBottom = "10px";
-      postDiv.style.padding = "10px";
-      let contentP = document.createElement('p');
-      contentP.textContent = post.author + " (" + new Date(post.timestamp).toLocaleString() + "): " + post.content;
-      postDiv.appendChild(contentP);
-      if(post.media !== ""){
-        let mediaElem = document.createElement('img');
-        mediaElem.src = post.media;
-        mediaElem.style.maxWidth = "100%";
-        postDiv.appendChild(mediaElem);
-      }
-      // Phần tùy chỉnh chèn plugin bình luận (ví dụ: Facebook Comments)
-      let commentsDiv = document.createElement('div');
-      commentsDiv.innerHTML = '<!-- Chèn mã Facebook Comments Plugin ở đây -->';
-      postDiv.appendChild(commentsDiv);
-      container.prepend(postDiv);
-    }
-    // Lắng nghe realtime từ Firebase cho bài đăng
-    database.ref('posts').on('child_added', function(snapshot) {
-      renderPost(snapshot.val());
+      // Nếu có ảnh, thêm thông tin ảnh vào đối tượng postData
+      database.ref('posts').push(postData);
+      document.getElementById('post-text').value = "";
     });
-
-    // -----------------------
-    // Xử lý Games – placeholder cho ít nhất 30 game
-    // -----------------------
-    document.querySelectorAll('.game-btn').forEach(btn => {
-      btn.addEventListener('click', function(){
-        loadGame(this.getAttribute('data-game'));
+    
+    /********************************************************************
+     * Cài đặt: Lưu các thiết lập cá nhân như màu, hình nền,...
+     ********************************************************************/
+    document.getElementById('save-settings').addEventListener('click', function(){
+      let primaryColor = document.getElementById('primary-color').value;
+      let user = auth.currentUser;
+      if(user){
+        firebase.database().ref('users/' + user.uid).update({
+          theme: themeSelect.value,
+          primaryColor: primaryColor
+        });
+      }
+      document.documentElement.style.setProperty('--primary-color', primaryColor);
+      alert("Cài đặt đã được lưu!");
+    });
+    
+    /********************************************************************
+     * Cập nhật hồ sơ: thay đổi avatar, ảnh bìa, liên kết nhạc…
+     * (Triển khai upload file với Cloudinary, và cập nhật Firebase)
+     ********************************************************************/
+    document.getElementById('profile-avatar').addEventListener('click', function(){
+      // Ví dụ: kích hoạt Cloudinary widget để upload ảnh avatar
+      cloudinary.openUploadWidget({
+        cloudName: cloudName,
+        uploadPreset: uploadPreset
+      }, (error, result) => {
+        if (!error && result && result.event === "success"){
+          let avatarUrl = result.info.secure_url;
+          firebase.database().ref('users/' + auth.currentUser.uid).update({
+            avatar: avatarUrl
+          });
+          document.getElementById('profile-avatar').src = avatarUrl;
+        }
       });
     });
-    function loadGame(gameId) {
-      let gameCanvas = document.getElementById('game-canvas');
-      gameCanvas.innerHTML = "<p>Đang tải " + gameId + "...</p>";
-      // Tại đây bạn có thể tích hợp các trò chơi dựa trên Canvas, WebGL hay lib JS khác.
-    }
-    // Ví dụ: mở/đóng modal game từ nút (ở đây dùng nút Thêm bạn bè như một decoy)
-    document.getElementById('add-friend-btn').addEventListener('click', function(){
-      document.getElementById('games-modal').style.display = 'block';
+    
+    /********************************************************************
+     * Gọi điện & Video Call với Agora
+     ********************************************************************/
+    document.getElementById('start-call-btn').addEventListener('click', function(){
+      // Sử dụng Agora để xuất video
+      let channel = "testChannel"; // Bạn có thể sử dụng tên kênh động
+      agoraClient.join(null, channel, null, (uid) => {
+        document.getElementById('call-status').innerText = "Đang trong cuộc gọi";
+        // Tạo stream và hiển thị ra #video-container
+        let localStream = AgoraRTC.createStream({audio: true, video: true});
+        localStream.init(() => {
+          localStream.play('video-container');
+          agoraClient.publish(localStream);
+        });
+      });
     });
-    document.getElementById('close-games-btn').addEventListener('click', function(){
-      document.getElementById('games-modal').style.display = 'none';
-    });
-
-    // -----------------------
-    // Xử lý Video Call với Agora (placeholder)
-    // -----------------------
-    document.getElementById('call-btn').addEventListener('click', function(){
-      document.getElementById('video-call-modal').style.display = 'block';
-      startAgoraCall();
-    });
+    
     document.getElementById('end-call-btn').addEventListener('click', function(){
-      endAgoraCall();
-      document.getElementById('video-call-modal').style.display = 'none';
+      agoraClient.leave(() => {
+        document.getElementById('call-status').innerText = "Chưa có cuộc gọi";
+      });
     });
-    function startAgoraCall() {
-      let videoContainer = document.getElementById('video-container');
-      videoContainer.innerHTML = "<p>Đang kết nối cuộc gọi video với Agora...</p>";
-      // Tích hợp AgoraRTC client và các logic join/leave channel.
-    }
-    function endAgoraCall() {
-      console.log("Cuộc gọi kết thúc.");
-    }
-
-    // -----------------------
-    // Chức năng bảo mật & chống sao chép code
-    // -----------------------
-    document.addEventListener('keydown', function(e) {
-      // Ví dụ: vô hiệu hóa Ctrl+Shift+I (dùng để mở DevTools)
-      if(e.ctrlKey && e.shiftKey && e.keyCode === 73) {
-        e.preventDefault();
-      }
+    
+    /********************************************************************
+     * Xử lý Trò chơi – Mỗi nút “Chơi” sẽ gọi hàm loadGame (ví dụ mở modal)
+     ********************************************************************/
+    document.querySelectorAll('.play-game-btn').forEach(button => {
+      button.addEventListener('click', function(){
+        let gameId = this.parentElement.getAttribute('data-game');
+        // Triển khai chi tiết trò chơi ngay tại đây hoặc load iframe, modal game riêng
+        alert("Bắt đầu chơi " + gameId + ". (Tính năng game cần được triển khai thêm chi tiết)");
+      });
     });
-
-    // -----------------------
-    // Update trạng thái online/offline người dùng
-    // -----------------------
-    window.addEventListener('load', () => {
-      if(currentUser){
-        database.ref('users/' + currentUser.uid + '/status').set("online");
-      }
-    });
-    window.addEventListener('beforeunload', () => {
-      if(currentUser){
-        database.ref('users/' + currentUser.uid + '/status').set("offline");
-      }
-    });
-
-    // -----------------------
-    // Phím tắt cho trải nghiệm người dùng tốt hơn
-    // -----------------------
-    document.addEventListener('keydown', function(e) {
-      if(e.key === "Enter" && document.activeElement === document.getElementById('chat-message-input')) {
-        sendMessage();
-      }
-      if(e.ctrlKey && e.key === "m") {
-        document.getElementById('settings-modal').style.display = 'block';
-      }
-    });
-
-    // -----------------------
-    // Ví dụ Animation với anime.js
-    // -----------------------
-    anime({
-      targets: '#app-logo',
-      translateY: [-20, 0],
-      opacity: [0,1],
-      duration: 1000,
-      easing: 'easeOutExpo'
-    });
+    
+    /********************************************************************
+     * Chức năng phụ: Notif, Emoji, phím tắt, chống tắt màn hình,...
+     ********************************************************************/
+    // Ví dụ: chống tắt màn hình – mỗi 60 giây gửi sự kiện 'mousemove'
+    setInterval(() => {
+      window.dispatchEvent(new Event('mousemove'));
+    }, 60000);
+    
+    // Thêm hiệu ứng với anime.js cho các phần tử khi load hay chuyển trang
+    
   </script>
 </body>
 </html>
