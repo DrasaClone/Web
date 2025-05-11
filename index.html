@@ -1,158 +1,715 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Realtime Chat Platform</title>
-
-  <!-- Firebase SDKs (App, Auth, Database) -->
-  <script src="https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js"></script> <!-- :contentReference[oaicite:0]{index=0} -->
-  <script src="https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js"></script> <!-- :contentReference[oaicite:1]{index=1} -->
-  <script src="https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js"></script> <!-- :contentReference[oaicite:2]{index=2} -->
-  <!-- FirebaseUI for Auth (Email/Google/Phone) -->
-  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" /> <!-- :contentReference[oaicite:3]{index=3} -->
-  <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth__en.js"></script> <!-- :contentReference[oaicite:4]{index=4} -->
-
-  <!-- PubNub Chat SDK -->
-  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.9.js"></script> <!-- :contentReference[oaicite:5]{index=5} -->
-
-  <!-- Anime.js for animations -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.0/anime.min.js"></script> <!-- :contentReference[oaicite:6]{index=6} -->
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nền Tảng Chat Realtime Cao Cấp</title>
   <style>
-    body { font-family: sans-serif; margin:0; padding:0; display:flex; flex-direction:column; height:100vh; }
-    #auth-container, #chat-container { flex:1; display:none; padding:1rem; }
-    #chat-container { display:flex; flex-direction:column; }
-    #messages { flex:1; overflow-y:auto; list-style:none; padding:0; }
-    #messages li { margin:0.5rem 0; }
-    #send-form { display:flex; }
-    #send-form input { flex:1; padding:0.5rem; }
-    #send-form button { padding:0.5rem 1rem; }
-    /* Dark mode */
-    .dark { background:#222; color:#eee; }
+    /* ---------- Reset & cơ bản ---------- */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: #fff;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1, h2, h3 { text-align: center; margin-bottom: 1rem; }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-bottom: 10px;
+    }
+    button:hover { background-color: #0056b3; }
+    button:disabled { background-color: #999; cursor: not-allowed; }
+    /* ---------- Các nút phụ ---------- */
+    .deleteBtn {
+      background: #dc3545;
+      margin-left: 5px;
+      color: #fff;
+    }
+    .editBtn {
+      background: #ffc107;
+      margin-left: 5px;
+      color: #000;
+    }
+    .replyBtn {
+      background: #17a2b8;
+      margin-left: 5px;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 0.8em;
+      margin-top: 5px;
+    }
+    .emojiBtn {
+      background: #6c757d;
+      margin-left: 5px;
+      color: #fff;
+    }
+    .likeBtn, .deleteBtn, .editBtn, .emojiBtn, .replyBtn {
+      font-size: 0.8em;
+    }
+    .likeCount { font-weight: bold; margin-left: 5px; }
+    /* ---------- Dark mode ---------- */
+    body.dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+    body.dark-mode .container { background: #1e1e1e; }
+    body.dark-mode input,
+    body.dark-mode button { background-color: #333; color: #e0e0e0; border-color: #444; }
+    /* ---------- Các phần giao diện ---------- */
+    #loginSection, #chatSection { margin-bottom: 1rem; }
+    #chatSection { display: none; }
+    #chatHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    #userInfo { display: flex; align-items: center; }
+    #userAvatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-left: 10px;
+      display: none;
+    }
+    #roomSelector, #searchContainer {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    #searchInput {
+      width: 80%;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #onlineUsersContainer {
+      background: #eee;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    #onlineUsersContainer h4 { margin-bottom: 5px; text-align: center; }
+    #onlineUsers div { margin: 2px 0; text-align: center; font-size: 0.9em; }
+    #messages {
+      border: 1px solid #ddd;
+      background: #fafafa;
+      height: 300px;
+      overflow-y: auto;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+    }
+    .message {
+      background: #eef;
+      padding: 8px;
+      margin-bottom: 8px;
+      border-radius: 5px;
+      position: relative;
+    }
+    .timestamp {
+      font-size: 0.8em;
+      color: #555;
+      position: absolute;
+      top: 5px;
+      right: 5px;
+    }
+    #typingIndicator {
+      min-height: 20px;
+      font-style: italic;
+      color: #777;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    hr { border: 0; border-top: 1px solid #ccc; margin: 10px 0; }
+    #darkModeContainer { text-align: right; margin-bottom: 10px; }
+    #loginError { color: red; text-align: center; }
+    /* ---------- File attachment ---------- */
+    #attachBtn { background-color: #28a745; margin-right: 5px; }
+    /* Responsive */
+    @media (max-width: 600px) {
+      .container { margin: 1rem; padding: 0.5rem; }
+      button { width: 100%; margin-bottom: 8px; }
+    }
   </style>
 </head>
 <body>
-
-  <!-- 1. Authentication -->
-  <div id="auth-container">
-    <h2>Đăng nhập</h2>
-    <div id="firebaseui-auth-container"></div>
-  </div>
-
-  <!-- 2. Chat Interface -->
-  <div id="chat-container">
-    <h2>Chat Room</h2>
-    <ul id="messages"></ul>
-    <form id="send-form">
-      <input id="msg-input" type="text" placeholder="Nhập tin nhắn..." autocomplete="off" />
-      <button type="submit">Gửi</button>
-    </form>
-    <button id="toggle-theme">Dark/Light</button>
-  </div>
-
-  <!-- 3. Facebook Comments Plugin -->
-  <div id="fb-comments" style="margin-top:2rem;">
-    <div class="fb-comments"
-         data-href="https://drasaclone.github.io/Web"
-         data-width="100%"
-         data-numposts="100">
+  <div class="container">
+    <h1>Nền Tảng Chat Realtime Cao Cấp</h1>
+    
+    <!-- Dark mode toggle -->
+    <div id="darkModeContainer">
+      <button id="darkModeToggle">Chế độ tối</button>
+    </div>
+    
+    <!-- Phần đăng nhập/đăng ký -->
+    <div id="loginSection">
+      <h2>Đăng nhập / Đăng ký</h2>
+      <div id="emailLogin">
+        <input id="emailInput" type="email" placeholder="Email">
+        <input id="passwordInput" type="password" placeholder="Mật khẩu">
+        <button id="loginEmailBtn">Đăng nhập Email</button>
+        <button id="registerEmailBtn">Đăng ký Email</button>
+      </div>
+      <hr>
+      <div id="googleLogin">
+        <button id="loginGoogleBtn">Đăng nhập với Google</button>
+      </div>
+      <hr>
+      <div id="phoneLogin">
+        <input id="phoneInput" type="text" placeholder="Số điện thoại (e.g. +84123456789)">
+        <button id="loginPhoneBtn">Đăng nhập với SĐT</button>
+        <div id="recaptcha-container"></div>
+      </div>
+      <div id="loginError"></div>
+    </div>
+    
+    <!-- Phần Chat -->
+    <div id="chatSection">
+      <div id="chatHeader">
+        <div id="userInfo">
+          <span id="welcomeMsg">Welcome, Guest</span>
+          <img id="userAvatar" src="" alt="Avatar">
+        </div>
+        <button id="logoutBtn">Đăng xuất</button>
+      </div>
+      <!-- Chọn phòng chat (room) -->
+      <div id="roomSelector">
+        Chọn phòng chat: 
+        <select id="chatRoomSelect">
+          <option value="general">General</option>
+          <option value="tech">Tech Talk</option>
+          <option value="random">Random</option>
+          <option value="gaming">Gaming</option>
+        </select>
+      </div>
+      <!-- Tìm kiếm tin nhắn -->
+      <div id="searchContainer">
+        <input type="text" id="searchInput" placeholder="Tìm kiếm tin nhắn...">
+      </div>
+      <!-- Danh sách người online của phòng hiện tại -->
+      <div id="onlineUsersContainer">
+        <h4>Người Online</h4>
+        <div id="onlineUsers"></div>
+      </div>
+      <div id="typingIndicator"></div>
+      <div id="messages"></div>
+      <div id="messageInputContainer">
+        <input id="messageInput" type="text" placeholder="Nhập tin nhắn...">
+        <button id="sendBtn">Gửi</button>
+        <button id="attachBtn">Đính kèm ảnh</button>
+        <button id="emojiBtn" class="emojiBtn">😀</button>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+      </div>
+    </div>
+    
+    <!-- Facebook Comments -->
+    <div id="fbCommentsSection">
+      <h3>Bình luận Facebook</h3>
+      <!-- Thay YOUR_WEBSITE_URL bằng URL thực của website bạn -->
+      <div class="fb-comments" data-href="YOUR_WEBSITE_URL" data-width="100%" data-numposts="5"></div>
     </div>
   </div>
-
+  
+  <!-- Audio thông báo (chắc chắn có file notification.mp3 trong cùng thư mục) -->
+  <audio id="notificationSound" src="notification.mp3" preload="auto"></audio>
+  
   <!-- Facebook SDK -->
   <div id="fb-root"></div>
-  <script async defer crossorigin="anonymous"
-    src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v17.0">
-  </script> <!-- :contentReference[oaicite:7]{index=7} -->
-
+  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v15.0"></script>
+  
+  <!-- Firebase SDK (app, auth, database, storage) -->
+  <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-storage-compat.js"></script>
+  
+  <!-- PubNub SDK -->
+  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.9.min.js"></script>
+  
+  <!-- Anime.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  
+  <!-- Emoji Button (picker) -->
+  <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/index.js"></script>
+  
   <script>
-    // 1. Khởi tạo Firebase
+    /********** CẤU HÌNH & KHỞI TẠO **********/
+    // Thay các giá trị bên dưới bằng thông tin thật của dự án bạn!
     const firebaseConfig = {
-  apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
-  authDomain: "webai-7642b.firebaseapp.com",
-  databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "webai-7642b",
-  storageBucket: "webai-7642b.firebasestorage.app",
-  messagingSenderId: "967881370128",
-  appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
-  measurementId: "G-61XJ390Q30"
+      apiKey: "YOUR_FIREBASE_API_KEY",
+      authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
+      projectId: "YOUR_FIREBASE_PROJECT_ID",
+      storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID",
+      databaseURL: "YOUR_FIREBASE_DATABASE_URL"
     };
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+    const storage = firebase.storage();
 
-    // 2. Cấu hình FirebaseUI Auth (Email/Google/Phone)
-    const ui = new firebaseui.auth.AuthUI(firebase.auth());
-    ui.start('#firebaseui-auth-container', {
-      signInOptions: [
-        firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        firebase.auth.PhoneAuthProvider.PROVIDER_ID
-      ],
-      callbacks: {
-        signInSuccessWithAuthResult: () => {
-          document.getElementById('auth-container').style.display = 'none';
-          document.getElementById('chat-container').style.display = 'flex';
-          return false;
-        }
-      }
-    }); <!-- :contentReference[oaicite:8]{index=8} -->
+    // Global cho PubNub & phòng chat
+    let pubnub;
+    let currentChannel = "general"; // Mặc định là "general"
+    let displayedMessages = {};  // Để tránh hiển thị trùng lặp
 
-    // 3. Thiết lập PubNub
-    const pubnub = new PubNub({
-      publishKey: "pub-c-9ad32978-37b1-4f15-bc57-bac1884507a4",
-      subscribeKey: "sub-c-0269ec54-430f-41b1-8a33-4200f566fcbb",
-      uuid: firebase.auth().currentUser?.uid || "anonymous"
-    });
+    // Các biến cho chỉ báo “đang nhập…”
+    let lastTypingSent = 0;
+    let typingTimeout;
 
-    const channel = "global-chat";
-
-    // 4. Xử lý hiển thị tin nhắn từ Firebase Realtime Database
-    const dbRef = firebase.database().ref('messages');
-    dbRef.on('child_added', snap => {
-      const msg = snap.val();
-      addMessage(msg.user, msg.text, msg.timestamp);
-    });
-
-    // 5. Gửi tin nhắn kết hợp Firebase DB + PubNub
-    document.getElementById('send-form').addEventListener('submit', e => {
-      e.preventDefault();
-      const text = document.getElementById('msg-input').value;
-      const user = firebase.auth().currentUser.displayName || "User";
-      const timestamp = Date.now();
-      // Lưu vào Firebase DB
-      dbRef.push({ user, text, timestamp });
-      // Đẩy sự kiện PubNub (ví dụ để hiện typing indicator hoặc notifications)
-      pubnub.publish({ channel, message: { user, text, timestamp } });
-      document.getElementById('msg-input').value = '';
-      // Hiệu ứng anime.js: làm nổi bật dòng mới
+    /********** DARK MODE TOGGLE **********/
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    darkModeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
       anime({
-        targets: '#messages li:last-child',
-        opacity: [0,1],
-        translateX: [-20,0],
-        duration: 500
-      }); <!-- :contentReference[oaicite:9]{index=9} -->
+        targets: 'body',
+        backgroundColor: document.body.classList.contains('dark-mode') ? '#121212' : '#f5f5f5',
+        duration: 500,
+        easing: 'easeInOutQuad'
+      });
     });
-
-    // 6. Nhận tin nhắn PubNub (ví dụ cho presence/typing)
-    pubnub.addListener({
-      message: m => {
-        console.log("PubNub message:", m.message);
-      }
-    });
-    pubnub.subscribe({ channels: [channel] });
-
-    // 7. Hàm hiển thị tin nhắn
-    function addMessage(user, text, ts) {
-      const li = document.createElement('li');
-      const time = new Date(ts).toLocaleTimeString();
-      li.textContent = `[${time}] ${user}: ${text}`;
-      document.getElementById('messages').appendChild(li);
+    if(localStorage.getItem('darkMode') === "true") {
+      document.body.classList.add('dark-mode');
     }
 
-    // 8. Dark/Light mode toggle
-    document.getElementById('toggle-theme').onclick = () => {
-      document.body.classList.toggle('dark');
-    };
+    /********** XỬ LÝ ĐĂNG NHẬP/ĐĂNG KÝ **********/
+    const loginError = document.getElementById('loginError');
+    function showError(msg) { loginError.innerText = msg; }
+    function clearError() { loginError.innerText = ""; }
+
+    // Đăng nhập Email
+    document.getElementById('loginEmailBtn').addEventListener('click', () => {
+      const email = document.getElementById('emailInput').value;
+      const password = document.getElementById('passwordInput').value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => clearError())
+        .catch(error => showError("Lỗi đăng nhập Email: " + error.message));
+    });
+    // Đăng ký Email
+    document.getElementById('registerEmailBtn').addEventListener('click', () => {
+      const email = document.getElementById('emailInput').value;
+      const password = document.getElementById('passwordInput').value;
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => clearError())
+        .catch(error => showError("Lỗi đăng ký Email: " + error.message));
+    });
+    // Đăng nhập Google
+    document.getElementById('loginGoogleBtn').addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(() => clearError())
+        .catch(error => showError("Lỗi đăng nhập Google: " + error.message));
+    });
+    // Đăng nhập SĐT với reCAPTCHA
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+      size: 'invisible',
+      callback: (response) => {}
+    });
+    document.getElementById('loginPhoneBtn').addEventListener('click', () => {
+      const phoneNumber = document.getElementById('phoneInput').value;
+      const appVerifier = window.recaptchaVerifier;
+      auth.signInWithPhoneNumber(phoneNumber, appVerifier)
+        .then(confirmationResult => {
+          const verificationCode = prompt('Nhập mã xác thực SMS:');
+          return confirmationResult.confirm(verificationCode);
+        })
+        .then(() => clearError())
+        .catch(error => showError("Lỗi đăng nhập SĐT: " + error.message));
+    });
+
+    auth.onAuthStateChanged(user => {
+      if(user) { showChat(); }
+      else { showLogin(); }
+    });
+
+    /********** HIỂN THỊ & CHUYỂN ĐỔI GIAO DIỆN **********/
+    function showChat() {
+      document.getElementById('loginSection').style.display = 'none';
+      document.getElementById('chatSection').style.display = 'block';
+      anime({
+        targets: '#chatSection',
+        opacity: [0, 1],
+        translateY: [-20, 0],
+        duration: 600,
+        easing: 'easeOutExpo'
+      });
+      updateUserInfo();
+      // Cấp quyền thông báo desktop nếu có
+      if ("Notification" in window && Notification.permission !== "granted")
+        Notification.requestPermission();
+      // Cập nhật trạng thái online cho user
+      setUserPresence(currentChannel);
+      // Lắng nghe thay đổi phòng chat
+      document.getElementById('chatRoomSelect').addEventListener('change', (e) => {
+        switchChannel(e.target.value);
+      });
+      // Khởi tạo PubNub & tải tin nhắn cho phòng hiện tại
+      initPubNub();
+      loadMessages();
+      updateOnlineUsers();
+      document.getElementById('messageInput').focus();
+      document.getElementById('messageInput').addEventListener('keypress', function(e) {
+        if(e.key === 'Enter') sendMessage();
+      });
+      document.getElementById('messageInput').addEventListener('input', handleTyping);
+      // Lắng nghe tìm kiếm tin nhắn
+      document.getElementById("searchInput").addEventListener("input", function(e){
+        const query = e.target.value.toLowerCase();
+        const msgs = document.querySelectorAll(".message");
+        msgs.forEach(m => {
+          if(m.textContent.toLowerCase().includes(query))
+            m.style.display = "";
+          else
+            m.style.display = "none";
+        });
+      });
+    }
+    function showLogin() {
+      document.getElementById('loginSection').style.display = 'block';
+      document.getElementById('chatSection').style.display = 'none';
+      document.getElementById('messages').innerHTML = '';
+      displayedMessages = {};
+      if(pubnub) { pubnub.unsubscribeAll(); }
+    }
+    function updateUserInfo() {
+      const user = auth.currentUser;
+      const name = user.displayName || user.email || user.phoneNumber || "User";
+      document.getElementById('welcomeMsg').innerText = "Welcome, " + name;
+      if(user.photoURL) {
+        const avatar = document.getElementById('userAvatar');
+        avatar.src = user.photoURL;
+        avatar.style.display = 'inline-block';
+      }
+    }
+
+    /********** ONLINE USERS & PRESENCE **********/
+    // Khi user đăng nhập, cập nhật trạng thái online và đặt room hiện tại
+    function setUserPresence(room) {
+      const user = auth.currentUser;
+      if(!user) return;
+      const statusRef = db.ref('/status/' + user.uid);
+      statusRef.set({
+        name: user.displayName || user.email || user.phoneNumber || "User",
+        room: room,
+        online: true,
+        lastChanged: firebase.database.ServerValue.TIMESTAMP
+      });
+      statusRef.onDisconnect().set({
+        name: user.displayName || user.email || user.phoneNumber || "User",
+        room: room,
+        online: false,
+        lastChanged: firebase.database.ServerValue.TIMESTAMP
+      });
+    }
+    // Cập nhật danh sách online users
+    function updateOnlineUsers() {
+      db.ref('/status').on('value', snapshot => {
+        const onlineDiv = document.getElementById("onlineUsers");
+        onlineDiv.innerHTML = "";
+        snapshot.forEach(childSnapshot => {
+          const data = childSnapshot.val();
+          if(data.online === true && data.room === currentChannel) {
+            let userItem = document.createElement("div");
+            userItem.textContent = data.name;
+            onlineDiv.appendChild(userItem);
+          }
+        });
+      });
+    }
+
+    /********** CHUYỂN PHÒNG CHAT **********/
+    function switchChannel(newChannel) {
+      // Hủy đăng ký PubNub từ kênh cũ
+      if(pubnub) { pubnub.unsubscribeAll(); }
+      currentChannel = newChannel;
+      // Cập nhật trạng thái online của user với phòng mới
+      setUserPresence(newChannel);
+      // Xóa tin nhắn cũ và reset cache
+      document.getElementById('messages').innerHTML = "";
+      displayedMessages = {};
+      // Khởi tạo lại PubNub, tải tin nhắn và cập nhật danh sách online
+      initPubNub();
+      loadMessages();
+      updateOnlineUsers();
+    }
+
+    /********** PUBNUB & TIN NHẮN REALTIME **********/
+    function initPubNub() {
+      const user = auth.currentUser;
+      if(!user) return;
+      pubnub = new PubNub({
+        subscribeKey: 'YOUR_PUBNUB_SUBSCRIBE_KEY',
+        publishKey: 'YOUR_PUBNUB_PUBLISH_KEY',
+        uuid: user.uid
+      });
+      let pubnubChannel = "chat_" + currentChannel;
+      pubnub.subscribe({ channels: [ pubnubChannel ] });
+      pubnub.addListener({
+        message: (msgEvent) => {
+          const msg = msgEvent.message;
+          updateMessageContent(msg);
+          // Nếu tin nhắn không do chính bạn gửi, phát âm và thông báo desktop
+          if(auth.currentUser && msg.uid && msg.uid !== auth.currentUser.uid) {
+            document.getElementById('notificationSound').play().catch(err => {});
+            if(document.hidden && Notification.permission === "granted") {
+              let title = "Tin nhắn mới từ " + msg.sender;
+              let body = msg.text ? msg.text : (msg.imageUrl ? "Gửi một hình ảnh" : "");
+              new Notification(title, { body: body });
+            }
+          }
+        },
+        signal: (signalEvent) => {
+          if(signalEvent.message && signalEvent.message.type === 'typing') {
+            const sender = signalEvent.publisher;
+            if(sender === auth.currentUser.uid) return;
+            showTypingIndicator(sender);
+          }
+        }
+      });
+    }
+    
+    function sendMessage() {
+      const textInput = document.getElementById('messageInput');
+      let text = textInput.value;
+      if(text.trim() === "") return;
+      const user = auth.currentUser;
+      const message = {
+        uid: user.uid,
+        sender: user.displayName || user.email || user.phoneNumber || "Anonymous",
+        text: text,
+        timestamp: Date.now(),
+        likes: 0
+      };
+      // Lưu tin nhắn lên Firebase theo phòng hiện tại
+      const msgRef = db.ref('channels/' + currentChannel + '/messages').push();
+      message.id = msgRef.key;
+      msgRef.set(message).catch(error => console.error("Lỗi lưu tin nhắn:", error));
+      // Gửi tin nhắn qua PubNub
+      pubnub.publish({ channel: "chat_" + currentChannel, message: message });
+      textInput.value = "";
+      animateNewMessage();
+    }
+
+    /********** FILE ATTACHMENT & EMOJI PICKER **********/
+    // Gửi file ảnh đính kèm
+    document.getElementById('attachBtn').addEventListener('click', () => {
+      document.getElementById('fileInput').click();
+    });
+    document.getElementById('fileInput').addEventListener('change', uploadImage);
+    function uploadImage() {
+      const file = document.getElementById('fileInput').files[0];
+      if(!file) return;
+      const user = auth.currentUser;
+      const filename = Date.now() + "_" + file.name;
+      const storageRef = storage.ref('images/' + filename);
+      const uploadTask = storageRef.put(file);
+      uploadTask.on('state_changed',
+        snapshot => {},
+        error => { console.error("Lỗi upload:", error); },
+        () => {
+          uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
+            const message = {
+              uid: user.uid,
+              sender: user.displayName || user.email || user.phoneNumber || "Anonymous",
+              text: "",
+              imageUrl: downloadURL,
+              timestamp: Date.now(),
+              likes: 0
+            };
+            const msgRef = db.ref('channels/' + currentChannel + '/messages').push();
+            message.id = msgRef.key;
+            msgRef.set(message).catch(error => console.error("Lỗi lưu tin nhắn ảnh:", error));
+            pubnub.publish({ channel: "chat_" + currentChannel, message: message });
+          });
+        }
+      );
+    }
+    // Emoji picker
+    const emojiButton = document.getElementById('emojiBtn');
+    const picker = new EmojiButton();
+    emojiButton.addEventListener('click', () => {
+      picker.togglePicker(emojiButton);
+    });
+    picker.on('emoji', selection => {
+      document.getElementById('messageInput').value += selection.emoji;
+    });
+
+    /********** TÍN HIỆU "ĐANG NHẬP" **********/
+    function handleTyping() {
+      const now = Date.now();
+      if(now - lastTypingSent > 3000) {
+        lastTypingSent = now;
+        pubnub.signal({ channel: "chat_" + currentChannel, message: { type: 'typing' } });
+      }
+    }
+    function showTypingIndicator(senderUid) {
+      const indicator = document.getElementById('typingIndicator');
+      indicator.innerText = "User " + senderUid.substring(0,6) + " đang nhập...";
+      if(typingTimeout) clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => { indicator.innerText = ""; }, 3000);
+    }
+
+    /********** TẢI & CẬP NHẬT TIN NHẮN **********/
+    // Hàm render HTML của tin nhắn
+    function renderMessageHTML(message) {
+      let content = `<strong>${message.sender}:</strong>`;
+      if(message.text) { content += ` ${message.text}`; }
+      if(message.imageUrl) {
+        content += `<br><img src="${message.imageUrl}" style="max-width:200px; margin-top:5px; border-radius:4px;">`;
+      }
+      content += `<div class="timestamp">${formatTimestamp(message.timestamp)}</div>`;
+      content += `<button class="likeBtn" onclick="likeMessage('${message.id}')">Like (<span class="likeCount">${message.likes || 0}</span>)</button>`;
+      if(auth.currentUser && message.uid === auth.currentUser.uid) {
+        content += `<button class="deleteBtn" onclick="deleteMessage('${message.id}')">Delete</button>`;
+        content += `<button class="editBtn" onclick="editMessage('${message.id}', '${(message.text||"").replace(/'/g, "\\'")}')">Edit</button>`;
+      }
+      // Thêm nút trả lời (Reply) cho mọi tin nhắn
+      content += `<button class="replyBtn" onclick="replyMessage('${message.id}', '${(message.text||"").replace(/'/g, "\\'")}')">Reply</button>`;
+      return content;
+    }
+    // Hiển thị tin nhắn mới (dành cho event child_added)
+    function displayMessage(message) {
+      if(displayedMessages[message.id]) return;
+      displayedMessages[message.id] = true;
+      const messagesDiv = document.getElementById('messages');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message';
+      msgDiv.setAttribute('data-msg-id', message.id);
+      msgDiv.innerHTML = renderMessageHTML(message);
+      messagesDiv.appendChild(msgDiv);
+      anime({
+        targets: msgDiv,
+        opacity: [0, 1],
+        translateY: [-20, 0],
+        duration: 500,
+        easing: 'easeOutExpo'
+      });
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+    // Cập nhật nội dung tin nhắn khi có thay đổi
+    function updateMessageContent(message) {
+      const msgDiv = document.querySelector("[data-msg-id='" + message.id + "']");
+      if(msgDiv) {
+        msgDiv.innerHTML = renderMessageHTML(message);
+      } else {
+        displayMessage(message);
+      }
+    }
+    // Định dạng timestamp dạng hh:mm:ss
+    function formatTimestamp(ts) {
+      const d = new Date(ts);
+      let hh = d.getHours(), mm = d.getMinutes(), ss = d.getSeconds();
+      hh = hh < 10 ? '0' + hh : hh;
+      mm = mm < 10 ? '0' + mm : mm;
+      ss = ss < 10 ? '0' + ss : ss;
+      return hh + ':' + mm + ':' + ss;
+    }
+    // Tải tin nhắn của phòng hiện tại từ Firebase
+    function loadMessages() {
+      const messagesRef = db.ref('channels/' + currentChannel + '/messages');
+      messagesRef.off();
+      messagesRef.on('child_added', snapshot => {
+        const msg = snapshot.val();
+        msg.id = snapshot.key;
+        displayMessage(msg);
+      });
+      messagesRef.on('child_changed', snapshot => {
+        const msg = snapshot.val();
+        msg.id = snapshot.key;
+        updateMessageContent(msg);
+      });
+      // Lắng nghe xóa tin nhắn
+      messagesRef.on('child_removed', snapshot => {
+        const msgId = snapshot.key;
+        const elem = document.querySelector("[data-msg-id='" + msgId + "']");
+        if(elem) {
+          elem.remove();
+          delete displayedMessages[msgId];
+        }
+      });
+    }
+    // Tăng lượt Like cho tin nhắn
+    function likeMessage(msgId) {
+      const msgRef = db.ref('channels/' + currentChannel + '/messages/' + msgId + '/likes');
+      msgRef.transaction(currentLikes => (currentLikes || 0) + 1);
+    }
+    // Xóa tin nhắn (chỉ cho tin của chính user gửi)
+    function deleteMessage(msgId) {
+      if(confirm("Bạn có chắc muốn xóa tin nhắn này?")) {
+        db.ref('channels/' + currentChannel + '/messages/' + msgId).remove();
+      }
+    }
+    // Chỉnh sửa tin nhắn (chỉ cho tin của chính user gửi)
+    function editMessage(msgId, currentText) {
+      const newText = prompt("Chỉnh sửa tin nhắn:", currentText);
+      if(newText != null && newText.trim() !== "") {
+        db.ref('channels/' + currentChannel + '/messages/' + msgId).update({ text: newText, timestamp: Date.now() });
+      }
+    }
+    // Hàm Reply: điền ký tự trích dẫn vào input
+    function replyMessage(msgId, quote) {
+      document.getElementById('messageInput').value = "> " + quote + "\n";
+      document.getElementById('messageInput').focus();
+    }
+    // Hiệu ứng cho input khi gửi tin nhắn
+    function animateNewMessage() {
+      anime({
+        targets: '#messageInput',
+        scale: [1, 1.05, 1],
+        duration: 300,
+        easing: 'easeInOutQuad'
+      });
+    }
+    // Cho phép gọi các hàm like, delete, edit, reply từ inline
+    window.likeMessage = likeMessage;
+    window.deleteMessage = deleteMessage;
+    window.editMessage = editMessage;
+    window.replyMessage = replyMessage;
+
+    /********** SERVICE WORKER (ví dụ offline cơ bản) **********/
+    if ('serviceWorker' in navigator) {
+      const swCode = `
+        self.addEventListener('install', e => self.skipWaiting());
+        self.addEventListener('activate', e => self.clients.claim());
+        self.addEventListener('fetch', event => {
+          event.respondWith(fetch(event.request));
+        });
+      `;
+      const blob = new Blob([swCode], { type: 'text/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl)
+        .then(reg => console.log('Service Worker đăng ký thành công, scope:', reg.scope))
+        .catch(err => console.error('Service Worker đăng ký thất bại:', err));
+    }
   </script>
 </body>
 </html>
