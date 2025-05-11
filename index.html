@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nền Tảng Chat Realtime Cao Cấp</title>
+  <title>Nền Tảng Chat Realtime</title>
   <style>
     /* ---------- Reset & cơ bản ---------- */
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -469,7 +469,7 @@
       if(!user) return;
       pubnub = new PubNub({
         subscribeKey: 'YOUR_PUBNUB_SUBSCRIBE_KEY',
-        publishKey: 'YOUR_PUBNUB_PUBLISH_KEY',
+        publishKey: 'pub-c-9ad32978-37b1-4f15-bc57-bac1884507a4',
         uuid: user.uid
       });
       let pubnubChannel = "chat_" + currentChannel;
