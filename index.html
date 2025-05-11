@@ -1,153 +1,155 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nền tảng trò chuyện</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Realtime Chat Platform</title>
+
+  <!-- Firebase SDKs (App, Auth, Database) -->
+  <script src="https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js"></script> <!-- :contentReference[oaicite:0]{index=0} -->
+  <script src="https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js"></script> <!-- :contentReference[oaicite:1]{index=1} -->
+  <script src="https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js"></script> <!-- :contentReference[oaicite:2]{index=2} -->
+  <!-- FirebaseUI for Auth (Email/Google/Phone) -->
+  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" /> <!-- :contentReference[oaicite:3]{index=3} -->
+  <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth__en.js"></script> <!-- :contentReference[oaicite:4]{index=4} -->
+
+  <!-- PubNub Chat SDK -->
+  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.9.js"></script> <!-- :contentReference[oaicite:5]{index=5} -->
+
+  <!-- Anime.js for animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.0/anime.min.js"></script> <!-- :contentReference[oaicite:6]{index=6} -->
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f0f2f5;
-    }
-    #auth-container, #chat-container {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    #messages {
-      max-height: 400px;
-      overflow-y: auto;
-      margin-bottom: 20px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    #messages div {
-      padding: 8px;
-      margin: 5px 0;
-      background: #e9ecef;
-      border-radius: 4px;
-    }
-    #message-input {
-      width: calc(100% - 80px);
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    #send-button {
-      padding: 10px 20px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    #send-button:hover {
-      background: #0056b3;
-    }
+    body { font-family: sans-serif; margin:0; padding:0; display:flex; flex-direction:column; height:100vh; }
+    #auth-container, #chat-container { flex:1; display:none; padding:1rem; }
+    #chat-container { display:flex; flex-direction:column; }
+    #messages { flex:1; overflow-y:auto; list-style:none; padding:0; }
+    #messages li { margin:0.5rem 0; }
+    #send-form { display:flex; }
+    #send-form input { flex:1; padding:0.5rem; }
+    #send-form button { padding:0.5rem 1rem; }
+    /* Dark mode */
+    .dark { background:#222; color:#eee; }
   </style>
 </head>
 <body>
+
+  <!-- 1. Authentication -->
   <div id="auth-container">
     <h2>Đăng nhập</h2>
     <div id="firebaseui-auth-container"></div>
   </div>
-  <div id="chat-container" style="display: none;">
-    <h2>Phòng trò chuyện</h2>
-    <div id="messages"></div>
-    <input type="text" id="message-input" placeholder="Nhập tin nhắn">
-    <button id="send-button">Gửi</button>
-  </div>
-  <div class="fb-comments" data-href="https://drasaclone.github.io/Web" data-width="500" data-numposts="5"></div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/6.0.2/firebaseui.css" />
-  <script src="https://cdn.firebase.com/libs/firebaseui/6.0.2/firebaseui.js"></script>
-  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.2.2.min.js"></script>
+  <!-- 2. Chat Interface -->
+  <div id="chat-container">
+    <h2>Chat Room</h2>
+    <ul id="messages"></ul>
+    <form id="send-form">
+      <input id="msg-input" type="text" placeholder="Nhập tin nhắn..." autocomplete="off" />
+      <button type="submit">Gửi</button>
+    </form>
+    <button id="toggle-theme">Dark/Light</button>
+  </div>
+
+  <!-- 3. Facebook Comments Plugin -->
+  <div id="fb-comments" style="margin-top:2rem;">
+    <div class="fb-comments"
+         data-href="https://drasaclone.github.io/Web"
+         data-width="100%"
+         data-numposts="100">
+    </div>
+  </div>
+
+  <!-- Facebook SDK -->
   <div id="fb-root"></div>
-  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v18.0" nonce="YOUR_NONCE"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script async defer crossorigin="anonymous"
+    src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v17.0">
+  </script> <!-- :contentReference[oaicite:7]{index=7} -->
 
   <script>
+    // 1. Khởi tạo Firebase
     const firebaseConfig = {
-  apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
-  authDomain: "webai-7642b.firebaseapp.com",
-  databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "webai-7642b",
-  storageBucket: "webai-7642b.firebasestorage.app",
-  messagingSenderId: "967881370128",
-  appId: "1:967881370128:web:e5c4b06e4f70f55a68b895"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      // ...
     };
     firebase.initializeApp(firebaseConfig);
 
-    const pubnub = new PubNub({
-      publishKey: "pub-c-9ad32978-37b1-4f15-bc57-bac1884507a4",
-      subscribeKey: "sub-c-0269ec54-430f-41b1-8a33-4200f566fcbb"
-    });
-
-    const uiConfig = {
+    // 2. Cấu hình FirebaseUI Auth (Email/Google/Phone)
+    const ui = new firebaseui.auth.AuthUI(firebase.auth());
+    ui.start('#firebaseui-auth-container', {
       signInOptions: [
         firebase.auth.EmailAuthProvider.PROVIDER_ID,
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
         firebase.auth.PhoneAuthProvider.PROVIDER_ID
       ],
       callbacks: {
-        signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+        signInSuccessWithAuthResult: () => {
+          document.getElementById('auth-container').style.display = 'none';
+          document.getElementById('chat-container').style.display = 'flex';
           return false;
         }
       }
-    };
-    const ui = new firebaseui.auth.AuthUI(firebase.auth());
-    ui.start('#firebaseui-auth-container', uiConfig);
+    }); <!-- :contentReference[oaicite:8]{index=8} -->
 
-    firebase.auth().onAuthStateChanged(function(user) {
-      if (user) {
-        document.getElementById('auth-container').style.display = 'none';
-        document.getElementById('chat-container').style.display = 'block';
-        pubnub.setUUID(user.uid);
-        pubnub.subscribe({ channels: ['chat-channel'] });
-        anime({
-          targets: '#chat-container',
-          opacity: [0, 1],
-          duration: 1000
-        });
-      } else {
-        document.getElementById('auth-container').style.display = 'block';
-        document.getElementById('chat-container').style.display = 'none';
-      }
+    // 3. Thiết lập PubNub
+    const pubnub = new PubNub({
+      publishKey: "YOUR_PUBLISH_KEY",
+      subscribeKey: "YOUR_SUBSCRIBE_KEY",
+      uuid: firebase.auth().currentUser?.uid || "anonymous"
     });
 
+    const channel = "global-chat";
+
+    // 4. Xử lý hiển thị tin nhắn từ Firebase Realtime Database
+    const dbRef = firebase.database().ref('messages');
+    dbRef.on('child_added', snap => {
+      const msg = snap.val();
+      addMessage(msg.user, msg.text, msg.timestamp);
+    });
+
+    // 5. Gửi tin nhắn kết hợp Firebase DB + PubNub
+    document.getElementById('send-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const text = document.getElementById('msg-input').value;
+      const user = firebase.auth().currentUser.displayName || "User";
+      const timestamp = Date.now();
+      // Lưu vào Firebase DB
+      dbRef.push({ user, text, timestamp });
+      // Đẩy sự kiện PubNub (ví dụ để hiện typing indicator hoặc notifications)
+      pubnub.publish({ channel, message: { user, text, timestamp } });
+      document.getElementById('msg-input').value = '';
+      // Hiệu ứng anime.js: làm nổi bật dòng mới
+      anime({
+        targets: '#messages li:last-child',
+        opacity: [0,1],
+        translateX: [-20,0],
+        duration: 500
+      }); <!-- :contentReference[oaicite:9]{index=9} -->
+    });
+
+    // 6. Nhận tin nhắn PubNub (ví dụ cho presence/typing)
     pubnub.addListener({
-      message: function(m) {
-        const msg = m.message;
-        const messageElement = document.createElement('div');
-        messageElement.textContent = `${msg.user}: ${msg.text}`;
-        document.getElementById('messages').appendChild(messageElement);
-        anime({
-          targets: messageElement,
-          translateY: [20, 0],
-          opacity: [0, 1],
-          duration: 500
-        });
+      message: m => {
+        console.log("PubNub message:", m.message);
       }
     });
+    pubnub.subscribe({ channels: [channel] });
 
-    document.getElementById('send-button').addEventListener('click', function() {
-      const message = document.getElementById('message-input').value;
-      if (message) {
-        pubnub.publish({
-          channel: 'chat-channel',
-          message: { user: firebase.auth().currentUser.displayName || 'Ẩn danh', text: message }
-        });
-        document.getElementById('message-input').value = '';
-      }
-    });
+    // 7. Hàm hiển thị tin nhắn
+    function addMessage(user, text, ts) {
+      const li = document.createElement('li');
+      const time = new Date(ts).toLocaleTimeString();
+      li.textContent = `[${time}] ${user}: ${text}`;
+      document.getElementById('messages').appendChild(li);
+    }
+
+    // 8. Dark/Light mode toggle
+    document.getElementById('toggle-theme').onclick = () => {
+      document.body.classList.toggle('dark');
+    };
   </script>
 </body>
 </html>
