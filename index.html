@@ -2,129 +2,104 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Nền Tảng Xã Hội</title>
-  <!-- Sử dụng một số reset CSS cơ bản -->
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f2f2f2; }
-    header { background: #333; color: #fff; padding: 10px; }
-    header h1 { margin: 0; }
-    nav ul { list-style: none; padding: 0; display: flex; }
-    nav ul li { margin-right: 15px; }
-    nav ul li a { color: #fff; text-decoration: none; }
-    section { padding: 20px; margin-bottom: 10px; background: #fff; }
-    .container { max-width: 900px; margin: auto; }
-    input, textarea, button { padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; }
-    button { cursor: pointer; }
-    .row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .col-half { flex: 1; min-width: 300px; }
-    /* Style cho hộp chat, diễn đàn */
-    #chatBox, #forumPosts { border: 1px solid #ccc; background: #fafafa; padding: 10px; height: 200px; overflow-y: scroll; }
-    .animated { background: #e6e6ff; padding: 10px; }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="container">
-      <h1>Nền Tảng Social</h1>
-      <nav>
-        <ul>
-          <li><a href="#home">Trang Chủ</a></li>
-          <li><a href="#chat">Trò Chuyện</a></li>
-          <li><a href="#forum">Diễn Đàn</a></li>
-          <li><a href="#upload">Tải Ảnh</a></li>
-          <li><a href="#profile">Tài Khoản</a></li>
-          <li><a href="#comments">Bình Luận</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
+  <title>Nền tảng Chat Realtime</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <div class="container">
-    <!-- Trang Chủ với hiệu ứng anime.js -->
-    <section id="home" class="animated">
-      <h2>Chào mừng bạn đến với Nền Tảng</h2>
-      <p>Khám phá các tính năng</p>
-    </section>
-  
-    <!-- Phần Chat sử dụng PubNub -->
-    <section id="chat">
-      <h2>Trò Chuyện Realtime</h2>
-      <div id="chatBox"></div>
-      <input type="text" id="chatMessage" placeholder="Nhập tin nhắn...">
-      <button id="sendChat">Gửi Tin Nhắn</button>
-    </section>
-  
-    <!-- Phần Diễn Đàn sử dụng Firebase Realtime Database -->
-    <section id="forum">
-      <h2>Diễn Đàn & Threads</h2>
-      <div id="forumPosts"></div>
-      <textarea id="forumMessage" placeholder="Khởi tạo chủ đề mới..."></textarea>
-      <button id="postForum">Đăng Chủ Đề</button>
-    </section>
-  
-    <!-- Phần Tải Ảnh qua Cloudinary -->
-    <section id="upload">
-      <h2>Tải Ảnh / Media</h2>
-      <button id="upload_widget_button">Chọn và Tải Ảnh</button>
-    </section>
-  
-    <!-- Phần Tài Khoản: Đăng nhập và đăng xuất -->
-    <section id="profile">
-      <h2>Tài Khoản & Đăng Nhập</h2>
-      <!-- Form đăng nhập Email/Password -->
-      <form id="emailLoginForm">
-        <input type="email" id="email" placeholder="Email của bạn" required>
-        <input type="password" id="password" placeholder="Mật khẩu" required>
-        <button type="submit">Đăng Nhập bằng Email</button>
-      </form>
-      <!-- Đăng nhập Google -->
-      <button id="googleSignIn">Đăng Nhập bằng Google</button>
-      <!-- Đăng nhập bằng Phone (SMS) -->
-      <div>
-        <input type="text" id="phone" placeholder="Số điện thoại (ví dụ: +84123456789)">
-        <button id="phoneSignIn">Gửi mã SMS</button>
-        <div id="recaptcha-container"></div>
-        <form id="phoneVerifyForm">
-          <input type="text" id="verificationCode" placeholder="Nhập mã xác minh" required>
-          <button type="submit">Xác Minh Số</button>
-        </form>
-      </div>
-      <!-- Nút Đăng xuất -->
-      <button id="logoutBtn">Đăng Xuất</button>
-    </section>
-  
-    <!-- Phần Bình Luận Facebook -->
-    <section id="comments">
-      <h2>Bình Luận Facebook</h2>
-      <!-- Lưu ý: Hãy thay data-href thành URL của trang Github Pages của bạn -->
-      <div class="fb-comments" data-href="https://drasaclone.github.io/Web" data-width="100%" data-numposts="100"></div>
-    </section>
-  </div>
-  
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
+  <!-- Firebase JS SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   
   <!-- PubNub SDK -->
-  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.33.0.min.js"></script>
-  
-  <!-- Cloudinary Upload Widget -->
-  <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
+  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.9.min.js"></script>
   
   <!-- Anime.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+        
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bad+Script&display=swap" rel="stylesheet">
+        
+  <style>
+    body {
+  font-family: "Bad Script", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+    .login-section,
+    .chat-section {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 20px;
+      opacity: 0; /* Khởi tạo ẩn để áp dụng hiệu ứng fade-in */
+    }
+    .login-section h2,
+    .chat-section h2 {
+      margin-top: 0;
+    }
+    #chat-window {
+      border: 1px solid #ccc;
+      height: 300px;
+      overflow-y: auto;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #f9f9f9;
+    }
+    input,
+    button {
+      margin: 5px 0;
+      padding: 5px;
+      font-size: 1rem;
+    }
+    .message {
+      opacity: 0;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Nền tảng Chat Realtime</h1>
   
-  <!-- Facebook SDK -->
+  <!-- Phần đăng nhập -->
+  <div class="login-section">
+    <h2>Đăng nhập</h2>
+    <!-- Đăng nhập bằng Google -->
+    <div id="login-google">
+      <button id="google-login">Đăng nhập với Google</button>
+    </div>
+    <hr>
+    <!-- Đăng nhập bằng Email -->
+    <div id="login-email">
+      <input type="email" id="email" placeholder="Email">
+      <input type="password" id="password" placeholder="Mật khẩu">
+      <button id="email-login">Đăng nhập/Đăng ký với Email</button>
+    </div>
+    <hr>
+    <!-- Đăng nhập bằng Số điện thoại -->
+    <div id="login-phone">
+      <input type="text" id="phone-number" placeholder="Số điện thoại (VD: +849xxxxxxxx)">
+      <div id="recaptcha-container"></div>
+      <button id="send-otp">Gửi OTP</button><br>
+      <input type="text" id="otp-code" placeholder="Nhập OTP">
+      <button id="verify-otp">Xác thực OTP</button>
+    </div>
+  </div>
+  
+  <!-- Phần Chat -->
+  <div class="chat-section">
+    <h2>Phòng Chat</h2>
+    <div id="chat-window"></div>
+    <input type="text" id="message-input" placeholder="Nhập tin nhắn...">
+    <button id="send-btn">Gửi</button>
+  </div>
+  
+  <!-- Plugin bình luận Facebook -->
   <div id="fb-root"></div>
-  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v15.0"></script>
+  <div class="fb-comments" data-href="https://drasaclone.github.io/Web" data-width="600" data-numposts="100"></div>
   
   <script>
-    /***********************
-     * 1. Cấu hình Firebase
-     ***********************/
-    const firebaseConfig = {
+    /* -------------------- CẤU HÌNH FIREBASE -------------------- */
+    var firebaseConfig = {
   apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
   authDomain: "webai-7642b.firebaseapp.com",
   databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -134,173 +109,165 @@
   appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
   measurementId: "G-61XJ390Q30"
     };
-    // Khởi tạo Firebase
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const database = firebase.database();
-    const firestore = firebase.firestore();
     
-    /***********************
-     * 2. Cấu hình PubNub cho Chat Realtime
-     ***********************/
-    const pubnub = new PubNub({
+    /* -------------------- KHỞI TẠO PUBNUB -------------------- */
+    var pubnub = new PubNub({
       publishKey: 'pub-c-9ad32978-37b1-4f15-bc57-bac1884507a4',
-      subscribeKey: 'sub-c-0269ec54-430f-41b1-8a33-4200f566fcbb',
-      uuid: "user-" + Math.floor(Math.random() * 10000)
+      subscribeKey: 'sub-c-0269ec54-430f-41b1-8a33-4200f566fcbb'
     });
     
-    // Đăng ký kênh chat
-    pubnub.subscribe({ channels: ['chat'] });
-    // Lắng nghe tin nhắn mới
+    pubnub.subscribe({
+      channels: ['chat']
+    });
+    
     pubnub.addListener({
       message: function(event) {
-        let messageData = event.message;
-        const chatBox = document.getElementById('chatBox');
-        let msgDiv = document.createElement('div');
-        msgDiv.textContent = messageData.user + ": " + messageData.text;
-        chatBox.appendChild(msgDiv);
+        var message = event.message;
+        appendMessage(message);
       }
     });
     
-    // Gửi tin nhắn chat
-    document.getElementById("sendChat").addEventListener("click", function() {
-      const messageText = document.getElementById("chatMessage").value;
-      const user = auth.currentUser ? (auth.currentUser.email || auth.currentUser.phoneNumber) : "Anonymous";
+    /* -------------------- HIỆU ỨNG TRÊN PAGE LOAD -------------------- */
+    window.addEventListener('load', function() {
+      // Hiệu ứng fade-in cho phần đăng nhập
+      anime({
+        targets: '.login-section',
+        opacity: [0, 1],
+        translateY: [-20, 0],
+        duration: 1000,
+        easing: 'easeOutExpo'
+      });
+      
+      // Hiệu ứng fade-in cho phần chat
+      anime({
+        targets: '.chat-section',
+        opacity: [0, 1],
+        translateY: [20, 0],
+        duration: 1000,
+        delay: 500,
+        easing: 'easeOutExpo'
+      });
+    });
+    
+    /* -------------------- XỬ LÝ ĐĂNG NHẬP -------------------- */
+    
+    // Đăng nhập bằng Google
+    document.getElementById("google-login").addEventListener("click", function() {
+      var provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+        .then(function(result) {
+          console.log("Đăng nhập thành công:", result.user.displayName);
+        })
+        .catch(function(error) {
+          console.error("Lỗi đăng nhập Google:", error);
+        });
+    });
+    
+    // Đăng nhập bằng Email
+    document.getElementById("email-login").addEventListener("click", function() {
+      var email = document.getElementById("email").value;
+      var password = document.getElementById("password").value;
+      
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(function(userCredential) {
+          console.log("Đăng nhập thành công với Email:", userCredential.user.email);
+        })
+        .catch(function(error) {
+          if (error.code === 'auth/user-not-found') {
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+              .then(function(userCredential) {
+                console.log("Tạo tài khoản Email thành công:", userCredential.user.email);
+              })
+              .catch(function(error) {
+                console.error("Lỗi tạo người dùng Email:", error.message);
+              });
+          } else {
+            console.error("Lỗi đăng nhập Email:", error.message);
+          }
+        });
+    });
+    
+    // Đăng nhập bằng Số điện thoại: Gửi OTP
+    document.getElementById("send-otp").addEventListener("click", function() {
+      var phoneNumber = document.getElementById("phone-number").value;
+      window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        'size': 'invisible'
+      });
+      
+      firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+        .then(function(confirmationResult) {
+          window.confirmationResult = confirmationResult;
+          console.log("OTP đã được gửi đến số điện thoại:", phoneNumber);
+        })
+        .catch(function(error) {
+          console.error("Lỗi gửi OTP:", error);
+        });
+    });
+    
+    // Xác thực OTP
+    document.getElementById("verify-otp").addEventListener("click", function() {
+      var otpCode = document.getElementById("otp-code").value;
+      window.confirmationResult.confirm(otpCode)
+        .then(function(result) {
+          console.log("Xác thực số điện thoại thành công:", result.user.phoneNumber);
+        })
+        .catch(function(error) {
+          console.error("OTP không chính xác:", error);
+        });
+    });
+    
+    /* -------------------- XỬ LÝ TIN NHẮN VÀ HIỆU ỨNG ANIME.JS -------------------- */
+    // Hàm tạo và hiển thị tin nhắn với hiệu ứng anime.js
+    function appendMessage(message) {
+      var chatWindow = document.getElementById("chat-window");
+      var p = document.createElement("p");
+      p.className = "message";
+      p.innerHTML = "<strong>" + message.sender + ":</strong> " + message.text;
+      chatWindow.appendChild(p);
+      
+      // Tự động cuộn xuống dưới khi có tin mới
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+      
+      // Hiệu ứng fade-in và dịch chuyển từ dưới lên cho tin nhắn
+      anime({
+        targets: p,
+        opacity: [0, 1],
+        translateY: [20, 0],
+        duration: 500,
+        easing: 'easeOutExpo'
+      });
+    }
+    
+    // Xử lý gửi tin nhắn
+    document.getElementById("send-btn").addEventListener("click", function() {
+      var input = document.getElementById("message-input");
+      var text = input.value.trim();
+      if (text === "") return;
+      
+      var user = firebase.auth().currentUser;
+      var senderName = user ? (user.displayName || user.email || user.phoneNumber) : "Anonymous";
+      var message = { sender: senderName, text: text };
+      
+      // Gửi tin nhắn qua PubNub
       pubnub.publish({
         channel: 'chat',
-        message: { user: user, text: messageText }
-      }, function(status, response) {
-        if (status.error) {
-          console.error("Lỗi gửi tin:", status);
-        } else {
-          console.log("Tin đã được gửi với timetoken:", response.timetoken);
-        }
+        message: message
       });
+      
+      // Lưu tin nhắn vào Firebase Realtime Database
+      firebase.database().ref('messages').push(message);
+      input.value = "";
     });
     
-    /***********************
-     * 3. Tích hợp đăng nhập với Firebase Auth
-     * - Email/Password, Google, Phone (SMS)
-     ***********************/
-    // Đăng nhập Email/Password
-    document.getElementById("emailLoginForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      auth.signInWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-          console.log("Đăng nhập thành công:", userCredential.user.email);
-        })
-        .catch((error) => {
-          console.error("Lỗi đăng nhập:", error.message);
-        });
-    });
-    
-    // Đăng nhập với Google
-    document.getElementById("googleSignIn").addEventListener("click", function() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then((result) => {
-          console.log("Đăng nhập Google thành công:", result.user.email);
-        })
-        .catch((error) => {
-          console.error("Lỗi Google Sign In:", error.message);
-        });
-    });
-    
-    // Đăng nhập bằng Phone (SMS)
-    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-      'size': 'invisible',
-      'callback': function(response) {
-        // Xử lý khi reCAPTCHA được giải quyết
-      }
-    });
-    
-    document.getElementById("phoneSignIn").addEventListener("click", function() {
-      const phoneNumber = document.getElementById("phone").value;
-      firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
-        .then((confirmationResult) => {
-          window.confirmationResult = confirmationResult;
-          console.log("SMS đã được gửi!");
-        }).catch((error) => {
-          console.error("Lỗi gửi SMS:", error.message);
-        });
-    });
-    
-    document.getElementById("phoneVerifyForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const code = document.getElementById("verificationCode").value;
-      window.confirmationResult.confirm(code)
-        .then((result) => {
-          console.log("Xác minh thành công, số:", result.user.phoneNumber);
-        })
-        .catch((error) => {
-          console.error("Lỗi xác minh mã:", error.message);
-        });
-    });
-    
-    // Chức năng Đăng xuất
-    document.getElementById("logoutBtn").addEventListener("click", function() {
-      auth.signOut().then(() => {
-        console.log("Đã đăng xuất người dùng.");
-      }).catch((error) => {
-        console.error("Lỗi đăng xuất:", error);
-      });
-    });
-    
-    /***********************
-     * 4. Diễn đàn: Đăng bài và tải bài viết từ Firebase Realtime Database
-     ***********************/
-    document.getElementById("postForum").addEventListener("click", function() {
-      const message = document.getElementById("forumMessage").value;
-      const user = auth.currentUser ? (auth.currentUser.email || auth.currentUser.phoneNumber) : "Anonymous";
-      // Lưu bài viết vào phần 'forumPosts'
-      const postRef = database.ref('forumPosts').push();
-      postRef.set({
-        user: user,
-        message: message,
-        timestamp: Date.now()
-      });
-      document.getElementById("forumMessage").value = "";
-    });
-    
-    // Hiển thị bài viết khi có bài mới
-    database.ref('forumPosts').on('child_added', function(snapshot) {
-      const data = snapshot.val();
-      const forumPostsDiv = document.getElementById("forumPosts");
-      let postDiv = document.createElement("div");
-      postDiv.textContent = data.user + ": " + data.message;
-      forumPostsDiv.appendChild(postDiv);
-    });
-    
-    /***********************
-     * 5. Cloudinary Upload Widget cho tải ảnh
-     ***********************/
-    var myWidget = cloudinary.createUploadWidget({
-      cloudName: 'dgbux4wzo', 
-      uploadPreset: 'okeqfdx4'
-    }, (error, result) => { 
-      if (!error && result && result.event === "success") { 
-        console.log('Ảnh đã tải lên thành công:', result.info);
-        // Bạn có thể lưu URL ảnh (result.info.secure_url) lên cơ sở dữ liệu của mình
-      }
-    });
-    
-    document.getElementById("upload_widget_button").addEventListener("click", function(){
-      myWidget.open();
-    }, false);
-    
-    /***********************
-     * 6. Hiệu ứng với anime.js
-     ***********************/
-    anime({
-      targets: '.animated',
-      translateX: 250,
-      duration: 1500,
-      loop: true,
-      direction: 'alternate',
-      easing: 'easeInOutSine'
+    // Lấy và hiển thị tin nhắn đã lưu từ Firebase
+    firebase.database().ref('messages').on('child_added', function(snapshot) {
+      var message = snapshot.val();
+      appendMessage(message);
     });
   </script>
+  
+  <!-- SDK Facebook cho bình luận -->
+  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v11.0"></script>
 </body>
 </html>
