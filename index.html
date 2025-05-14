@@ -658,6 +658,21 @@
       );
     }
     updatePresence();
+// Loading Animation
+  document.querySelectorAll('.progress-circle').forEach(el => {
+    const circle = el.querySelector('.progress');
+    const text = el.querySelector('.percentage');
+    const radius = circle.getAttribute('r');
+    const circumference = 2 * Math.PI * radius;
+    const percent = parseInt(el.getAttribute('data-percentage'), 10);
+
+    circle.style.strokeDasharray = `${circumference}`;
+    const offset = circumference - (percent / 100) * circumference;
+    setTimeout(() => {
+      circle.style.strokeDashoffset = offset;
+      text.textContent = `${percent}%`;
+    }, 100);
+  });
   </script>
 </body>
 </html>
