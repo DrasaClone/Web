@@ -15,53 +15,140 @@
   
   <!-- Anime.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-        
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bad+Script&display=swap" rel="stylesheet">
-        
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bad+Script&display=swap" rel="stylesheet">
+  
   <style>
+    /* Global Styles */
     body {
-  font-family: "Bad Script", cursive;
-  font-weight: 400;
-  font-style: normal;
-}
-    .login-section,
-    .chat-section {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin-bottom: 20px;
-      opacity: 0; /* Khởi tạo ẩn để áp dụng hiệu ứng fade-in */
+      font-family: "Bad Script", cursive;
+      font-weight: 400;
+      font-style: normal;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
     }
-    .login-section h2,
-    .chat-section h2 {
-      margin-top: 0;
+    
+    body.dark-theme {
+      background: linear-gradient(135deg, #232526, #414345);
     }
-    #chat-window {
-      border: 1px solid #ccc;
-      height: 300px;
-      overflow-y: auto;
-      padding: 10px;
+    
+    header {
+      padding: 20px;
+    }
+    
+    h1 {
       margin-bottom: 10px;
-      background-color: #f9f9f9;
     }
-    input,
-    button {
+    
+    .theme-switcher {
+      margin-bottom: 10px;
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    
+    .nav {
+      margin: 20px 0;
+    }
+    
+    .nav-btn {
+      margin: 0 10px;
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    
+    .nav-btn.active {
+      background: rgba(255,255,255,0.5);
+    }
+    
+    /* Section common styles */
+    .section {
+      border: 1px solid rgba(255,255,255,0.5);
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 600px;
+      background-color: rgba(0,0,0,0.5);
+      border-radius: 10px;
+      opacity: 0;
+    }
+    
+    .active-page {
+      opacity: 1 !important;
+    }
+    
+    input, button {
       margin: 5px 0;
       padding: 5px;
       font-size: 1rem;
+      border-radius: 5px;
+      border: none;
     }
-    .message {
-      opacity: 0;
-      margin: 5px 0;
+    
+    input {
+      width: 80%;
+    }
+    
+    #chat-window, #pm-chat-window {
+      border: 1px solid rgba(255,255,255,0.5);
+      height: 300px;
+      overflow-y: auto;
+      padding: 10px;
+      margin: 10px 0;
+      background-color: rgba(255,255,255,0.1);
+      text-align: left;
+    }
+    
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      font-size: 2rem;
+      color: #000;
+      display: none; /* Ẩn ban đầu */
     }
   </style>
 </head>
 <body>
-  <h1>Nền tảng Chat Realtime</h1>
+  <header>
+    <h1>Nền tảng Chat Realtime</h1>
+    <button id="theme-switcher" class="theme-switcher">Chuyển đổi chủ đề</button>
+    <div class="nav">
+      <button class="nav-btn active" data-target="chat-section">Chat</button>
+      <button class="nav-btn" data-target="forum-section">Forum</button>
+      <button class="nav-btn" data-target="threads-section">Threads</button>
+      <button class="nav-btn" data-target="social-section">Mạng Xã Hội</button>
+    </div>
+  </header>
   
-  <!-- Phần đăng nhập -->
-  <div class="login-section">
+  <!-- Loading overlay cho chuyển tiếp trang -->
+  <div id="loading-overlay" class="loading-overlay">
+    <h1>Loading...</h1>
+  </div>
+  
+  <!-- Login Section -->
+  <div class="section login-section" id="login-section">
     <h2>Đăng nhập</h2>
     <!-- Đăng nhập bằng Google -->
     <div id="login-google">
@@ -85,29 +172,72 @@
     </div>
   </div>
   
-  <!-- Phần Chat -->
-  <div class="chat-section">
+  <!-- Chat Section -->
+  <div class="section chat-section active-page" id="chat-section">
     <h2>Phòng Chat</h2>
+    <div class="nickname-section">
+      <input type="text" id="nickname" placeholder="Nhập nickname của bạn...">
+      <button id="set-nickname-btn">Đổi Nickname</button>
+    </div>
+    <div id="presence-list">
+      <h3>Người trực tuyến:</h3>
+      <ul id="online-users-list"></ul>
+    </div>
     <div id="chat-window"></div>
-    <input type="text" id="message-input" placeholder="Nhập tin nhắn...">
-    <button id="send-btn">Gửi</button>
+    <div class="chat-input">
+      <input type="text" id="message-input" placeholder="Nhập tin nhắn...">
+      <button id="send-btn">Gửi</button>
+    </div>
+    <button id="toggle-pm-btn">Nhắn tin riêng</button>
+    <div class="private-msg-section" id="private-msg-section" style="display: none;">
+      <h2>Nhắn tin riêng</h2>
+      <input type="text" id="pm-recipient" placeholder="Người nhận (nickname)">
+      <input type="text" id="pm-message" placeholder="Nhập tin nhắn riêng...">
+      <button id="send-pm-btn">Gửi tin riêng</button>
+      <div id="pm-chat-window"></div>
+    </div>
+  </div>
+  
+  <!-- Forum Section -->
+  <div class="section forum-section" id="forum-section" style="display: none;">
+    <h2>Forum</h2>
+    <div id="forum-content">
+      <p>Nội dung forum sẽ được cập nhật ở đây.</p>
+    </div>
+  </div>
+  
+  <!-- Threads Section -->
+  <div class="section threads-section" id="threads-section" style="display: none;">
+    <h2>Threads</h2>
+    <div id="threads-content">
+      <p>Danh sách threads sẽ được hiển thị ở đây.</p>
+    </div>
+  </div>
+  
+  <!-- Social Network Section -->
+  <div class="section social-network-section" id="social-section" style="display: none;">
+    <h2>Mạng Xã Hội</h2>
+    <div id="social-content">
+      <p>Chức năng kết nối mạng xã hội sẽ hiển thị ở đây.</p>
+    </div>
   </div>
   
   <!-- Plugin bình luận Facebook -->
   <div id="fb-root"></div>
   <div class="fb-comments" data-href="https://drasaclone.github.io/Web" data-width="600" data-numposts="100"></div>
   
+  <!-- Scripts -->
   <script>
     /* -------------------- CẤU HÌNH FIREBASE -------------------- */
     var firebaseConfig = {
-  apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
-  authDomain: "webai-7642b.firebaseapp.com",
-  databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "webai-7642b",
-  storageBucket: "webai-7642b.firebasestorage.app",
-  messagingSenderId: "967881370128",
-  appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
-  measurementId: "G-61XJ390Q30"
+      apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
+      authDomain: "webai-7642b.firebaseapp.com",
+      databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "webai-7642b",
+      storageBucket: "webai-7642b.firebasestorage.app",
+      messagingSenderId: "967881370128",
+      appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
+      measurementId: "G-61XJ390Q30"
     };
     firebase.initializeApp(firebaseConfig);
     
@@ -117,41 +247,54 @@
       subscribeKey: 'sub-c-0269ec54-430f-41b1-8a33-4200f566fcbb'
     });
     
+    // Subscribe vào kênh "chat" và lắng nghe sự kiện presence
     pubnub.subscribe({
-      channels: ['chat']
+      channels: ['chat'],
+      withPresence: true
     });
     
     pubnub.addListener({
       message: function(event) {
         var message = event.message;
-        appendMessage(message);
+        // Nếu message có thuộc tính private thì hiện tin nhắn riêng, ngược lại hiện tin công khai
+        if(message.private){
+          appendPrivateMessage(message);
+        } else {
+          appendMessage(message);
+        }
+      },
+      presence: function(event) {
+        // Cập nhật danh sách presence mỗi khi có sự kiện
+        updatePresence();
       }
     });
     
     /* -------------------- HIỆU ỨNG TRÊN PAGE LOAD -------------------- */
     window.addEventListener('load', function() {
-      // Hiệu ứng fade-in cho phần đăng nhập
+      // Hiệu ứng fade-in cho login và trang đang hoạt động
       anime({
-        targets: '.login-section',
+        targets: '#login-section',
         opacity: [0, 1],
         translateY: [-20, 0],
-        duration: 1000,
+        duration: 5000,
         easing: 'easeOutExpo'
       });
-      
-      // Hiệu ứng fade-in cho phần chat
       anime({
-        targets: '.chat-section',
+        targets: '.active-page',
         opacity: [0, 1],
         translateY: [20, 0],
-        duration: 1000,
-        delay: 500,
+        duration: 5000,
+        delay: 1000,
         easing: 'easeOutExpo'
       });
     });
     
-    /* -------------------- XỬ LÝ ĐĂNG NHẬP -------------------- */
+    /* -------------------- CHUYỂN ĐỔI CHỦ ĐỀ -------------------- */
+    document.getElementById("theme-switcher").addEventListener("click", function() {
+      document.body.classList.toggle("dark-theme");
+    });
     
+    /* -------------------- XỬ LÝ ĐĂNG NHẬP -------------------- */
     // Đăng nhập bằng Google
     document.getElementById("google-login").addEventListener("click", function() {
       var provider = new firebase.auth.GoogleAuthProvider();
@@ -217,8 +360,118 @@
         });
     });
     
-    /* -------------------- XỬ LÝ TIN NHẮN VÀ HIỆU ỨNG ANIME.JS -------------------- */
-    // Hàm tạo và hiển thị tin nhắn với hiệu ứng anime.js
+    /* -------------------- CHUYỂN ĐỔI GIỮA CÁC TRANG -------------------- */
+    var navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var targetId = this.getAttribute('data-target');
+        // Hiệu ứng chuyển loading với 3 kiểu ngẫu nhiên
+        showLoadingTransition(function() {
+          // Ẩn tất cả các trang (chat, forum, threads, social) và xóa active-page
+          document.querySelectorAll('.chat-section, .forum-section, .threads-section, .social-network-section').forEach(function(section) {
+            section.style.display = "none";
+            section.classList.remove('active-page');
+          });
+          // Xóa active ở các nút
+          navButtons.forEach(function(b) { b.classList.remove('active'); });
+          // Hiển thị trang đích và thêm active-page
+          document.getElementById(targetId).style.display = "block";
+          document.getElementById(targetId).classList.add('active-page');
+          // Hiệu ứng fade-in cho trang đích
+          anime({
+            targets: '#' + targetId,
+            opacity: [0, 1],
+            translateY: [20, 0],
+            duration: 500,
+            easing: 'easeOutExpo'
+          });
+          btn.classList.add('active');
+        });
+      });
+    });
+    
+    function showLoadingTransition(callback) {
+      var overlay = document.getElementById("loading-overlay");
+      overlay.style.display = "flex";
+      // Chọn ngẫu nhiên 1 trong 3 hiệu ứng loading
+      var randomTransition = Math.floor(Math.random() * 3);
+      switch(randomTransition) {
+        case 0:
+          anime({
+            targets: overlay,
+            opacity: [0, 1],
+            scale: [0.5, 1],
+            duration: 500,
+            easing: 'easeOutExpo',
+            complete: function() {
+              setTimeout(function() {
+                anime({
+                  targets: overlay,
+                  opacity: [1, 0],
+                  duration: 500,
+                  easing: 'easeInExpo',
+                  complete: function() {
+                    overlay.style.display = "none";
+                    callback();
+                  }
+                });
+              }, 300);
+            }
+          });
+          break;
+        case 1:
+          anime({
+            targets: overlay,
+            translateY: [-100, 0],
+            opacity: [0, 1],
+            duration: 500,
+            easing: 'easeOutExpo',
+            complete: function() {
+              setTimeout(function() {
+                anime({
+                  targets: overlay,
+                  translateY: [0, 100],
+                  opacity: [1, 0],
+                  duration: 500,
+                  easing: 'easeInExpo',
+                  complete: function() {
+                    overlay.style.display = "none";
+                    callback();
+                  }
+                });
+              }, 300);
+            }
+          });
+          break;
+        case 2:
+          anime({
+            targets: overlay,
+            rotate: ['0deg', '360deg'],
+            opacity: [0, 1],
+            duration: 500,
+            easing: 'easeOutExpo',
+            complete: function() {
+              setTimeout(function() {
+                anime({
+                  targets: overlay,
+                  rotate: ['360deg', '720deg'],
+                  opacity: [1, 0],
+                  duration: 500,
+                  easing: 'easeInExpo',
+                  complete: function() {
+                    overlay.style.display = "none";
+                    callback();
+                  }
+                });
+              }, 300);
+            }
+          });
+          break;
+      }
+    }
+    
+    /* -------------------- XỬ LÝ TIN NHẮN & HIỆU ỨNG ANIME -------------------- */
+    // Hiển thị tin nhắn công khai
     function appendMessage(message) {
       var chatWindow = document.getElementById("chat-window");
       var p = document.createElement("p");
@@ -226,10 +479,8 @@
       p.innerHTML = "<strong>" + message.sender + ":</strong> " + message.text;
       chatWindow.appendChild(p);
       
-      // Tự động cuộn xuống dưới khi có tin mới
       chatWindow.scrollTop = chatWindow.scrollHeight;
       
-      // Hiệu ứng fade-in và dịch chuyển từ dưới lên cho tin nhắn
       anime({
         targets: p,
         opacity: [0, 1],
@@ -239,35 +490,132 @@
       });
     }
     
-    // Xử lý gửi tin nhắn
+    // Hiển thị tin nhắn riêng
+    function appendPrivateMessage(message) {
+      var pmWindow = document.getElementById("pm-chat-window");
+      var p = document.createElement("p");
+      p.className = "message";
+      p.innerHTML = "<strong>" + message.sender + " (riêng):</strong> " + message.text;
+      pmWindow.appendChild(p);
+      
+      pmWindow.scrollTop = pmWindow.scrollHeight;
+      
+      anime({
+        targets: p,
+        opacity: [0, 1],
+        translateY: [20, 0],
+        duration: 500,
+        easing: 'easeOutExpo'
+      });
+    }
+    
+    // Gửi tin công khai
     document.getElementById("send-btn").addEventListener("click", function() {
       var input = document.getElementById("message-input");
       var text = input.value.trim();
       if (text === "") return;
       
       var user = firebase.auth().currentUser;
-      var senderName = user ? (user.displayName || user.email || user.phoneNumber) : "Anonymous";
+      var senderName = (window.userNickname) ? window.userNickname : (user ? (user.displayName || user.email || user.phoneNumber) : "Anonymous");
       var message = { sender: senderName, text: text };
       
-      // Gửi tin nhắn qua PubNub
       pubnub.publish({
         channel: 'chat',
         message: message
       });
       
-      // Lưu tin nhắn vào Firebase Realtime Database
       firebase.database().ref('messages').push(message);
       input.value = "";
     });
     
-    // Lấy và hiển thị tin nhắn đã lưu từ Firebase
+    // Gửi tin nhắn riêng
+    document.getElementById("send-pm-btn").addEventListener("click", function() {
+      var recipient = document.getElementById("pm-recipient").value.trim();
+      var msg = document.getElementById("pm-message").value.trim();
+      if(recipient === "" || msg === "") return;
+      
+      var senderName = (window.userNickname) ? window.userNickname : "Anonymous";
+      var message = { sender: senderName, text: msg, private: true };
+      var pmChannel = "pm-" + recipient;
+      
+      pubnub.publish({
+        channel: pmChannel,
+        message: message
+      });
+      
+      // Hiển thị tin nhắn riêng của người gửi
+      appendPrivateMessage(message);
+      document.getElementById("pm-message").value = "";
+    });
+    
+    // Lấy tin nhắn từ Firebase và hiển thị
     firebase.database().ref('messages').on('child_added', function(snapshot) {
       var message = snapshot.val();
       appendMessage(message);
     });
+    
+    /* -------------------- NICKNAME & PRESENCE -------------------- */
+    document.getElementById("set-nickname-btn").addEventListener("click", function() {
+      var nickname = document.getElementById("nickname").value.trim();
+      if(nickname === "") return;
+      window.userNickname = nickname;
+      alert("Nickname đã được đặt thành: " + nickname);
+      
+      // Subscribe vào kênh tin riêng của người dùng
+      pubnub.subscribe({
+        channels: ["pm-" + nickname]
+      });
+      updatePresence();
+    });
+    
+    document.getElementById("toggle-pm-btn").addEventListener("click", function() {
+      var pmSection = document.getElementById("private-msg-section");
+      if(pmSection.style.display === "none") {
+        anime({
+          targets: pmSection,
+          opacity: [0, 1],
+          height: ['0px', 'auto'],
+          duration: 500,
+          easing: 'easeOutExpo',
+          begin: function() {
+            pmSection.style.display = "block";
+          }
+        });
+      } else {
+        anime({
+          targets: pmSection,
+          opacity: [1, 0],
+          height: ['auto', '0px'],
+          duration: 500,
+          easing: 'easeInExpo',
+          complete: function() {
+            pmSection.style.display = "none";
+          }
+        });
+      }
+    });
+    
+    // Cập nhật danh sách người trực tuyến sử dụng hereNow của PubNub
+    function updatePresence() {
+      pubnub.hereNow(
+        {
+          channels: ['chat'],
+          includeUUIDs: true
+        },
+        function (status, response) {
+          var onlineList = document.getElementById("online-users-list");
+          onlineList.innerHTML = "";
+          if(response.channels.chat && response.channels.chat.occupants){
+            response.channels.chat.occupants.forEach(function(occupant) {
+              var li = document.createElement("li");
+              li.textContent = occupant.uuid;
+              onlineList.appendChild(li);
+            });
+          }
+        }
+      );
+    }
+    updatePresence();
   </script>
-  
-  <!-- SDK Facebook cho bình luận -->
-  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v11.0"></script>
 </body>
 </html>
