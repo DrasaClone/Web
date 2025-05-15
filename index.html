@@ -619,7 +619,30 @@
       var message = snapshot.val();
       appendMessage(message);
     });
-    
+          
+    // Phân biệt giữa các người dùng
+function appendMessage(message) {
+  var chatWindow = document.getElementById("chat-window");
+  var p = document.createElement("p");
+  
+  var user = firebase.auth().currentUser;
+  var senderName = message.sender;
+  
+  p.className = "message " + (senderName === user.displayName ? "user" : "other");
+  p.innerHTML = "<strong>" + senderName + ":</strong> " + message.text;
+  
+  chatWindow.appendChild(p);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+  
+  anime({
+    targets: p,
+    opacity: [0, 1],
+    translateY: [20, 0],
+    duration: 500,
+    easing: 'easeOutExpo'
+  });
+}
+
     /* -------------------- NICKNAME & PRESENCE -------------------- */
     document.getElementById("set-nickname-btn").addEventListener("click", function() {
       var nickname = document.getElementById("nickname").value.trim();
