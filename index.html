@@ -380,6 +380,8 @@
       measurementId: "G-61XJ390Q30"
     };
     firebase.initializeApp(firebaseConfig);
+      var db = firebase.firestore();       // Dùng cho Firestore
+      var rtdb = firebase.database();       // Dùng cho Realtime Database
     
     /* -------------------- KHỞI TẠO PUBNUB -------------------- */
     var pubnub = new PubNub({
