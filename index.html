@@ -291,7 +291,27 @@
   <div class="section social-network-section" id="social-section" style="display: none;">
     <h2>Mạng Xã Hội</h2>
     <div id="social-content">
-      <p>Chức năng kết nối mạng xã hội sẽ hiển thị ở đây.</p>
+    <div id="app">
+      <h1>Mạng Xã Hội Demo - Firestore & Realtime DB</h1>
+
+      <!-- Đăng nhập bằng nickname -->
+      <div id="login">
+        <input type="text" id="nickname" placeholder="Nhập nickname của bạn">
+        <button id="loginBtn">Đăng Nhập</button>
+      </div>
+
+      <!-- Khu vực đăng bài -->
+      <div id="postArea" style="display:none;">
+        <textarea id="postContent" placeholder="Bạn muốn chia sẻ gì?"></textarea>
+        <input type="file" id="imageUpload" accept="image/*">
+        <button id="postBtn">Đăng bài</button>
+      </div>
+
+      <!-- Feed hiển thị bài đăng -->
+      <div id="feed">
+        <!-- Các bài đăng sẽ được load tại đây -->
+      </div>
+    </div>
     </div>
   </div>
   
