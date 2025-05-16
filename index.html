@@ -935,6 +935,67 @@ function appendMessage(message) {
         });
       }
 
+// Hiển thị danh sách người dùng
+// Giả sử bạn có định danh cho user hiện tại
+  var currentUserId = "user_1";
+  var userStatusRef = database.ref('/status/' + currentUserId);
+  var connectedRef = database.ref(".info/connected");
+
+  connectedRef.on("value", function(snapshot) {
+    if (snapshot.val() === false) return;
+
+    // Khi mất kết nối sẽ tự động chuyển về trạng thái offline
+    userStatusRef.onDisconnect().set({
+      state: "offline",
+      last_changed: firebase.database.ServerValue.TIMESTAMP
+    }).then(function() {
+      // Khi có kết nối, set trạng thái online
+      userStatusRef.set({
+        state: "online",
+        last_changed: firebase.database.ServerValue.TIMESTAMP
+      });
+    });
+  });
+
+  // Hàm cập nhật UI cho người dùng
+  function updateUserUI(userId, nickname, status) {
+    var list = document.getElementById("user-list");
+    var userItem = document.getElementById("user-" + userId);
+
+    if (!userItem) {
+      userItem = document.createElement("li");
+      userItem.id = "user-" + userId;
+      userItem.className = "user-item";
+
+      var statusDot = document.createElement("span");
+      statusDot.className = "status-dot " + (status === "online" ? "online" : "offline");
+      statusDot.id = "dot-" + userId;
+
+      var textNode = document.createTextNode(nickname);
+      userItem.appendChild(statusDot);
+      userItem.appendChild(textNode);
+      list.appendChild(userItem);
+    } else {
+      var statusDot = document.getElementById("dot-" + userId);
+      statusDot.className = "status-dot " + (status === "online" ? "online" : "offline");
+    }
+  }
+
+  // Lắng nghe thay đổi trạng thái của tất cả người dùng
+  var statusRef = database.ref('/status');
+  statusRef.on("child_added", function(snapshot) {
+    var userId = snapshot.key;
+    var statusData = snapshot.val();
+    var nickname = userId;  // Hoặc lấy từ node khác nếu có lưu thông tin chi tiết
+    updateUserUI(userId, nickname, statusData.state);
+  });
+  statusRef.on("child_changed", function(snapshot) {
+    var userId = snapshot.key;
+    var statusData = snapshot.val();
+    var nickname = userId;
+    updateUserUI(userId, nickname, statusData.state);
+  });
+
   </script>
 </body>
 </html>
