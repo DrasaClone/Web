@@ -803,6 +803,118 @@ function appendMessage(message) {
       text.textContent = `${percent}%`;
     }, 100);
   });
+// Private Chat
+      pubnub.subscribe({ channels: ['chat'], withPresence: true });
+      pubnub.addListener({
+        message: function(event) {
+          var msg = event.message;
+          renderMessage(msg.sender, msg.text);
+        },
+        presence: function(event) {
+          console.log("Presence event:", event);
+        }
+      });
+
+      /********* Hàm gửi tin nhắn (Firebase & PubNub) *********/
+      function sendMessage() {
+        var messageInput = document.getElementById("message-input");
+        var messageText = messageInput.value;
+        if (!messageText) return;
+        var messageData = {
+          sender: "current-user",  // Có thể thay bằng tên thật sau này
+          text: messageText,
+          timestamp: Date.now()
+        };
+
+        // Lưu tin nhắn vào Firebase
+        database.ref("messages").push(messageData);
+
+        // Phát tin nhắn qua PubNub
+        pubnub.publish({
+          channel: "chat",
+          message: messageData
+        }, function(status, response) {
+          if (status.error) {
+            console.error("Lỗi gửi tin nhắn qua PubNub:", status);
+          }
+        });
+
+        messageInput.value = "";
+      }
+      document.getElementById("send-message").addEventListener("click", sendMessage);
+
+      /********* Hàm hiển thị tin nhắn với hiệu ứng (Anime.js) *********/
+      function renderMessage(sender, text) {
+        var messageElem = document.createElement("div");
+        messageElem.textContent = sender + ": " + text;
+        messageElem.style.opacity = 0;
+        messageElem.style.transform = "translateY(-20px)";
+        document.getElementById("messages").appendChild(messageElem);
+
+        anime({
+          targets: messageElem,
+          opacity: [0, 1],
+          translateY: [-20, 0],
+          easing: "easeOutExpo",
+          duration: 600
+        });
+      }
+      // Lắng nghe tin nhắn mới từ Firebase
+      database.ref("messages").on("child_added", function(snapshot) {
+        var msg = snapshot.val();
+        renderMessage(msg.sender, msg.text);
+      });
+
+      /********* Hàm tải danh sách người dùng từ Firebase *********/
+      // Giả sử bạn có bảng "users" trong Firebase chứa danh sách người dùng
+      function loadUserList() {
+        database.ref("users").on("value", function(snapshot) {
+          var users = snapshot.val() || {};
+          var userListElem = document.getElementById("user-list");
+          userListElem.innerHTML = "";
+          for (var uid in users) {
+            var li = document.createElement("li");
+            li.textContent = users[uid].email || uid;
+            userListElem.appendChild(li);
+          }
+        });
+      }
+      loadUserList();
+
+      /********* Hàm hiển thị Cài đặt & Tài khoản với anime.js *********/
+      function showSettings() {
+        var settingsElem = document.getElementById("settings");
+        var overlayElem = document.getElementById("overlay");
+        overlayElem.style.display = "block";
+        settingsElem.style.display = "block";
+
+        anime({
+          targets: "#settings",
+          opacity: [0, 1],
+          translateY: [-50, 0],
+          easing: "easeOutExpo",
+          duration: 500
+        });
+
+        // Cập nhật thông tin người dùng (ví dụ, từ Auth)
+        document.getElementById("current-user").textContent = "user@example.com";
+      }
+      function closeSettings() {
+        var settingsElem = document.getElementById("settings");
+        var overlayElem = document.getElementById("overlay");
+        anime({
+          targets: "#settings",
+          opacity: [1, 0],
+          translateY: [0, -50],
+          easing: "easeInExpo",
+          duration: 500,
+          complete: function() {
+            settingsElem.style.display = "none";
+            overlayElem.style.display = "none";
+          }
+        });
+      }
+
   </script>
 </body>
 </html>
