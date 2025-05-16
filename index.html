@@ -909,7 +909,63 @@ function appendMessage(message) {
       }
 
 // Hiển thị danh sách người dùng
+        userStatusRef.set({
+          state: "online",
+          last_changed: firebase.database.ServerValue.TIMESTAMP
+        });
+      });
+    });
 
+    /******************** PHẦN 4: Hàm cập nhật giao diện người dùng ********************/
+    function updateUserUI(userId, nickname, status) {
+      var list = document.getElementById("user-list");
+      var userItem = document.getElementById("user-" + userId);
+
+      // Nếu phần tử chưa tồn tại, tạo mới
+      if (!userItem) {
+        userItem = document.createElement("li");
+        userItem.id = "user-" + userId;
+        userItem.className = "user-item";
+        
+        // Tạo dot hiển thị trạng thái
+        var statusDot = document.createElement("span");
+        statusDot.className = "status-dot " + (status === "online" ? "online" : "offline");
+        statusDot.id = "dot-" + userId;
+        
+        // Tạo text node cho nickname
+        var textNode = document.createTextNode(nickname);
+        
+        // Ghép các thành phần và thêm vào danh sách
+        userItem.appendChild(statusDot);
+        userItem.appendChild(textNode);
+        list.appendChild(userItem);
+      } else {
+        // Nếu đã tạo, chỉ cập nhật lại trạng thái (màu sắc của dot)
+        var statusDot = document.getElementById("dot-" + userId);
+        statusDot.className = "status-dot " + (status === "online" ? "online" : "offline");
+      }
+    }
+
+    /******************** PHẦN 5: Lắng nghe và cập nhật trạng thái từ Firebase ********************/
+    // Tham chiếu đến node chứa trạng thái của tất cả người dùng
+    var statusRef = database.ref('/status');
+    
+    // Lắng nghe khi có user mới được thêm vào
+    statusRef.on("child_added", function(snapshot) {
+      var userId = snapshot.key;
+      var statusData = snapshot.val();
+      var nickname = userId;  // Thay thế bằng dữ liệu thật nếu có.
+      updateUserUI(userId, nickname, statusData.state);
+    });
+    
+    // Lắng nghe khi trạng thái của user thay đổi
+    statusRef.on("child_changed", function(snapshot) {
+      var userId = snapshot.key;
+      var statusData = snapshot.val();
+      var nickname = userId;
+      updateUserUI(userId, nickname, statusData.state);
+    });
+          
   </script>
 </body>
 </html>
