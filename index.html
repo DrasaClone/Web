@@ -266,6 +266,30 @@
         z-index: 900;
       }
 
+
+  .user-list {
+    list-style: none;
+    padding: 0;
+  }
+  .user-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+    display: inline-block;
+  }
+  .online {
+    background-color: green;
+  }
+  .offline {
+    background-color: red;
+  }
+
   </style>
 </head>
 <body>
@@ -275,7 +299,7 @@
     <div class="nav">
       <button class="nav-btn active" data-target="chat-section">Chat</button>
       <button class="nav-btn" data-target="forum-section">Forum</button>
-      <button class="nav-btn" data-target="threads-section">Private Chat</button>
+      <button class="nav-btn" data-target="threads-section">User List</button>
       <button class="nav-btn" data-target="social-section">Mạng Xã Hội</button>
     </div>
   </header>
@@ -353,35 +377,7 @@
   
   <!-- Threads Section -->
   <div class="section threads-section" id="threads-section" style="display: none;">
-    <h2>Private Chat</h2>
-    <!-- Sidebar: Danh sách người dùng và nút cài đặt -->
-    <div id="sidebar">
-      <h3>Danh sách người dùng</h3>
-      <ul id="user-list">
-        <!-- Danh sách người dùng sẽ được tải từ Firebase -->
-      </ul>
-      <hr />
-      <button onclick="showSettings()">Cài đặt & Tài khoản</button>
-    </div>
-
-    <!-- Phần chính: Khu vực tin nhắn và bộ điều khiển chat -->
-    <div id="main">
-      <div id="messages">
-        <!-- Tin nhắn sẽ hiển thị tại đây -->
-      </div>
-      <div id="chat-controls">
-        <input type="text" id="message-input" placeholder="Nhập tin nhắn..." />
-        <button id="send-message">Gửi</button>
-      </div>
-    </div>
-
-    <!-- Overlay và cửa sổ Cài đặt/Tài khoản -->
-    <div id="overlay"></div>
-    <div id="settings">
-      <h3>Cài đặt & Tài khoản</h3>
-      <p>Tài khoản: <span id="current-user">Chưa đăng nhập</span></p>
-      <button onclick="closeSettings()">Đóng</button>
-    </div>
+    <h2>UserList</h2>
   </div>
   
   <!-- Social Network Section -->
