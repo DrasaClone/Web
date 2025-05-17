@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Nền tảng Chat Realtime</title>
-  <meta name="description" content="Nền tảng Chat Realtime tích hợp chat, forum, private chat, mạng xã hội và phần trò chơi với Firebase, PubNub, Cloudinary và Anime.js.">
+  <title>Nền tảng Chat Realtime - Phiên bản Nâng Cấp Toàn Diện</title>
+  <meta name="description" content="Nền tảng Chat Realtime tích hợp chat, forum, private chat, mạng xã hội và trò chơi với Firebase, PubNub, Cloudinary và Anime.js.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <!-- Firebase JS SDK -->
@@ -134,7 +134,7 @@
     }
     .progress-circle circle {
       fill: none;
-      stroke-width: 12;
+      stroke-width: 12px;
       stroke-linecap: round;
     }
     .progress-circle .bg {
@@ -155,7 +155,7 @@
       font-weight: bold;
     }
     
-    /* Chat Window với màu chữ được thay đổi thành đen */
+    /* Chat Window (màu chữ thay đổi thành đen) */
     #chat-window {
       border: 1px solid rgba(255,255,255,0.5);
       height: 300px;
@@ -233,11 +233,34 @@
       border-bottom: 1px dotted #ccc;
     }
     
-    /* Phần trò chơi */
-    .game-container iframe {
-      width: 100%;
-      height: 500px;
+    /* PHẦN PRIVATE CHAT: Danh sách người dùng có presence và typing */
+    #private-chat-user-list {
+      margin-bottom: 10px;
+      padding: 10px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 5px;
+    }
+    .private-chat-user-item {
+      padding: 5px;
+      border-bottom: 1px solid #ccc;
+      cursor: pointer;
+    }
+    .private-chat-user-item:hover {
+      background: rgba(0,0,0,0.1);
+    }
+    /* Đồng thời hiển thị tên user hiện chọn để chat riêng */
+    #private-chat-selected-indicator {
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    
+    /* PHẦN TRÒ CHƠI: Hiển thị nút chuyển hướng sang các web trò chơi */
+    .game-buttons button {
+      margin: 5px;
+      padding: 8px 16px;
+      border-radius: 5px;
       border: none;
+      cursor: pointer;
     }
     
     /* Facebook comments container */
@@ -250,7 +273,7 @@
       max-width: 600px;
       color: #000;
     }
-
+    
     /* Toast Notifications */
     #toast-container {
       position: fixed;
@@ -277,7 +300,7 @@
     <h1>Nền tảng Chat Realtime</h1>
     <button id="theme-switcher" class="theme-switcher">Chuyển đổi chủ đề nhanh</button>
     <div class="nav">
-      <!-- Các nút điều hướng -->
+      <!-- Các nút định hướng -->
       <button class="nav-btn active" data-target="chat-section">Chat</button>
       <button class="nav-btn" data-target="forum-section">Forum</button>
       <button class="nav-btn" data-target="private-chat-section">Private Chat</button>
@@ -288,7 +311,7 @@
     </div>
   </header>
   
-  <!-- Loading overlay -->
+  <!-- Loading Overlay -->
   <div id="loading-overlay" class="loading-overlay">
     <h1>Loading...</h1>
     <div class="progress-circle" data-percentage="75">
@@ -361,13 +384,17 @@
   <!-- Private Chat Section -->
   <div class="section private-chat-section" id="private-chat-section" style="display: none;">
     <h2>Private Chat</h2>
+    <!-- Danh sách người dùng có presence (green/red) và typing indicator -->
+    <div id="private-chat-user-list"></div>
+    <!-- Hiển thị thông tin về người dùng được chọn để chat riêng -->
+    <div id="private-chat-selected-indicator"></div>
+    <!-- Khu vực lịch sử chat riêng -->
+    <div id="pm-chat-window" style="min-height:300px; overflow-y:auto;"></div>
     <div class="private-chat-input">
-      <input type="text" id="pm-recipient" placeholder="Người nhận (nickname)">
       <input type="text" id="pm-message" placeholder="Nhập tin nhắn riêng...">
       <button id="send-pm-btn">Gửi tin riêng</button>
       <button id="upload-pm-btn">Upload Image</button>
     </div>
-    <div id="pm-chat-window" style="min-height:300px; overflow-y:auto;"></div>
   </div>
   
   <!-- Social Network Section -->
@@ -381,15 +408,14 @@
     <div id="social-posts"></div>
   </div>
   
-  <!-- Game Section -->
+  <!-- Game Section: Các nút chuyển hướng sang web trò chơi -->
   <div class="section game-section" id="game-section" style="display: none;">
     <h2>Trò chơi</h2>
-    <p>Bạn có thể chơi trò chơi bên dưới hoặc click vào đường link để mở cửa sổ trò chơi.</p>
-    <div class="game-container">
-      <!-- Gắn đường link trò chơi thông qua iframe -->
-      <iframe src="https://example-game-link.com"></iframe>
+    <div class="game-buttons">
+      <button onclick="window.open('https://game1.example.com','_blank')">Game 1</button>
+      <button onclick="window.open('https://game2.example.com','_blank')">Game 2</button>
+      <button onclick="window.open('https://game3.example.com','_blank')">Game 3</button>
     </div>
-    <p>Nếu không thể hiển thị trò chơi, hãy <a href="https://example-game-link.com" target="_blank">click vào đây</a>.</p>
   </div>
   
   <!-- Profile Section -->
@@ -424,15 +450,21 @@
   
   <!-- Scripts -->
   <script>
+    // Global variables cho private chat
+    var currentPrivateChatUser = null; // uid của người dùng được chọn để chat riêng
+    var currentUser = null; // thông tin người dùng hiện tại sau khi đăng nhập
+    var currentConversationListener = null; // dùng để gỡ listener khi đổi private chat
+    var typingTimeout; // dùng để debounce update typing
+    
     /* -------------------- HÀM HỖ TRỢ -------------------- */
-    // Hàm chuyển đổi ký tự đặc biệt thành dạng an toàn để tránh XSS
+    // Saniize đầu vào
     function sanitize(str) {
       var temp = document.createElement('div');
       temp.textContent = str;
       return temp.innerHTML;
     }
     
-    // Hệ thống Toast cho thông báo thay cho alert()
+    // Hệ thống Toast thông báo
     function showToast(message) {
       const container = document.getElementById("toast-container");
       const toast = document.createElement("div");
@@ -447,19 +479,19 @@
       }, 3000);
     }
     
-    // Hàm format thời gian
+    // Format thời gian
     function formatTime(timestamp) {
       return new Date(timestamp).toLocaleString();
     }
     
-    // Hàm ghi lại mọi thao tác vào node "logs" của Firebase
+    // Ghi log hành động vào node "logs"
     function logEvent(eventType, details) {
       var logObj = {
         eventType: eventType,
         details: details,
         timestamp: Date.now(),
-        user: firebase.auth().currentUser 
-              ? (firebase.auth().currentUser.displayName || firebase.auth().currentUser.email)
+        user: currentUser 
+              ? (currentUser.displayName || currentUser.email)
               : "Anonymous"
       };
       firebase.database().ref('logs').push(logObj);
@@ -492,14 +524,14 @@
     pubnub.addListener({
       message: function(event) {
         var message = event.message;
-        if(message.private){
+        if(message.private) {
           appendPrivateMessage(message);
         } else {
           appendMessage(message);
         }
       },
       presence: function(event) {
-        updatePresence();
+        // Ví dụ: hiển thị thông báo online/offline
         if(event.action === "join") {
           appendSystemMessage(sanitize(event.uuid) + " đã online");
         } else if(event.action === "leave" || event.action === "timeout") {
@@ -530,7 +562,6 @@
     
     /* -------------------- CHUYỂN ĐỔI GIỮA CÁC TRANG -------------------- */
     var navButtons = document.querySelectorAll('.nav-btn');
-    // Cập nhật querySelector để bao gồm .game-section
     navButtons.forEach(function(btn) {
       btn.addEventListener('click', function() {
         var targetId = this.getAttribute('data-target');
@@ -636,12 +667,12 @@
       }
     }
     
-    /* -------------------- XỬ LÝ TIN NHẮN & HIỆU ỨNG -------------------- */
+    /* -------------------- XỬ LÝ TIN NHẮN PUBLIC -------------------- */
     function appendMessage(message) {
       var senderName = sanitize(message.sender);
       var chatWindow = document.getElementById("chat-window");
       var msgDiv = document.createElement("div");
-      var myIdentifier = window.userNickname || (firebase.auth().currentUser ? (firebase.auth().currentUser.displayName || firebase.auth().currentUser.email) : "Anonymous");
+      var myIdentifier = window.userNickname || (currentUser ? (currentUser.displayName || currentUser.email) : "Anonymous");
       var messageClass = (senderName === myIdentifier) ? "mine" : "other";
       msgDiv.className = "message " + messageClass;
       var content = "<strong>" + senderName + ":</strong><br>" + sanitize(message.text || "");
@@ -679,6 +710,8 @@
       });
     }
     
+    /* -------------------- XỬ LÝ PRIVATE CHAT -------------------- */
+    // Hàm hiển thị tin nhắn private chat
     function appendPrivateMessage(message) {
       var pmWindow = document.getElementById("pm-chat-window");
       var msgDiv = document.createElement("div");
@@ -702,144 +735,128 @@
       });
     }
     
-    /* ---------- CHỈNH SỬA PHẦN CHAT: LẤY LẠI LỊCH SỬ TIN NHẮN ---------- */
-    firebase.database().ref('messages').on('child_added', function(snapshot) {
-      var message = snapshot.val();
-      appendMessage(message);
-    });
-    
-    /* -------------------- GỬI TIN NHẮN CHAT & LOG -------------------- */
-    document.getElementById("send-btn").addEventListener("click", function() {
-      var input = document.getElementById("message-input");
-      var text = input.value.trim();
-      if (text === "") return;
-      var user = firebase.auth().currentUser;
-      var senderName = window.userNickname || (user ? (user.displayName || user.email || user.phoneNumber) : "Anonymous");
-      var message = { sender: senderName, text: text, timestamp: Date.now() };
-      pubnub.publish({ channel: 'chat', message: message });
-      firebase.database().ref('messages').push(message);
-      input.value = "";
-      logEvent("chat-send", "Gửi tin chat: " + text);
-    });
-    
-    document.getElementById("upload-chat-btn").addEventListener("click", function() {
-      cloudinary.createUploadWidget({
-          cloudName: 'demo',
-          uploadPreset: 'ml_default'
-        }, function(error, result) {
-          if(!error && result && result.event === "success") {
-            var url = result.info.secure_url;
-            var user = firebase.auth().currentUser;
-            var senderName = window.userNickname || (user ? (user.displayName || user.email || user.phoneNumber) : "Anonymous");
-            var message = { sender: senderName, image: url, timestamp: Date.now() };
-            pubnub.publish({ channel: 'chat', message: message });
-            firebase.database().ref('messages').push(message);
-            logEvent("chat-upload", "Upload image cho chat: " + url);
-          }
-        }).open();
-    });
-    
-    /* -------------------- PHẦN FORUM: ĐĂNG BÀI, LIKE, COMMENT & LOG -------------------- */
-    document.getElementById("submit-forum-btn").addEventListener("click", function() {
-      var forumMsg = document.getElementById("forum-message").value.trim();
-      if(forumMsg === "") return;
-      var senderName = window.userNickname || "Anonymous";
-      var forumPost = { sender: senderName, text: forumMsg, timestamp: Date.now(), likeCount: 0 };
-      firebase.database().ref('forumPosts').push(forumPost);
-      document.getElementById("forum-message").value = "";
-      logEvent("forum-post", "Đăng bài forum: " + forumMsg);
-    });
-    
-    document.getElementById("upload-forum-btn").addEventListener("click", function() {
-      cloudinary.createUploadWidget({
-          cloudName: 'demo',
-          uploadPreset: 'ml_default'
-        }, function(error, result) {
-          if(!error && result && result.event === "success") {
-            var url = result.info.secure_url;
-            var forumMsgField = document.getElementById("forum-message");
-            forumMsgField.value = forumMsgField.value + " <img src='" + url + "' alt='Image'/>";
-            logEvent("forum-upload", "Upload image cho forum: " + url);
-          }
-        }).open();
-    });
-    
-    firebase.database().ref('forumPosts').on('child_added', function(snapshot) {
-      var postKey = snapshot.key;
-      var post = snapshot.val();
-      if(typeof post.likeCount === "undefined") post.likeCount = 0;
-      var forumPostsDiv = document.getElementById('forum-posts');
-      var postDiv = document.createElement('div');
-      postDiv.className = "post-card";
-      postDiv.id = "forum-post-" + postKey;
-      var content = "<strong>" + sanitize(post.sender) + ":</strong><br>" + sanitize(post.text || "");
-      if(post.image) {
-        content += "<br><img src='" + post.image + "' alt='Forum Image'/>";
+    // Hàm load lịch sử private chat của một cuộc trò chuyện (dựa trên convId)
+    function loadPrivateChat(convId) {
+      // Xóa nội dung cũ
+      document.getElementById("pm-chat-window").innerHTML = "";
+      // Nếu có listener trước đó, gỡ bỏ nó
+      if(currentConversationListener) {
+        currentConversationListener.off();
       }
-      if(post.timestamp) {
-        content += "<br><small>" + formatTime(post.timestamp) + "</small>";
-      }
-      content += "<br><button class='like-btn' data-post-id='" + postKey + "'>Like (<span class='like-count'>" + post.likeCount + "</span>)</button>";
-      content += " <button class='show-comment-btn' data-post-id='" + postKey + "'>Show Comments</button>";
-      content += "<div class='comment-section' id='comment-section-" + postKey + "' style='display:none;'>";
-      content += "<input type='text' class='comment-input' placeholder='Write a comment...'>";
-      content += "<button class='submit-comment-btn' data-post-id='" + postKey + "'>Comment</button>";
-      content += "<div class='comment-list' id='comment-list-" + postKey + "'></div>";
-      content += "</div>";
-      postDiv.innerHTML = content;
-      forumPostsDiv.appendChild(postDiv);
-      attachForumCommentsListener(postKey);
-    });
-    
-    document.getElementById("forum-posts").addEventListener("click", function(e) {
-      if(e.target && e.target.classList.contains("like-btn")) {
-        var postId = e.target.getAttribute("data-post-id");
-        var likeRef = firebase.database().ref("forumPosts/" + postId + "/likeCount");
-        likeRef.transaction(function(currentLikes) {
-          return (currentLikes || 0) + 1;
-        });
-        logEvent("forum-like", "Like bài forum " + postId);
-      }
-      if(e.target && e.target.classList.contains("show-comment-btn")) {
-        var postId = e.target.getAttribute("data-post-id");
-        var commentSection = document.getElementById("comment-section-" + postId);
-        commentSection.style.display = (commentSection.style.display === "none") ? "block" : "none";
-      }
-    });
-    
-    document.getElementById("forum-posts").addEventListener("click", function(e) {
-      if(e.target && e.target.classList.contains("submit-comment-btn")) {
-        var postId = e.target.getAttribute("data-post-id");
-        var parent = e.target.parentNode;
-        var commentInput = parent.querySelector(".comment-input");
-        var commentText = commentInput.value.trim();
-        if(commentText === "") return;
-        var commentObj = {
-          sender: window.userNickname || (firebase.auth().currentUser ? (firebase.auth().currentUser.displayName || firebase.auth().currentUser.email) : "Anonymous"),
-          text: commentText,
-          timestamp: Date.now()
-        };
-        firebase.database().ref("forumComments/" + postId).push(commentObj);
-        commentInput.value = "";
-        logEvent("forum-comment", "Comment bài forum " + postId + ": " + commentText);
-      }
-    });
-    
-    function attachForumCommentsListener(postId) {
-      firebase.database().ref("forumComments/" + postId).on("child_added", function(snapshot) {
-        var comment = snapshot.val();
-        var commentListDiv = document.getElementById("comment-list-" + postId);
-        if(commentListDiv) {
-          var commentDiv = document.createElement("div");
-          commentDiv.className = "comment";
-          commentDiv.innerHTML = "<strong>" + sanitize(comment.sender) + ":</strong> " + sanitize(comment.text) +
-                                 "<br><small>" + formatTime(comment.timestamp) + "</small>";
-          commentListDiv.appendChild(commentDiv);
-        }
+      currentConversationListener = firebase.database().ref("privateChats/" + convId);
+      currentConversationListener.on("child_added", function(snapshot) {
+        var message = snapshot.val();
+        appendPrivateMessage(message);
       });
     }
     
-    /* -------------------- PHẦN MẠNG XÃ HỘI: ĐĂNG BÀI, LIKE, COMMENT & LOG -------------------- */
+    // Hàm chọn người dùng để chat riêng
+    function selectPrivateChat(uid) {
+      currentPrivateChatUser = uid;
+      // Hiển thị tên người dùng được chọn và cập nhật typing indicator nếu có
+      firebase.database().ref("users/" + uid).once("value").then(function(snapshot) {
+        var userData = snapshot.val();
+        var indicator = "";
+        if(userData.typing) {
+          indicator = " (Đang nhập...)";
+        }
+        document.getElementById("private-chat-selected-indicator").innerHTML = userData.displayName + indicator;
+      });
+      
+      // Xác định convId dựa trên uid hiện tại và người được chọn
+      if(currentUser) {
+        var convId = (currentUser.uid < uid)
+                    ? currentUser.uid + "_" + uid
+                    : uid + "_" + currentUser.uid;
+        loadPrivateChat(convId);
+      }
+    }
+    
+    // Cập nhật danh sách người dùng trong Private Chat (hiển thị presence)
+    firebase.database().ref("users").on("value", function(snapshot) {
+      let userListHTML = "";
+      snapshot.forEach(function(childSnapshot) {
+        var userData = childSnapshot.val();
+        var uid = childSnapshot.key;
+        // Hiển thị: chấm xanh nếu online, đỏ nếu offline; nếu typing → chữ "Đang nhập..."
+        var dotColor = userData.status === "online" ? "green" : "red";
+        userListHTML += `<div class="private-chat-user-item" data-uid="${uid}" onclick="selectPrivateChat('${uid}')">`;
+        userListHTML += `<span style="display:inline-block; width:10px; height:10px; background:${dotColor}; border-radius:50%; margin-right:5px;"></span>`;
+        userListHTML += userData.displayName;
+        if(userData.typing) {
+          userListHTML += ` <span style="font-size:0.8rem; color:blue;">Đang nhập...</span>`;
+        }
+        userListHTML += `</div>`;
+      });
+      document.getElementById("private-chat-user-list").innerHTML = userListHTML;
+    });
+    
+    // Khi người dùng đang gõ tin nhắn trong private chat, cập nhật trạng thái typing
+    document.getElementById("pm-message").addEventListener("input", function() {
+      if(currentUser) {
+        firebase.database().ref("users/" + currentUser.uid).update({ typing: true });
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(function(){
+          firebase.database().ref("users/" + currentUser.uid).update({ typing: false });
+        }, 1000);
+      }
+    });
+    
+    // Gửi tin nhắn private chat
+    document.getElementById("send-pm-btn").addEventListener("click", function() {
+      if(!currentPrivateChatUser) {
+        showToast("Vui lòng chọn người dùng để chat riêng!");
+        return;
+      }
+      var input = document.getElementById("pm-message");
+      var text = input.value.trim();
+      if(text === "") return;
+      if(currentUser) {
+        var senderName = currentUser.displayName || currentUser.email;
+        // Xác định convId
+        var convId = (currentUser.uid < currentPrivateChatUser)
+                    ? currentUser.uid + "_" + currentPrivateChatUser
+                    : currentPrivateChatUser + "_" + currentUser.uid;
+        var message = { sender: senderName, text: text, timestamp: Date.now() };
+        firebase.database().ref("privateChats/" + convId).push(message);
+        input.value = "";
+        firebase.database().ref("users/" + currentUser.uid).update({ typing: false });
+        logEvent("private-chat-send", "Gửi tin private chat: " + text);
+      }
+    });
+    
+    // Upload image cho private chat
+    document.getElementById("upload-pm-btn").addEventListener("click", function() {
+      if(!currentPrivateChatUser) {
+        showToast("Vui lòng chọn người dùng để chat riêng!");
+        return;
+      }
+      cloudinary.createUploadWidget({
+          cloudName: 'demo',
+          uploadPreset: 'ml_default'
+        }, function(error, result) {
+          if(!error && result && result.event === "success") {
+            var url = result.info.secure_url;
+            if(currentUser) {
+              var senderName = currentUser.displayName || currentUser.email;
+              var convId = (currentUser.uid < currentPrivateChatUser)
+                          ? currentUser.uid + "_" + currentPrivateChatUser
+                          : currentPrivateChatUser + "_" + currentUser.uid;
+              var message = { sender: senderName, image: url, timestamp: Date.now() };
+              firebase.database().ref("privateChats/" + convId).push(message);
+              logEvent("private-chat-upload", "Upload image cho private chat: " + url);
+            }
+          }
+        }).open();
+    });
+    
+    /* -------------------- XỬ LÝ SOCIAL NETWORK -------------------- */
+    function updateSocialPostLike(postId) {
+      firebase.database().ref("socialPosts/" + postId + "/likeCount").transaction(function(currentLikes) {
+        return (currentLikes || 0) + 1;
+      });
+    }
+    
     document.getElementById("submit-social-btn").addEventListener("click", function() {
       var socialMsg = document.getElementById("social-message").value.trim();
       if(socialMsg === "") return;
@@ -894,10 +911,7 @@
     document.getElementById("social-posts").addEventListener("click", function(e) {
       if(e.target && e.target.classList.contains("social-like-btn")) {
         var postId = e.target.getAttribute("data-post-id");
-        var likeRef = firebase.database().ref("socialPosts/" + postId + "/likeCount");
-        likeRef.transaction(function(currentLikes) {
-          return (currentLikes || 0) + 1;
-        });
+        updateSocialPostLike(postId);
         logEvent("social-like", "Like bài xã hội " + postId);
       }
       if(e.target && e.target.classList.contains("social-show-comment-btn")) {
@@ -912,7 +926,7 @@
         var commentText = commentInput.value.trim();
         if(commentText === "") return;
         var commentObj = {
-          sender: window.userNickname || (firebase.auth().currentUser ? (firebase.auth().currentUser.displayName || firebase.auth().currentUser.email) : "Anonymous"),
+          sender: window.userNickname || (currentUser ? (currentUser.displayName || currentUser.email) : "Anonymous"),
           text: commentText,
           timestamp: Date.now()
         };
@@ -936,13 +950,12 @@
       });
     }
     
-    /* -------------------- PHẦN PROFILE & LOG -------------------- */
+    /* -------------------- PHẦN PROFILE & SETTINGS -------------------- */
     function updateProfileSection() {
       var profileInfoDiv = document.getElementById("profile-info");
-      var user = firebase.auth().currentUser;
-      if(user) {
-        var infoHTML = "<p><strong>Email:</strong> " + (user.email || "Không có") + "</p>";
-        infoHTML += "<p><strong>Tên hiển thị:</strong> " + (user.displayName || "Không có") + "</p>";
+      if(currentUser) {
+        var infoHTML = "<p><strong>Email:</strong> " + (currentUser.email || "Không có") + "</p>";
+        infoHTML += "<p><strong>Tên hiển thị:</strong> " + (currentUser.displayName || "Không có") + "</p>";
         infoHTML += "<p><strong>Nickname:</strong> " + (window.userNickname || "Chưa đặt") + "</p>";
         profileInfoDiv.innerHTML = infoHTML;
       } else {
@@ -960,11 +973,6 @@
       logEvent("profile-update", "Cập nhật nickname: " + newNickname);
     });
     
-    firebase.auth().onAuthStateChanged(function(user) {
-      updateProfileSection();
-    });
-    
-    /* -------------------- PHẦN SETTINGS -------------------- */
     document.getElementById("theme-select").addEventListener("change", function() {
       var selectedTheme = this.value;
       document.body.className = selectedTheme;
@@ -977,12 +985,28 @@
       document.body.className = themeSelect.value = themeSelect.options[nextThemeIndex].value;
     });
     
-    /* -------------------- PHẦN ĐĂNG NHẬP & LOG -------------------- */
+    /* -------------------- PHẦN ĐĂNG NHẬP -------------------- */
+    firebase.auth().onAuthStateChanged(function(user) {
+      if(user) {
+        currentUser = user;
+        // Cập nhật thông tin người dùng trong node "users"
+        var userRef = firebase.database().ref("users/" + user.uid);
+        userRef.set({
+          displayName: user.displayName || user.email,
+          status: "online",
+          typing: false
+        });
+        userRef.onDisconnect().update({ status: "offline", typing: false });
+      }
+      updateProfileSection();
+    });
+    
     document.getElementById("google-login").addEventListener("click", function() {
       var provider = new firebase.auth.GoogleAuthProvider();
       firebase.auth().signInWithPopup(provider)
         .then(function(result) {
           showToast("Đăng nhập thành công: " + result.user.displayName);
+          currentUser = result.user;
           updateProfileSection();
           logEvent("login", "Đăng nhập với Google: " + result.user.displayName);
         })
@@ -998,6 +1022,7 @@
       firebase.auth().signInWithEmailAndPassword(email, password)
         .then(function(userCredential) {
           showToast("Đăng nhập thành công với Email: " + userCredential.user.email);
+          currentUser = userCredential.user;
           updateProfileSection();
           logEvent("login", "Đăng nhập với Email: " + userCredential.user.email);
         })
@@ -1006,6 +1031,7 @@
             firebase.auth().createUserWithEmailAndPassword(email, password)
               .then(function(userCredential) {
                 showToast("Tạo tài khoản Email thành công: " + userCredential.user.email);
+                currentUser = userCredential.user;
                 updateProfileSection();
                 logEvent("signup", "Tạo tài khoản Email: " + userCredential.user.email);
               })
@@ -1040,6 +1066,7 @@
       window.confirmationResult.confirm(otpCode)
         .then(function(result) {
           showToast("Xác thực số điện thoại thành công: " + result.user.phoneNumber);
+          currentUser = result.user;
           updateProfileSection();
           logEvent("otp-verify", "Xác thực OTP thành công cho số: " + result.user.phoneNumber);
         })
@@ -1070,8 +1097,6 @@
     });
     
     // (Có thể bổ sung thêm push notifications, caching offline, ...)
-
-    // (Hàm updatePresence có thể được định nghĩa thêm nếu cần để quản lý danh sách online)
   </script>
 </body>
 </html>
