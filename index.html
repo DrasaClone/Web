@@ -1027,8 +1027,16 @@
     
     /* -------------------- THÔNG BÁO -------------------- */
     function showAlert() {
-      showToast("Chào bạn! Dự án đang được phát triển nên có thể xảy ra lỗi. Hãy sử dụng một cách văn minh và tích cực. Cảm ơn bạn đã tin dùng dịch vụ của chúng tôi.");
+      showToast("Chào bạn! Đây là thông báo về trang web của chúng tôi Một số thông báo về trang web như sau: Đây là một dự án đang được phát triển nên đôi lúc sẽ xảy ra lỗi Khi có lỗi xảy ra, chúng tôi sẽ cố gắng khắc phục sớm nhất có thể Một số cách để xử lý lỗi của chúng tôi như: Tải lại trang web Nếu trang vẫn lỗi, bạn có thể truy cập vào lúc khác Một số điều người dùng cần lưu ý như: Nhắn tin văn minh, nhắn với mục đích tốt vì trang không có kiểm duyệt, vì vậy chúng tôi sẽ cố gắng để kiểm soát để người dùng có một trải nghiệm, môi trường giao tiếp tốt nhất Nếu người dùng sử dụng các mục đích không tốt thì chúng tôi có thể cấm tài khoản Trân trọng cảm ơn người dùng đã tin tưởng sử dụng dịch vụ của chúng tôi");
     }
+
+    function showAlert() {
+      alert("Chào bạn! Đây là thông báo về trang web của chúng tôi Một số thông báo về trang web như sau: Đây là một dự án đang được phát triển nên đôi lúc sẽ xảy ra lỗi Khi có lỗi xảy ra, chúng tôi sẽ cố gắng khắc phục sớm nhất có thể Một số cách để xử lý lỗi của chúng tôi như: Tải lại trang web Nếu trang vẫn lỗi, bạn có thể truy cập vào lúc khác Một số điều người dùng cần lưu ý như: Nhắn tin văn minh, nhắn với mục đích tốt vì trang không có kiểm duyệt, vì vậy chúng tôi sẽ cố gắng để kiểm soát để người dùng có một trải nghiệm, môi trường giao tiếp tốt nhất Nếu người dùng sử dụng các mục đích không tốt thì chúng tôi có thể cấm tài khoản Trân trọng cảm ơn người dùng đã tin tưởng sử dụng dịch vụ của chúng tôi");
+    }
+
+    // Hiển thị thông báo khi trang được tải
+    window.onload = showAlert;
+    
     
     // Loading Animation cho progress-circle
     document.querySelectorAll('.progress-circle').forEach(el => {
