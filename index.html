@@ -292,7 +292,21 @@
   <div class="section social-network-section" id="social-section" style="display: none;">
     <h2>Mạng Xã Hội</h2>
     <div id="social-content">
-      <p>Chức năng kết nối mạng xã hội sẽ hiển thị ở đây.</p>
+      <!-- Bắt đầu tích hợp Mạng Xã Hội Demo -->
+      <div id="social-app">
+        <h3>Mạng Xã Hội</h3>
+        <div id="login-social">
+          <input type="text" id="nickname-social" placeholder="Nhập nickname của bạn">
+          <button id="loginBtn-social">Đăng Nhập</button>
+        </div>
+        <div id="postArea-social" style="display:none;">
+          <textarea id="postContent-social" placeholder="Bạn muốn chia sẻ gì?"></textarea>
+          <input type="file" id="imageUpload-social" accept="image/*">
+          <button id="postBtn-social">Đăng bài</button>
+        </div>
+        <div id="feed-social"></div>
+      </div>
+      <!-- Kết thúc tích hợp -->
     </div>
   </div>
   
