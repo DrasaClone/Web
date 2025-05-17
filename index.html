@@ -795,7 +795,12 @@ function appendMessage(message) {
       });
     }
     pubnub.subscribe({ channels:['social-feed'] });
-    pubnub.addListener({ message: loadPostsSocial });
+pubnub.addListener({
+  message: function(event) {
+    loadPostsSocial();
+  }
+});
+
     window.addEventListener('load', loadPostsSocial);
     
     function showAlert() {
