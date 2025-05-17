@@ -25,10 +25,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&display=swap" rel="stylesheet">
   
   <!-- Facebook SDK -->
-  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v17.0"></script>
+  <script async defer crossorigin="anonymous"
+    src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v17.0">
+  </script>
   
   <style>
-    /* Các chủ đề */
+    /* Các chủ đề giao diện */
     body.theme-default {
       background: linear-gradient(135deg, #667eea, #764ba2);
       color: #fff;
@@ -87,7 +89,7 @@
       background: rgba(255,255,255,0.5);
     }
     
-    /* Section Styles chung */
+    /* Section chung */
     .section {
       border: 1px solid rgba(255,255,255,0.5);
       padding: 20px;
@@ -158,48 +160,46 @@
       font-weight: bold;
     }
     
-    /* Chat Window 2 cột */
-    #chat-window-container {
-      display: flex;
+    /* Chat Window: chỉ một khung hiển thị tin nhắn */
+    #chat-window {
       border: 1px solid rgba(255,255,255,0.5);
-      min-height: 300px;
-      margin: 10px 0;
-    }
-    #chat-window-others, #chat-window-mine {
-      width: 50%;
-      padding: 10px;
-      min-height: 300px;
+      height: 300px;
       overflow-y: auto;
+      padding: 10px;
+      margin: 10px 0;
+      background-color: rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
     }
-    #chat-window-others {
-      border-right: 1px solid #fff;
-    }
-    
-    /* Tin nhắn */
     .message {
       margin: 10px 0;
       padding: 10px;
       border-radius: 10px;
+      max-width: 80%;
       word-break: break-word;
-      max-width: 90%;
     }
-    /* Tin nhắn của tôi: căn lề phải, nền xanh lá nhạt */
+    /* Tin nhắn của "tôi": căn về bên phải, nền xanh lá nhạt */
     .message.mine {
-      background-color: #a8e6cf;
       align-self: flex-end;
+      background-color: #a8e6cf;
       text-align: right;
     }
-    /* Tin nhắn của người khác: căn lề trái, nền xanh dương nhạt */
+    /* Tin nhắn của người khác: căn về bên trái, nền xanh dương nhạt */
     .message.other {
-      background-color: #81d4fa;
       align-self: flex-start;
+      background-color: #81d4fa;
       text-align: left;
     }
-    .message small {
-      display: block;
-      font-size: 0.7rem;
-      margin-top: 5px;
-      color: #ccc;
+    /* Tin hệ thống thông báo online/offline */
+    .system-message {
+      align-self: center;
+      background-color: #ffe082;
+      color: #333;
+      font-style: italic;
+      padding: 5px;
+      border-radius: 5px;
+      max-width: 70%;
+      margin: 10px auto;
     }
     
     /* Card cho forum & social posts */
@@ -280,7 +280,7 @@
     </div>
   </div>
   
-  <!-- Chat Section: 2 cột tin nhắn và upload image -->
+  <!-- Chat Section: hiển thị tin nhắn trong 1 khung với thông báo online/offline -->
   <div class="section chat-section active-page" id="chat-section">
     <h2>Phòng Chat</h2>
     <div class="nickname-section">
@@ -291,10 +291,7 @@
       <h3>Người trực tuyến:</h3>
       <ul id="online-users-list"></ul>
     </div>
-    <div id="chat-window-container">
-      <div id="chat-window-others"></div>
-      <div id="chat-window-mine"></div>
-    </div>
+    <div id="chat-window"></div>
     <div class="chat-input">
       <input type="text" id="message-input" placeholder="Nhập tin nhắn...">
       <button id="send-btn">Gửi</button>
@@ -397,7 +394,6 @@
     pubnub.addListener({
       message: function(event) {
         var message = event.message;
-        // Nếu tin nhắn có thuộc tính private thì gửi về private chat
         if(message.private){
           appendPrivateMessage(message);
         } else {
@@ -406,18 +402,32 @@
       },
       presence: function(event) {
         updatePresence();
+        // Thông báo khi có người join/leave
+        if(event.action === "join") {
+          appendSystemMessage(event.uuid + " đã online");
+        } else if(event.action === "leave" || event.action === "timeout") {
+          appendSystemMessage(event.uuid + " đã offline");
+        }
       }
     });
     
     /* -------------------- HIỆU ỨNG TRÊN PAGE LOAD -------------------- */
     window.addEventListener('load', function() {
-      anime({ targets: '#login-section', opacity: [0, 1], translateY: [-20, 0], duration: 5000, easing: 'easeOutExpo' });
-      anime({ targets: '.active-page', opacity: [0, 1], translateY: [20, 0], duration: 5000, delay: 1000, easing: 'easeOutExpo' });
-    });
-    
-    /* -------------------- CHUYỂN ĐỔI CHỦ ĐỀ -------------------- */
-    document.getElementById("theme-switcher").addEventListener("click", function() {
-      document.body.classList.toggle("theme-dark");
+      anime({
+        targets: '#login-section',
+        opacity: [0, 1],
+        translateY: [-20, 0],
+        duration: 5000,
+        easing: 'easeOutExpo'
+      });
+      anime({
+        targets: '.active-page',
+        opacity: [0, 1],
+        translateY: [20, 0],
+        duration: 500,
+        delay: 1000,
+        easing: 'easeOutExpo'
+      });
     });
     
     /* -------------------- CHUYỂN ĐỔI GIỮA CÁC TRANG -------------------- */
@@ -453,33 +463,71 @@
       var randomTransition = Math.floor(Math.random() * 3);
       switch(randomTransition) {
         case 0:
-          anime({ targets: overlay, opacity: [0, 1], scale: [0.5, 1], duration: 500, easing: 'easeOutExpo',
+          anime({
+            targets: overlay,
+            opacity: [0, 1],
+            scale: [0.5, 1],
+            duration: 500,
+            easing: 'easeOutExpo',
             complete: function() {
               setTimeout(function() {
-                anime({ targets: overlay, opacity: [1, 0], duration: 500, easing: 'easeInExpo',
-                  complete: function() { overlay.style.display = "none"; callback(); }
+                anime({
+                  targets: overlay,
+                  opacity: [1, 0],
+                  duration: 500,
+                  easing: 'easeInExpo',
+                  complete: function() {
+                    overlay.style.display = "none";
+                    callback();
+                  }
                 });
               }, 300);
             }
           });
           break;
         case 1:
-          anime({ targets: overlay, translateY: [-100, 0], opacity: [0, 1], duration: 500, easing: 'easeOutExpo',
+          anime({
+            targets: overlay,
+            translateY: [-100, 0],
+            opacity: [0, 1],
+            duration: 500,
+            easing: 'easeOutExpo',
             complete: function() {
               setTimeout(function() {
-                anime({ targets: overlay, translateY: [0, 100], opacity: [1, 0], duration: 500, easing: 'easeInExpo',
-                  complete: function() { overlay.style.display = "none"; callback(); }
+                anime({
+                  targets: overlay,
+                  translateY: [0, 100],
+                  opacity: [1, 0],
+                  duration: 500,
+                  easing: 'easeInExpo',
+                  complete: function() {
+                    overlay.style.display = "none";
+                    callback();
+                  }
                 });
               }, 300);
             }
           });
           break;
         case 2:
-          anime({ targets: overlay, rotate: ['0deg', '360deg'], opacity: [0, 1], duration: 500, easing: 'easeOutExpo',
+          anime({
+            targets: overlay,
+            rotate: ['0deg', '360deg'],
+            opacity: [0, 1],
+            duration: 500,
+            easing: 'easeOutExpo',
             complete: function() {
               setTimeout(function() {
-                anime({ targets: overlay, rotate: ['360deg', '720deg'], opacity: [1, 0], duration: 500, easing: 'easeInExpo',
-                  complete: function() { overlay.style.display = "none"; callback(); }
+                anime({
+                  targets: overlay,
+                  rotate: ['360deg', '720deg'],
+                  opacity: [1, 0],
+                  duration: 500,
+                  easing: 'easeInExpo',
+                  complete: function() {
+                    overlay.style.display = "none";
+                    callback();
+                  }
                 });
               }, 300);
             }
@@ -493,46 +541,54 @@
       return new Date(timestamp).toLocaleString();
     }
     
-    /* -------------------- XỬ LÝ TIN NHẮN & HIỆU Ứng ANIME -------------------- */
+    /* -------------------- XỬ LÝ TIN NHẮN & HIỆU ỨNG ANIME -------------------- */
+    // Hiển thị tin nhắn của chat chung
     function appendMessage(message) {
       var senderName = message.sender;
-      var p = document.createElement("div");
-      p.className = "message " + ((window.userNickname && senderName === window.userNickname) ? "mine" : "other");
-      var content = "<strong>" + senderName + ":</strong><br>" + (message.text ? message.text : "");
-      if (message.image) {
-        content += "<br><img src='" + message.image + "' alt='Uploaded Image' style='max-width:100%; border-radius:5px;'/>";
-      }
-      if (message.timestamp) {
-        content += "<br><small>" + formatTime(message.timestamp) + "</small>";
-      }
-      p.innerHTML = content;
-      // Chia theo cột dựa vào sender
-      if(window.userNickname && senderName === window.userNickname) {
-        document.getElementById('chat-window-mine').appendChild(p);
-      } else {
-        document.getElementById('chat-window-others').appendChild(p);
-      }
-      // Cuộn tự động
-      document.getElementById('chat-window-mine').scrollTop = document.getElementById('chat-window-mine').scrollHeight;
-      document.getElementById('chat-window-others').scrollTop = document.getElementById('chat-window-others').scrollHeight;
-      anime({ targets: p, opacity: [0, 1], translateY: [20, 0], duration: 500, easing: 'easeOutExpo' });
-    }
-    
-    function appendPrivateMessage(message) {
-      var pmWindow = document.getElementById("pm-chat-window");
-      var p = document.createElement("div");
-      p.className = "message";
-      var content = "<strong>" + message.sender + " (riêng):</strong><br>" + (message.text ? message.text : "");
+      var chatWindow = document.getElementById("chat-window");
+      var msgDiv = document.createElement("div");
+      // Nếu tin của tôi dùng class "mine", còn của người khác dùng "other"
+      msgDiv.className = "message " + ((window.userNickname && senderName === window.userNickname) ? "mine" : "other");
+      var content = "<strong>" + senderName + ":</strong><br>" + (message.text || "");
       if(message.image) {
         content += "<br><img src='" + message.image + "' alt='Uploaded Image' style='max-width:100%; border-radius:5px;'/>";
       }
       if(message.timestamp) {
         content += "<br><small>" + formatTime(message.timestamp) + "</small>";
       }
-      p.innerHTML = content;
-      pmWindow.appendChild(p);
+      msgDiv.innerHTML = content;
+      chatWindow.appendChild(msgDiv);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+      anime({ targets: msgDiv, opacity: [0, 1], translateY: [20, 0], duration: 500, easing: 'easeOutExpo' });
+    }
+    
+    // Hiển thị tin hệ thống (ví dụ thông báo online/offline)
+    function appendSystemMessage(text) {
+      var chatWindow = document.getElementById("chat-window");
+      var sysDiv = document.createElement("div");
+      sysDiv.className = "system-message";
+      sysDiv.innerHTML = text;
+      chatWindow.appendChild(sysDiv);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+      anime({ targets: sysDiv, opacity: [0, 1], translateY: [20, 0], duration: 500, easing: 'easeOutExpo' });
+    }
+    
+    // Tin nhắn riêng
+    function appendPrivateMessage(message) {
+      var pmWindow = document.getElementById("pm-chat-window");
+      var msgDiv = document.createElement("div");
+      msgDiv.className = "message";
+      var content = "<strong>" + message.sender + " (riêng):</strong><br>" + (message.text || "");
+      if(message.image) {
+        content += "<br><img src='" + message.image + "' alt='Uploaded Image' style='max-width:100%; border-radius:5px;'/>";
+      }
+      if(message.timestamp) {
+        content += "<br><small>" + formatTime(message.timestamp) + "</small>";
+      }
+      msgDiv.innerHTML = content;
+      pmWindow.appendChild(msgDiv);
       pmWindow.scrollTop = pmWindow.scrollHeight;
-      anime({ targets: p, opacity: [0, 1], translateY: [20, 0], duration: 500, easing: 'easeOutExpo' });
+      anime({ targets: msgDiv, opacity: [0, 1], translateY: [20, 0], duration: 500, easing: 'easeOutExpo' });
     }
     
     /* Gửi tin nhắn chat (văn bản) */
@@ -550,10 +606,12 @@
     
     /* Upload image cho Chat */
     document.getElementById("upload-chat-btn").addEventListener("click", function() {
-      cloudinary.createUploadWidget({
+      cloudinary.createUploadWidget(
+        {
           cloudName: 'demo',
           uploadPreset: 'ml_default'
-        }, function(error, result) {
+        },
+        function(error, result) {
           if(!error && result && result.event === "success") {
             var url = result.info.secure_url;
             var user = firebase.auth().currentUser;
@@ -562,30 +620,35 @@
             pubnub.publish({ channel: 'chat', message: message });
             firebase.database().ref('messages').push(message);
           }
-        }).open();
+        }
+      ).open();
     });
     
     /* Upload image cho Forum */
     document.getElementById("upload-forum-btn").addEventListener("click", function() {
-      cloudinary.createUploadWidget({
+      cloudinary.createUploadWidget(
+        {
           cloudName: 'demo',
           uploadPreset: 'ml_default'
-        }, function(error, result) {
+        },
+        function(error, result) {
           if(!error && result && result.event === "success") {
             var url = result.info.secure_url;
-            // Giả sử trường forum-message có thể chứa cả văn bản và đường dẫn ảnh
             var forumMsgField = document.getElementById("forum-message");
             forumMsgField.value = forumMsgField.value + " <img src='" + url + "' alt='Image'/>";
           }
-        }).open();
+        }
+      ).open();
     });
     
     /* Upload image cho Private Chat */
     document.getElementById("upload-pm-btn").addEventListener("click", function() {
-      cloudinary.createUploadWidget({
+      cloudinary.createUploadWidget(
+        {
           cloudName: 'demo',
           uploadPreset: 'ml_default'
-        }, function(error, result) {
+        },
+        function(error, result) {
           if(!error && result && result.event === "success") {
             var url = result.info.secure_url;
             var user = firebase.auth().currentUser;
@@ -595,21 +658,25 @@
             pubnub.publish({ channel: pmChannel, message: message });
             appendPrivateMessage(message);
           }
-        }).open();
+        }
+      ).open();
     });
     
     /* Upload image cho Mạng Xã Hội */
     document.getElementById("upload-social-btn").addEventListener("click", function() {
-      cloudinary.createUploadWidget({
+      cloudinary.createUploadWidget(
+        {
           cloudName: 'demo',
           uploadPreset: 'ml_default'
-        }, function(error, result) {
+        },
+        function(error, result) {
           if(!error && result && result.event === "success") {
             var url = result.info.secure_url;
             var socialMsgField = document.getElementById("social-message");
             socialMsgField.value = socialMsgField.value + " <img src='" + url + "' alt='Image'/>";
           }
-        }).open();
+        }
+      ).open();
     });
     
     /* Lắng nghe tin nhắn từ Firebase (chat công khai) */
@@ -630,17 +697,20 @@
     });
     
     function updatePresence() {
-      pubnub.hereNow({ channels: ['chat'], includeUUIDs: true }, function (status, response) {
-        var onlineList = document.getElementById("online-users-list");
-        onlineList.innerHTML = "";
-        if(response.channels.chat && response.channels.chat.occupants){
-          response.channels.chat.occupants.forEach(function(occupant) {
-            var li = document.createElement("li");
-            li.textContent = occupant.uuid;
-            onlineList.appendChild(li);
-          });
+      pubnub.hereNow(
+        { channels: ['chat'], includeUUIDs: true },
+        function (status, response) {
+          var onlineList = document.getElementById("online-users-list");
+          onlineList.innerHTML = "";
+          if(response.channels.chat && response.channels.chat.occupants) {
+            response.channels.chat.occupants.forEach(function(occupant) {
+              var li = document.createElement("li");
+              li.textContent = occupant.uuid;
+              onlineList.appendChild(li);
+            });
+          }
         }
-      });
+      );
     }
     updatePresence();
     
@@ -657,17 +727,17 @@
     firebase.database().ref('forumPosts').on('child_added', function(snapshot) {
       var post = snapshot.val();
       var forumPostsDiv = document.getElementById('forum-posts');
-      var p = document.createElement('div');
-      p.className = "post-card";
-      var content = "<strong>" + post.sender + ":</strong><br>" + (post.text ? post.text : "");
+      var postDiv = document.createElement('div');
+      postDiv.className = "post-card";
+      var content = "<strong>" + post.sender + ":</strong><br>" + (post.text || "");
       if(post.image) {
         content += "<br><img src='" + post.image + "' alt='Forum Image'/>";
       }
       if(post.timestamp) {
         content += "<br><small>" + formatTime(post.timestamp) + "</small>";
       }
-      p.innerHTML = content;
-      forumPostsDiv.appendChild(p);
+      postDiv.innerHTML = content;
+      forumPostsDiv.appendChild(postDiv);
     });
     
     /* -------------------- SOCIAL NETWORK FUNCTIONALITY -------------------- */
@@ -683,17 +753,17 @@
     firebase.database().ref('socialPosts').on('child_added', function(snapshot) {
       var post = snapshot.val();
       var socialPostsDiv = document.getElementById('social-posts');
-      var p = document.createElement('div');
-      p.className = "post-card";
-      var content = "<strong>" + post.sender + ":</strong><br>" + (post.text ? post.text : "");
+      var postDiv = document.createElement('div');
+      postDiv.className = "post-card";
+      var content = "<strong>" + post.sender + ":</strong><br>" + (post.text || "");
       if(post.image) {
         content += "<br><img src='" + post.image + "' alt='Social Post Image'/>";
       }
       if(post.timestamp) {
         content += "<br><small>" + formatTime(post.timestamp) + "</small>";
       }
-      p.innerHTML = content;
-      socialPostsDiv.appendChild(p);
+      postDiv.innerHTML = content;
+      socialPostsDiv.appendChild(postDiv);
     });
     
     /* -------------------- PROFILE FUNCTIONALITY -------------------- */
@@ -717,7 +787,6 @@
       updateProfileSection();
       pubnub.subscribe({ channels: ["pm-" + newNickname] });
     });
-    
     firebase.auth().onAuthStateChanged(function(user) {
       updateProfileSection();
     });
@@ -738,7 +807,6 @@
         })
         .catch(function(error) { console.error("Lỗi đăng nhập Google:", error); });
     });
-    
     document.getElementById("email-login").addEventListener("click", function() {
       var email = document.getElementById("email").value;
       var password = document.getElementById("password").value;
@@ -760,7 +828,6 @@
           }
         });
     });
-    
     document.getElementById("send-otp").addEventListener("click", function() {
       var phoneNumber = document.getElementById("phone-number").value;
       window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' });
@@ -771,7 +838,6 @@
         })
         .catch(function(error) { console.error("Lỗi gửi OTP:", error); });
     });
-    
     document.getElementById("verify-otp").addEventListener("click", function() {
       var otpCode = document.getElementById("otp-code").value;
       window.confirmationResult.confirm(otpCode)
