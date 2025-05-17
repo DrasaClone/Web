@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Nền tảng Chat Realtime - Phiên bản Nâng Cấp Toàn Diện</title>
+  <title>Nền tảng Chat Realtime - Phiên bản Nâng Cấp</title>
   <meta name="description" content="Nền tảng Chat Realtime tích hợp chat, forum, private chat, mạng xã hội và trò chơi với Firebase, PubNub, Cloudinary và Anime.js.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -155,7 +155,7 @@
       font-weight: bold;
     }
     
-    /* Chat Window (màu chữ thay đổi thành đen) */
+    /* Chat Window */
     #chat-window {
       border: 1px solid rgba(255,255,255,0.5);
       height: 300px;
@@ -233,7 +233,7 @@
       border-bottom: 1px dotted #ccc;
     }
     
-    /* PHẦN PRIVATE CHAT: Danh sách người dùng có presence và typing */
+    /* Private Chat */
     #private-chat-user-list {
       margin-bottom: 10px;
       padding: 10px;
@@ -248,13 +248,12 @@
     .private-chat-user-item:hover {
       background: rgba(0,0,0,0.1);
     }
-    /* Đồng thời hiển thị tên user hiện chọn để chat riêng */
     #private-chat-selected-indicator {
       margin-bottom: 10px;
       font-weight: bold;
     }
     
-    /* PHẦN TRÒ CHƠI: Hiển thị nút chuyển hướng sang các web trò chơi */
+    /* Game Section */
     .game-buttons button {
       margin: 5px;
       padding: 8px 16px;
@@ -263,7 +262,7 @@
       cursor: pointer;
     }
     
-    /* Facebook comments container */
+    /* Facebook Comments Container */
     .fb-comments-container {
       border: 2px solid #ffffff;
       padding: 10px;
@@ -323,8 +322,8 @@
     </div>
   </div>
   
-  <!-- Toast Container -->
-  <div id="toast-container"></div>
+  <!-- Toast Container (Accessibility: aria-live) -->
+  <div id="toast-container" aria-live="polite"></div>
   
   <!-- Login Section -->
   <div class="section login-section" id="login-section">
@@ -384,11 +383,11 @@
   <!-- Private Chat Section -->
   <div class="section private-chat-section" id="private-chat-section" style="display: none;">
     <h2>Private Chat</h2>
-    <!-- Danh sách người dùng có presence (green/red) và typing indicator -->
+    <!-- Danh sách người dùng với trạng thái online và thông báo đang nhập -->
     <div id="private-chat-user-list"></div>
-    <!-- Hiển thị thông tin về người dùng được chọn để chat riêng -->
+    <!-- Hiển thị thông tin user đang được chọn để chat riêng -->
     <div id="private-chat-selected-indicator"></div>
-    <!-- Khu vực lịch sử chat riêng -->
+    <!-- Lịch sử tin nhắn private chat -->
     <div id="pm-chat-window" style="min-height:300px; overflow-y:auto;"></div>
     <div class="private-chat-input">
       <input type="text" id="pm-message" placeholder="Nhập tin nhắn riêng...">
@@ -408,7 +407,7 @@
     <div id="social-posts"></div>
   </div>
   
-  <!-- Game Section: Các nút chuyển hướng sang web trò chơi -->
+  <!-- Game Section -->
   <div class="section game-section" id="game-section" style="display: none;">
     <h2>Trò chơi</h2>
     <div class="game-buttons">
@@ -450,653 +449,554 @@
   
   <!-- Scripts -->
   <script>
-    // Global variables cho private chat
-    var currentPrivateChatUser = null; // uid của người dùng được chọn để chat riêng
-    var currentUser = null; // thông tin người dùng hiện tại sau khi đăng nhập
-    var currentConversationListener = null; // dùng để gỡ listener khi đổi private chat
-    var typingTimeout; // dùng để debounce update typing
-    
-    /* -------------------- HÀM HỖ TRỢ -------------------- */
-    // Saniize đầu vào
-    function sanitize(str) {
-      var temp = document.createElement('div');
-      temp.textContent = str;
-      return temp.innerHTML;
-    }
-    
-    // Hệ thống Toast thông báo
-    function showToast(message) {
-      const container = document.getElementById("toast-container");
-      const toast = document.createElement("div");
-      toast.className = "toast";
-      toast.textContent = message;
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.classList.add("hide");
-        toast.addEventListener("transitionend", () => {
-          toast.remove();
-        });
-      }, 3000);
-    }
-    
-    // Format thời gian
-    function formatTime(timestamp) {
-      return new Date(timestamp).toLocaleString();
-    }
-    
-    // Ghi log hành động vào node "logs"
-    function logEvent(eventType, details) {
-      var logObj = {
-        eventType: eventType,
-        details: details,
-        timestamp: Date.now(),
-        user: currentUser 
-              ? (currentUser.displayName || currentUser.email)
-              : "Anonymous"
+    "use strict";
+    (function(){
+      /* ---------- Global Variables & Helper Functions ---------- */
+      let currentPrivateChatUser = null;
+      let currentUser = null;
+      let currentConversationListener = null;
+      let typingTimeout;
+      
+      const sanitize = (str) => {
+        const temp = document.createElement('div');
+        temp.textContent = str;
+        return temp.innerHTML;
       };
-      firebase.database().ref('logs').push(logObj);
-    }
-    
-    /* -------------------- CẤU HÌNH FIREBASE -------------------- */
-    var firebaseConfig = {
-      apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
-      authDomain: "webai-7642b.firebaseapp.com",
-      databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "webai-7642b",
-      storageBucket: "webai-7642b.firebasestorage.app",
-      messagingSenderId: "967881370128",
-      appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
-      measurementId: "G-61XJ390Q30"
-    };
-    firebase.initializeApp(firebaseConfig);
-    
-    /* -------------------- KHỞI TẠO PUBNUB -------------------- */
-    var pubnub = new PubNub({
-      publishKey: 'pub-c-9ad32978-37b1-4f15-bc57-bac1884507a4',
-      subscribeKey: 'sub-c-0269ec54-430f-41b1-8a33-4200f566fcbb'
-    });
-    
-    pubnub.subscribe({
-      channels: ['chat'],
-      withPresence: true
-    });
-    
-    pubnub.addListener({
-      message: function(event) {
-        var message = event.message;
-        if(message.private) {
-          appendPrivateMessage(message);
-        } else {
-          appendMessage(message);
+      
+      const showToast = (message) => {
+        const container = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.classList.add("hide");
+          toast.addEventListener("transitionend", () => { toast.remove(); });
+        }, 3000);
+      };
+      
+      const formatTime = (timestamp) => new Date(timestamp).toLocaleString();
+      
+      const logEvent = (eventType, details) => {
+        const logObj = {
+          eventType,
+          details,
+          timestamp: Date.now(),
+          user: currentUser ? (currentUser.displayName || currentUser.email) : "Anonymous"
+        };
+        firebase.database().ref('logs').push(logObj);
+      };
+      
+      /* ---------- Firebase Configuration ---------- */
+      const firebaseConfig = {
+        apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
+        authDomain: "webai-7642b.firebaseapp.com",
+        databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "webai-7642b",
+        storageBucket: "webai-7642b.firebasestorage.app",
+        messagingSenderId: "967881370128",
+        appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
+        measurementId: "G-61XJ390Q30"
+      };
+      firebase.initializeApp(firebaseConfig);
+      
+      /* ---------- PubNub Initialization ---------- */
+      const pubnub = new PubNub({
+        publishKey: 'pub-c-9ad32978-37b1-4f15-bc57-bac1884507a4',
+        subscribeKey: 'sub-c-0269ec54-430f-41b1-8a33-4200f566fcbb'
+      });
+      pubnub.subscribe({ channels: ['chat'], withPresence: true });
+      
+      pubnub.addListener({
+        message: (event) => {
+          const message = event.message;
+          if(message.private) {
+            appendPrivateMessage(message);
+          } else {
+            appendMessage(message);
+          }
+        },
+        presence: (event) => {
+          if(event.action === "join") {
+            appendSystemMessage(sanitize(event.uuid) + " đã online");
+          } else if (event.action === "leave" || event.action === "timeout") {
+            appendSystemMessage(sanitize(event.uuid) + " đã offline");
+          }
         }
-      },
-      presence: function(event) {
-        // Ví dụ: hiển thị thông báo online/offline
-        if(event.action === "join") {
-          appendSystemMessage(sanitize(event.uuid) + " đã online");
-        } else if(event.action === "leave" || event.action === "timeout") {
-          appendSystemMessage(sanitize(event.uuid) + " đã offline");
-        }
-      }
-    });
-    
-    /* -------------------- HIỆU ỨNG TRÊN PAGE LOAD -------------------- */
-    document.addEventListener("DOMContentLoaded", function() {
-      anime({
-        targets: '#login-section',
-        opacity: [0, 1],
-        translateY: [-20, 0],
-        duration: 5000,
-        easing: 'easeOutExpo'
-      });
-      anime({
-        targets: '.active-page',
-        opacity: [0, 1],
-        translateY: [20, 0],
-        duration: 500,
-        delay: 1000,
-        easing: 'easeOutExpo'
-      });
-      showAlert();
-    });
-    
-    /* -------------------- CHUYỂN ĐỔI GIỮA CÁC TRANG -------------------- */
-    var navButtons = document.querySelectorAll('.nav-btn');
-    navButtons.forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var targetId = this.getAttribute('data-target');
-        showLoadingTransition(function() {
-          document.querySelectorAll('.chat-section, .forum-section, .private-chat-section, .social-network-section, .game-section, .profile-section, .settings-section')
-            .forEach(function(section) {
-              section.style.display = "none";
-              section.classList.remove('active-page');
-            });
-          navButtons.forEach(function(b) { b.classList.remove('active'); });
-          var targetSection = document.getElementById(targetId);
-          targetSection.style.display = "block";
-          targetSection.classList.add('active-page');
-          anime({
-            targets: '#' + targetId,
-            opacity: [0, 1],
-            translateY: [20, 0],
-            duration: 500,
-            easing: 'easeOutExpo'
-          });
-          btn.classList.add('active');
-          if(targetId === "profile-section") updateProfileSection();
-        });
-      });
-    });
-    
-    function showLoadingTransition(callback) {
-      var overlay = document.getElementById("loading-overlay");
-      overlay.style.display = "flex";
-      var randomTransition = Math.floor(Math.random() * 3);
-      switch(randomTransition) {
-        case 0:
-          anime({
-            targets: overlay,
-            opacity: [0, 1],
-            scale: [0.5, 1],
-            duration: 500,
-            easing: 'easeOutExpo',
-            complete: function() {
-              setTimeout(function() {
-                anime({
-                  targets: overlay,
-                  opacity: [1, 0],
-                  duration: 500,
-                  easing: 'easeInExpo',
-                  complete: function() {
-                    overlay.style.display = "none";
-                    callback();
-                  }
-                });
-              }, 300);
-            }
-          });
-          break;
-        case 1:
-          anime({
-            targets: overlay,
-            translateY: [-100, 0],
-            opacity: [0, 1],
-            duration: 500,
-            easing: 'easeOutExpo',
-            complete: function() {
-              setTimeout(function() {
-                anime({
-                  targets: overlay,
-                  translateY: [0, 100],
-                  opacity: [1, 0],
-                  duration: 500,
-                  easing: 'easeInExpo',
-                  complete: function() {
-                    overlay.style.display = "none";
-                    callback();
-                  }
-                });
-              }, 300);
-            }
-          });
-          break;
-        case 2:
-          anime({
-            targets: overlay,
-            rotate: ['0deg', '360deg'],
-            opacity: [0, 1],
-            duration: 500,
-            easing: 'easeOutExpo',
-            complete: function() {
-              setTimeout(function() {
-                anime({
-                  targets: overlay,
-                  rotate: ['360deg', '720deg'],
-                  opacity: [1, 0],
-                  duration: 500,
-                  easing: 'easeInExpo',
-                  complete: function() {
-                    overlay.style.display = "none";
-                    callback();
-                  }
-                });
-              }, 300);
-            }
-          });
-          break;
-      }
-    }
-    
-    /* -------------------- XỬ LÝ TIN NHẮN PUBLIC -------------------- */
-    function appendMessage(message) {
-      var senderName = sanitize(message.sender);
-      var chatWindow = document.getElementById("chat-window");
-      var msgDiv = document.createElement("div");
-      var myIdentifier = window.userNickname || (currentUser ? (currentUser.displayName || currentUser.email) : "Anonymous");
-      var messageClass = (senderName === myIdentifier) ? "mine" : "other";
-      msgDiv.className = "message " + messageClass;
-      var content = "<strong>" + senderName + ":</strong><br>" + sanitize(message.text || "");
-      if (message.image) {
-        content += "<br><img src='" + message.image + "' alt='Uploaded Image' style='max-width:100%; border-radius:5px;'/>";
-      }
-      if (message.timestamp) {
-        content += "<br><small>" + formatTime(message.timestamp) + "</small>";
-      }
-      msgDiv.innerHTML = content;
-      chatWindow.appendChild(msgDiv);
-      chatWindow.scrollTop = chatWindow.scrollHeight;
-      anime({
-        targets: msgDiv,
-        opacity: [0, 1],
-        translateY: [20, 0],
-        duration: 500,
-        easing: 'easeOutExpo'
-      });
-    }
-    
-    function appendSystemMessage(text) {
-      var chatWindow = document.getElementById("chat-window");
-      var sysDiv = document.createElement("div");
-      sysDiv.className = "system-message";
-      sysDiv.innerHTML = sanitize(text);
-      chatWindow.appendChild(sysDiv);
-      chatWindow.scrollTop = chatWindow.scrollHeight;
-      anime({
-        targets: sysDiv,
-        opacity: [0, 1],
-        translateY: [20, 0],
-        duration: 500,
-        easing: 'easeOutExpo'
-      });
-    }
-    
-    /* -------------------- XỬ LÝ PRIVATE CHAT -------------------- */
-    // Hàm hiển thị tin nhắn private chat
-    function appendPrivateMessage(message) {
-      var pmWindow = document.getElementById("pm-chat-window");
-      var msgDiv = document.createElement("div");
-      msgDiv.className = "message";
-      var content = "<strong>" + sanitize(message.sender) + " (riêng):</strong><br>" + sanitize(message.text || "");
-      if(message.image) {
-        content += "<br><img src='" + message.image + "' alt='Uploaded Image' style='max-width:100%; border-radius:5px;'/>";
-      }
-      if(message.timestamp) {
-        content += "<br><small>" + formatTime(message.timestamp) + "</small>";
-      }
-      msgDiv.innerHTML = content;
-      pmWindow.appendChild(msgDiv);
-      pmWindow.scrollTop = pmWindow.scrollHeight;
-      anime({
-        targets: msgDiv,
-        opacity: [0, 1],
-        translateY: [20, 0],
-        duration: 500,
-        easing: 'easeOutExpo'
-      });
-    }
-    
-    // Hàm load lịch sử private chat của một cuộc trò chuyện (dựa trên convId)
-    function loadPrivateChat(convId) {
-      // Xóa nội dung cũ
-      document.getElementById("pm-chat-window").innerHTML = "";
-      // Nếu có listener trước đó, gỡ bỏ nó
-      if(currentConversationListener) {
-        currentConversationListener.off();
-      }
-      currentConversationListener = firebase.database().ref("privateChats/" + convId);
-      currentConversationListener.on("child_added", function(snapshot) {
-        var message = snapshot.val();
-        appendPrivateMessage(message);
-      });
-    }
-    
-    // Hàm chọn người dùng để chat riêng
-    function selectPrivateChat(uid) {
-      currentPrivateChatUser = uid;
-      // Hiển thị tên người dùng được chọn và cập nhật typing indicator nếu có
-      firebase.database().ref("users/" + uid).once("value").then(function(snapshot) {
-        var userData = snapshot.val();
-        var indicator = "";
-        if(userData.typing) {
-          indicator = " (Đang nhập...)";
-        }
-        document.getElementById("private-chat-selected-indicator").innerHTML = userData.displayName + indicator;
       });
       
-      // Xác định convId dựa trên uid hiện tại và người được chọn
-      if(currentUser) {
-        var convId = (currentUser.uid < uid)
-                    ? currentUser.uid + "_" + uid
-                    : uid + "_" + currentUser.uid;
-        loadPrivateChat(convId);
-      }
-    }
-    
-    // Cập nhật danh sách người dùng trong Private Chat (hiển thị presence)
-    firebase.database().ref("users").on("value", function(snapshot) {
-      let userListHTML = "";
-      snapshot.forEach(function(childSnapshot) {
-        var userData = childSnapshot.val();
-        var uid = childSnapshot.key;
-        // Hiển thị: chấm xanh nếu online, đỏ nếu offline; nếu typing → chữ "Đang nhập..."
-        var dotColor = userData.status === "online" ? "green" : "red";
-        userListHTML += `<div class="private-chat-user-item" data-uid="${uid}" onclick="selectPrivateChat('${uid}')">`;
-        userListHTML += `<span style="display:inline-block; width:10px; height:10px; background:${dotColor}; border-radius:50%; margin-right:5px;"></span>`;
-        userListHTML += userData.displayName;
-        if(userData.typing) {
-          userListHTML += ` <span style="font-size:0.8rem; color:blue;">Đang nhập...</span>`;
-        }
-        userListHTML += `</div>`;
+      /* ---------- Page Load Animation ---------- */
+      document.addEventListener("DOMContentLoaded", () => {
+        anime({
+          targets: '#login-section',
+          opacity: [0, 1],
+          translateY: [-20, 0],
+          duration: 5000,
+          easing: 'easeOutExpo'
+        });
+        anime({
+          targets: '.active-page',
+          opacity: [0, 1],
+          translateY: [20, 0],
+          duration: 500,
+          delay: 1000,
+          easing: 'easeOutExpo'
+        });
+        showToast("Chào bạn! Dự án đang được phát triển, hãy sử dụng một cách văn minh.");
       });
-      document.getElementById("private-chat-user-list").innerHTML = userListHTML;
-    });
-    
-    // Khi người dùng đang gõ tin nhắn trong private chat, cập nhật trạng thái typing
-    document.getElementById("pm-message").addEventListener("input", function() {
-      if(currentUser) {
-        firebase.database().ref("users/" + currentUser.uid).update({ typing: true });
-        clearTimeout(typingTimeout);
-        typingTimeout = setTimeout(function(){
+      
+      /* ---------- Page Navigation & Loading Transition ---------- */
+      const navButtons = document.querySelectorAll('.nav-btn');
+      navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.getAttribute('data-target');
+          showLoadingTransition(() => {
+            document.querySelectorAll('.chat-section, .forum-section, .private-chat-section, .social-network-section, .game-section, .profile-section, .settings-section')
+              .forEach(section => { section.style.display = "none"; section.classList.remove('active-page'); });
+            navButtons.forEach(b => b.classList.remove('active'));
+            const targetSection = document.getElementById(targetId);
+            targetSection.style.display = "block";
+            targetSection.classList.add('active-page');
+            anime({
+              targets: '#' + targetId,
+              opacity: [0, 1],
+              translateY: [20, 0],
+              duration: 500,
+              easing: 'easeOutExpo'
+            });
+            btn.classList.add('active');
+            if(targetId === "profile-section") updateProfileSection();
+          });
+        });
+      });
+      
+      const showLoadingTransition = (callback) => {
+        const overlay = document.getElementById("loading-overlay");
+        overlay.style.display = "flex";
+        const randomTransition = Math.floor(Math.random() * 3);
+        switch(randomTransition) {
+          case 0:
+            anime({
+              targets: overlay,
+              opacity: [0, 1],
+              scale: [0.5, 1],
+              duration: 500,
+              easing: 'easeOutExpo',
+              complete: () => {
+                setTimeout(() => {
+                  anime({
+                    targets: overlay,
+                    opacity: [1, 0],
+                    duration: 500,
+                    easing: 'easeInExpo',
+                    complete: () => { overlay.style.display = "none"; callback(); }
+                  });
+                }, 300);
+              }
+            });
+            break;
+          case 1:
+            anime({
+              targets: overlay,
+              translateY: [-100, 0],
+              opacity: [0, 1],
+              duration: 500,
+              easing: 'easeOutExpo',
+              complete: () => {
+                setTimeout(() => {
+                  anime({
+                    targets: overlay,
+                    translateY: [0, 100],
+                    opacity: [1, 0],
+                    duration: 500,
+                    easing: 'easeInExpo',
+                    complete: () => { overlay.style.display = "none"; callback(); }
+                  });
+                }, 300);
+              }
+            });
+            break;
+          case 2:
+            anime({
+              targets: overlay,
+              rotate: ['0deg', '360deg'],
+              opacity: [0, 1],
+              duration: 500,
+              easing: 'easeOutExpo',
+              complete: () => {
+                setTimeout(() => {
+                  anime({
+                    targets: overlay,
+                    rotate: ['360deg', '720deg'],
+                    opacity: [1, 0],
+                    duration: 500,
+                    easing: 'easeInExpo',
+                    complete: () => { overlay.style.display = "none"; callback(); }
+                  });
+                }, 300);
+              }
+            });
+            break;
+        }
+      };
+      
+      /* ---------- Chat Functions ---------- */
+      const appendMessage = (message) => {
+        const senderName = sanitize(message.sender);
+        const chatWindow = document.getElementById("chat-window");
+        const msgDiv = document.createElement("div");
+        const myIdentifier = window.userNickname || (currentUser ? (currentUser.displayName || currentUser.email) : "Anonymous");
+        msgDiv.className = "message " + (senderName === myIdentifier ? "mine" : "other");
+        let content = `<strong>${senderName}:</strong><br>${sanitize(message.text || "")}`;
+        if(message.image) content += `<br><img src='${message.image}' alt='Uploaded Image' style='max-width:100%; border-radius:5px;'/>`;
+        if(message.timestamp) content += `<br><small>${formatTime(message.timestamp)}</small>`;
+        msgDiv.innerHTML = content;
+        chatWindow.appendChild(msgDiv);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+        anime({ targets: msgDiv, opacity: [0, 1], translateY: [20, 0], duration: 500, easing: 'easeOutExpo' });
+      };
+      
+      const appendSystemMessage = (text) => {
+        const chatWindow = document.getElementById("chat-window");
+        const sysDiv = document.createElement("div");
+        sysDiv.className = "system-message";
+        sysDiv.innerHTML = sanitize(text);
+        chatWindow.appendChild(sysDiv);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+        anime({ targets: sysDiv, opacity: [0, 1], translateY: [20, 0], duration: 500, easing: 'easeOutExpo' });
+      };
+      
+      /* ---------- Private Chat Functions ---------- */
+      const appendPrivateMessage = (message) => {
+        const pmWindow = document.getElementById("pm-chat-window");
+        const msgDiv = document.createElement("div");
+        msgDiv.className = "message";
+        let content = `<strong>${sanitize(message.sender)} (riêng):</strong><br>${sanitize(message.text || "")}`;
+        if(message.image) content += `<br><img src='${message.image}' alt='Uploaded Image' style='max-width:100%; border-radius:5px;'/>`;
+        if(message.timestamp) content += `<br><small>${formatTime(message.timestamp)}</small>`;
+        msgDiv.innerHTML = content;
+        pmWindow.appendChild(msgDiv);
+        pmWindow.scrollTop = pmWindow.scrollHeight;
+        anime({ targets: msgDiv, opacity: [0, 1], translateY: [20, 0], duration: 500, easing: 'easeOutExpo' });
+      };
+      
+      const loadPrivateChat = (convId) => {
+        document.getElementById("pm-chat-window").innerHTML = "";
+        if(currentConversationListener) currentConversationListener.off();
+        currentConversationListener = firebase.database().ref("privateChats/" + convId);
+        currentConversationListener.on("child_added", snapshot => { appendPrivateMessage(snapshot.val()); });
+      };
+      
+      window.selectPrivateChat = (uid) => {
+        currentPrivateChatUser = uid;
+        firebase.database().ref("users/" + uid).once("value").then(snapshot => {
+          const userData = snapshot.val();
+          const indicator = userData.typing ? " (Đang nhập...)" : "";
+          document.getElementById("private-chat-selected-indicator").innerHTML = userData.displayName + indicator;
+        });
+        if(currentUser) {
+          const convId = currentUser.uid < uid ? currentUser.uid + "_" + uid : uid + "_" + currentUser.uid;
+          loadPrivateChat(convId);
+        }
+      };
+      
+      firebase.database().ref("users").on("value", snapshot => {
+        let userListHTML = "";
+        snapshot.forEach(childSnapshot => {
+          const userData = childSnapshot.val();
+          const uid = childSnapshot.key;
+          const dotColor = userData.status === "online" ? "green" : "red";
+          userListHTML += `<div class="private-chat-user-item" data-uid="${uid}" onclick="selectPrivateChat('${uid}')">`;
+          userListHTML += `<span style="display:inline-block; width:10px; height:10px; background:${dotColor}; border-radius:50%; margin-right:5px;"></span>`;
+          userListHTML += userData.displayName;
+          if(userData.typing) userListHTML += ` <span style="font-size:0.8rem; color:blue;">Đang nhập...</span>`;
+          userListHTML += `</div>`;
+        });
+        document.getElementById("private-chat-user-list").innerHTML = userListHTML;
+      });
+      
+      document.getElementById("pm-message").addEventListener("input", () => {
+        if(currentUser) {
+          firebase.database().ref("users/" + currentUser.uid).update({ typing: true });
+          clearTimeout(typingTimeout);
+          typingTimeout = setTimeout(() => { firebase.database().ref("users/" + currentUser.uid).update({ typing: false }); }, 1000);
+        }
+      });
+      
+      document.getElementById("send-pm-btn").addEventListener("click", () => {
+        if(!currentPrivateChatUser) {
+          showToast("Vui lòng chọn người dùng để chat riêng!");
+          return;
+        }
+        const input = document.getElementById("pm-message");
+        const text = input.value.trim();
+        if(text === "") return;
+        if(currentUser) {
+          const senderName = currentUser.displayName || currentUser.email;
+          const convId = currentUser.uid < currentPrivateChatUser ? currentUser.uid + "_" + currentPrivateChatUser : currentPrivateChatUser + "_" + currentUser.uid;
+          const message = { sender: senderName, text, timestamp: Date.now() };
+          firebase.database().ref("privateChats/" + convId).push(message);
+          input.value = "";
           firebase.database().ref("users/" + currentUser.uid).update({ typing: false });
-        }, 1000);
-      }
-    });
-    
-    // Gửi tin nhắn private chat
-    document.getElementById("send-pm-btn").addEventListener("click", function() {
-      if(!currentPrivateChatUser) {
-        showToast("Vui lòng chọn người dùng để chat riêng!");
-        return;
-      }
-      var input = document.getElementById("pm-message");
-      var text = input.value.trim();
-      if(text === "") return;
-      if(currentUser) {
-        var senderName = currentUser.displayName || currentUser.email;
-        // Xác định convId
-        var convId = (currentUser.uid < currentPrivateChatUser)
-                    ? currentUser.uid + "_" + currentPrivateChatUser
-                    : currentPrivateChatUser + "_" + currentUser.uid;
-        var message = { sender: senderName, text: text, timestamp: Date.now() };
-        firebase.database().ref("privateChats/" + convId).push(message);
-        input.value = "";
-        firebase.database().ref("users/" + currentUser.uid).update({ typing: false });
-        logEvent("private-chat-send", "Gửi tin private chat: " + text);
-      }
-    });
-    
-    // Upload image cho private chat
-    document.getElementById("upload-pm-btn").addEventListener("click", function() {
-      if(!currentPrivateChatUser) {
-        showToast("Vui lòng chọn người dùng để chat riêng!");
-        return;
-      }
-      cloudinary.createUploadWidget({
+          logEvent("private-chat-send", "Gửi tin private chat: " + text);
+        }
+      });
+      
+      document.getElementById("upload-pm-btn").addEventListener("click", () => {
+        if(!currentPrivateChatUser) {
+          showToast("Vui lòng chọn người dùng để chat riêng!");
+          return;
+        }
+        cloudinary.createUploadWidget({
           cloudName: 'demo',
           uploadPreset: 'ml_default'
-        }, function(error, result) {
+        }, (error, result) => {
           if(!error && result && result.event === "success") {
-            var url = result.info.secure_url;
+            const url = result.info.secure_url;
             if(currentUser) {
-              var senderName = currentUser.displayName || currentUser.email;
-              var convId = (currentUser.uid < currentPrivateChatUser)
-                          ? currentUser.uid + "_" + currentPrivateChatUser
-                          : currentPrivateChatUser + "_" + currentUser.uid;
-              var message = { sender: senderName, image: url, timestamp: Date.now() };
+              const senderName = currentUser.displayName || currentUser.email;
+              const convId = currentUser.uid < currentPrivateChatUser ? currentUser.uid + "_" + currentPrivateChatUser : currentPrivateChatUser + "_" + currentUser.uid;
+              const message = { sender: senderName, image: url, timestamp: Date.now() };
               firebase.database().ref("privateChats/" + convId).push(message);
               logEvent("private-chat-upload", "Upload image cho private chat: " + url);
             }
           }
         }).open();
-    });
-    
-    /* -------------------- XỬ LÝ SOCIAL NETWORK -------------------- */
-    function updateSocialPostLike(postId) {
-      firebase.database().ref("socialPosts/" + postId + "/likeCount").transaction(function(currentLikes) {
-        return (currentLikes || 0) + 1;
       });
-    }
-    
-    document.getElementById("submit-social-btn").addEventListener("click", function() {
-      var socialMsg = document.getElementById("social-message").value.trim();
-      if(socialMsg === "") return;
-      var senderName = window.userNickname || "Anonymous";
-      var socialPost = { sender: senderName, text: socialMsg, timestamp: Date.now(), likeCount: 0 };
-      firebase.database().ref('socialPosts').push(socialPost);
-      document.getElementById("social-message").value = "";
-      logEvent("social-post", "Đăng bài xã hội: " + socialMsg);
-    });
-    
-    document.getElementById("upload-social-btn").addEventListener("click", function() {
-      cloudinary.createUploadWidget({
+      
+      /* ---------- Social Network Functions ---------- */
+      const updateSocialPostLike = (postId) => {
+        firebase.database().ref("socialPosts/" + postId + "/likeCount").transaction(currentLikes => (currentLikes || 0) + 1);
+      };
+      
+      document.getElementById("submit-social-btn").addEventListener("click", () => {
+        const socialMsg = document.getElementById("social-message").value.trim();
+        if(socialMsg === "") return;
+        const senderName = window.userNickname || "Anonymous";
+        const socialPost = { sender: senderName, text: socialMsg, timestamp: Date.now(), likeCount: 0 };
+        firebase.database().ref('socialPosts').push(socialPost);
+        document.getElementById("social-message").value = "";
+        logEvent("social-post", "Đăng bài xã hội: " + socialMsg);
+      });
+      
+      document.getElementById("upload-social-btn").addEventListener("click", () => {
+        cloudinary.createUploadWidget({
           cloudName: 'demo',
           uploadPreset: 'ml_default'
-        }, function(error, result) {
+        }, (error, result) => {
           if(!error && result && result.event === "success") {
-            var url = result.info.secure_url;
-            var socialMsgField = document.getElementById("social-message");
-            socialMsgField.value = socialMsgField.value + " <img src='" + url + "' alt='Image'/>";
+            const url = result.info.secure_url;
+            const socialMsgField = document.getElementById("social-message");
+            socialMsgField.value += " <img src='" + url + "' alt='Image'/>";
             logEvent("social-upload", "Upload image cho social: " + url);
           }
         }).open();
-    });
-    
-    firebase.database().ref('socialPosts').on('child_added', function(snapshot) {
-      var postKey = snapshot.key;
-      var post = snapshot.val();
-      if(typeof post.likeCount === "undefined") post.likeCount = 0;
-      var socialPostsDiv = document.getElementById('social-posts');
-      var postDiv = document.createElement('div');
-      postDiv.className = "post-card";
-      postDiv.id = "social-post-" + postKey;
-      var content = "<strong>" + sanitize(post.sender) + ":</strong><br>" + sanitize(post.text || "");
-      if(post.image) {
-        content += "<br><img src='" + post.image + "' alt='Social Post Image'/>";
-      }
-      if(post.timestamp) {
-        content += "<br><small>" + formatTime(post.timestamp) + "</small>";
-      }
-      content += "<br><button class='social-like-btn' data-post-id='" + postKey + "'>Like (<span class='social-like-count'>" + post.likeCount + "</span>)</button>";
-      content += " <button class='social-show-comment-btn' data-post-id='" + postKey + "'>Show Comments</button>";
-      content += "<div class='social-comment-section' id='social-comment-section-" + postKey + "' style='display:none;'>";
-      content += "<input type='text' class='social-comment-input' placeholder='Write a comment...'>";
-      content += "<button class='social-submit-comment-btn' data-post-id='" + postKey + "'>Comment</button>";
-      content += "<div class='social-comment-list' id='social-comment-list-" + postKey + "'></div>";
-      content += "</div>";
-      postDiv.innerHTML = content;
-      socialPostsDiv.appendChild(postDiv);
-      attachSocialCommentsListener(postKey);
-    });
-    
-    document.getElementById("social-posts").addEventListener("click", function(e) {
-      if(e.target && e.target.classList.contains("social-like-btn")) {
-        var postId = e.target.getAttribute("data-post-id");
-        updateSocialPostLike(postId);
-        logEvent("social-like", "Like bài xã hội " + postId);
-      }
-      if(e.target && e.target.classList.contains("social-show-comment-btn")) {
-        var postId = e.target.getAttribute("data-post-id");
-        var commentSection = document.getElementById("social-comment-section-" + postId);
-        commentSection.style.display = (commentSection.style.display === "none") ? "block" : "none";
-      }
-      if(e.target && e.target.classList.contains("social-submit-comment-btn")) {
-        var postId = e.target.getAttribute("data-post-id");
-        var parent = e.target.parentNode;
-        var commentInput = parent.querySelector(".social-comment-input");
-        var commentText = commentInput.value.trim();
-        if(commentText === "") return;
-        var commentObj = {
-          sender: window.userNickname || (currentUser ? (currentUser.displayName || currentUser.email) : "Anonymous"),
-          text: commentText,
-          timestamp: Date.now()
-        };
-        firebase.database().ref("socialComments/" + postId).push(commentObj);
-        commentInput.value = "";
-        logEvent("social-comment", "Comment bài social " + postId + ": " + commentText);
-      }
-    });
-    
-    function attachSocialCommentsListener(postId) {
-      firebase.database().ref("socialComments/" + postId).on("child_added", function(snapshot) {
-        var comment = snapshot.val();
-        var commentListDiv = document.getElementById("social-comment-list-" + postId);
-        if(commentListDiv) {
-          var commentDiv = document.createElement("div");
-          commentDiv.className = "social-comment";
-          commentDiv.innerHTML = "<strong>" + sanitize(comment.sender) + ":</strong> " + sanitize(comment.text) +
-                                 "<br><small>" + formatTime(comment.timestamp) + "</small>";
-          commentListDiv.appendChild(commentDiv);
+      });
+      
+      firebase.database().ref('socialPosts').on('child_added', snapshot => {
+        const postKey = snapshot.key;
+        const post = snapshot.val();
+        if(typeof post.likeCount === "undefined") post.likeCount = 0;
+        const socialPostsDiv = document.getElementById('social-posts');
+        const postDiv = document.createElement('div');
+        postDiv.className = "post-card";
+        postDiv.id = "social-post-" + postKey;
+        let content = `<strong>${sanitize(post.sender)}:</strong><br>${sanitize(post.text || "")}`;
+        if(post.image) content += `<br><img src='${post.image}' alt='Social Post Image' style='max-width:100%; border-radius:5px;'/>`;
+        if(post.timestamp) content += `<br><small>${formatTime(post.timestamp)}</small>`;
+        content += `<br><button class='social-like-btn' data-post-id='${postKey}'>Like (<span class='social-like-count'>${post.likeCount}</span>)</button>`;
+        content += ` <button class='social-show-comment-btn' data-post-id='${postKey}'>Show Comments</button>`;
+        content += `<div class='social-comment-section' id='social-comment-section-${postKey}' style='display:none;'>`;
+        content += `<input type='text' class='social-comment-input' placeholder='Write a comment...'>`;
+        content += `<button class='social-submit-comment-btn' data-post-id='${postKey}'>Comment</button>`;
+        content += `<div class='social-comment-list' id='social-comment-list-${postKey}'></div>`;
+        content += `</div>`;
+        postDiv.innerHTML = content;
+        socialPostsDiv.appendChild(postDiv);
+        attachSocialCommentsListener(postKey);
+      });
+      
+      document.getElementById("social-posts").addEventListener("click", e => {
+        if(e.target && e.target.classList.contains("social-like-btn")) {
+          const postId = e.target.getAttribute("data-post-id");
+          updateSocialPostLike(postId);
+          logEvent("social-like", "Like bài xã hội " + postId);
+        }
+        if(e.target && e.target.classList.contains("social-show-comment-btn")) {
+          const postId = e.target.getAttribute("data-post-id");
+          const commentSection = document.getElementById("social-comment-section-" + postId);
+          commentSection.style.display = (commentSection.style.display === "none") ? "block" : "none";
+        }
+        if(e.target && e.target.classList.contains("social-submit-comment-btn")) {
+          const postId = e.target.getAttribute("data-post-id");
+          const parent = e.target.parentNode;
+          const commentInput = parent.querySelector(".social-comment-input");
+          const commentText = commentInput.value.trim();
+          if(commentText === "") return;
+          const commentObj = {
+            sender: window.userNickname || (currentUser ? (currentUser.displayName || currentUser.email) : "Anonymous"),
+            text: commentText,
+            timestamp: Date.now()
+          };
+          firebase.database().ref("socialComments/" + postId).push(commentObj);
+          commentInput.value = "";
+          logEvent("social-comment", "Comment bài social " + postId + ": " + commentText);
         }
       });
-    }
-    
-    /* -------------------- PHẦN PROFILE & SETTINGS -------------------- */
-    function updateProfileSection() {
-      var profileInfoDiv = document.getElementById("profile-info");
-      if(currentUser) {
-        var infoHTML = "<p><strong>Email:</strong> " + (currentUser.email || "Không có") + "</p>";
-        infoHTML += "<p><strong>Tên hiển thị:</strong> " + (currentUser.displayName || "Không có") + "</p>";
-        infoHTML += "<p><strong>Nickname:</strong> " + (window.userNickname || "Chưa đặt") + "</p>";
-        profileInfoDiv.innerHTML = infoHTML;
-      } else {
-        profileInfoDiv.innerHTML = "<p>Chưa có thông tin, vui lòng đăng nhập.</p>";
-      }
-    }
-    
-    document.getElementById("update-profile-btn").addEventListener("click", function() {
-      var newNickname = document.getElementById("profile-nickname").value.trim();
-      if(newNickname === "") return;
-      window.userNickname = newNickname;
-      showToast("Nickname đã được cập nhật: " + newNickname);
-      updateProfileSection();
-      pubnub.subscribe({ channels: ["pm-" + newNickname] });
-      logEvent("profile-update", "Cập nhật nickname: " + newNickname);
-    });
-    
-    document.getElementById("theme-select").addEventListener("change", function() {
-      var selectedTheme = this.value;
-      document.body.className = selectedTheme;
-    });
-    
-    document.getElementById("theme-switcher").addEventListener("click", function() {
-      var themeSelect = document.getElementById("theme-select");
-      var nextThemeIndex = (themeSelect.selectedIndex + 1) % themeSelect.options.length;
-      themeSelect.selectedIndex = nextThemeIndex;
-      document.body.className = themeSelect.value = themeSelect.options[nextThemeIndex].value;
-    });
-    
-    /* -------------------- PHẦN ĐĂNG NHẬP -------------------- */
-    firebase.auth().onAuthStateChanged(function(user) {
-      if(user) {
-        currentUser = user;
-        // Cập nhật thông tin người dùng trong node "users"
-        var userRef = firebase.database().ref("users/" + user.uid);
-        userRef.set({
-          displayName: user.displayName || user.email,
-          status: "online",
-          typing: false
-        });
-        userRef.onDisconnect().update({ status: "offline", typing: false });
-      }
-      updateProfileSection();
-    });
-    
-    document.getElementById("google-login").addEventListener("click", function() {
-      var provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithPopup(provider)
-        .then(function(result) {
-          showToast("Đăng nhập thành công: " + result.user.displayName);
-          currentUser = result.user;
-          updateProfileSection();
-          logEvent("login", "Đăng nhập với Google: " + result.user.displayName);
-        })
-        .catch(function(error) {
-          console.error("Lỗi đăng nhập Google:", error);
-          showToast("Lỗi đăng nhập Google: " + error.message);
-        });
-    });
-    
-    document.getElementById("email-login").addEventListener("click", function() {
-      var email = document.getElementById("email").value;
-      var password = document.getElementById("password").value;
-      firebase.auth().signInWithEmailAndPassword(email, password)
-        .then(function(userCredential) {
-          showToast("Đăng nhập thành công với Email: " + userCredential.user.email);
-          currentUser = userCredential.user;
-          updateProfileSection();
-          logEvent("login", "Đăng nhập với Email: " + userCredential.user.email);
-        })
-        .catch(function(error) {
-          if (error.code === 'auth/user-not-found') {
-            firebase.auth().createUserWithEmailAndPassword(email, password)
-              .then(function(userCredential) {
-                showToast("Tạo tài khoản Email thành công: " + userCredential.user.email);
-                currentUser = userCredential.user;
-                updateProfileSection();
-                logEvent("signup", "Tạo tài khoản Email: " + userCredential.user.email);
-              })
-              .catch(function(error) {
-                console.error("Lỗi tạo người dùng Email:", error.message);
-                showToast("Lỗi tạo người dùng Email: " + error.message);
-              });
-          } else {
-            console.error("Lỗi đăng nhập Email:", error.message);
-            showToast("Lỗi đăng nhập Email: " + error.message);
+      
+      const attachSocialCommentsListener = postId => {
+        firebase.database().ref("socialComments/" + postId).on("child_added", snapshot => {
+          const comment = snapshot.val();
+          const commentListDiv = document.getElementById("social-comment-list-" + postId);
+          if(commentListDiv) {
+            const commentDiv = document.createElement("div");
+            commentDiv.className = "social-comment";
+            commentDiv.innerHTML = `<strong>${sanitize(comment.sender)}:</strong> ${sanitize(comment.text)}<br><small>${formatTime(comment.timestamp)}</small>`;
+            commentListDiv.appendChild(commentDiv);
           }
         });
-    });
-    
-    document.getElementById("send-otp").addEventListener("click", function() {
-      var phoneNumber = document.getElementById("phone-number").value;
-      window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' });
-      firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
-        .then(function(confirmationResult) {
-          window.confirmationResult = confirmationResult;
-          showToast("OTP đã được gửi đến số điện thoại: " + phoneNumber);
-          logEvent("otp-send", "Gửi OTP đến số: " + phoneNumber);
-        })
-        .catch(function(error) {
-          console.error("Lỗi gửi OTP:", error);
-          showToast("Lỗi gửi OTP: " + error.message);
-        });
-    });
-    
-    document.getElementById("verify-otp").addEventListener("click", function() {
-      var otpCode = document.getElementById("otp-code").value;
-      window.confirmationResult.confirm(otpCode)
-        .then(function(result) {
-          showToast("Xác thực số điện thoại thành công: " + result.user.phoneNumber);
-          currentUser = result.user;
-          updateProfileSection();
-          logEvent("otp-verify", "Xác thực OTP thành công cho số: " + result.user.phoneNumber);
-        })
-        .catch(function(error) {
-          console.error("OTP không chính xác:", error);
-          showToast("OTP không chính xác: " + error.message);
-        });
-    });
-    
-    /* -------------------- THÔNG BÁO -------------------- */
-    function showAlert() {
-      showToast("Chào bạn! Dự án đang được phát triển nên có thể xảy ra lỗi. Hãy sử dụng một cách văn minh và tích cực. Cảm ơn bạn đã tin dùng dịch vụ của chúng tôi.");
-    }
-    
-    // Loading Animation cho progress-circle
-    document.querySelectorAll('.progress-circle').forEach(el => {
-      const circle = el.querySelector('.progress');
-      const text = el.querySelector('.percentage');
-      const radius = circle.getAttribute('r');
-      const circumference = 2 * Math.PI * radius;
-      const percent = parseInt(el.getAttribute('data-percentage'), 10);
-      circle.style.strokeDasharray = `${circumference}`;
-      const offset = circumference - (percent / 100) * circumference;
-      setTimeout(() => {
-        circle.style.strokeDashoffset = offset;
-        text.textContent = `${percent}%`;
-      }, 100);
-    });
-    
-    // (Có thể bổ sung thêm push notifications, caching offline, ...)
+      };
+      
+      /* ---------- Profile & Settings ---------- */
+      const updateProfileSection = () => {
+        const profileInfoDiv = document.getElementById("profile-info");
+        if(currentUser) {
+          let infoHTML = `<p><strong>Email:</strong> ${currentUser.email || "Không có"}</p>`;
+          infoHTML += `<p><strong>Tên hiển thị:</strong> ${currentUser.displayName || "Không có"}</p>`;
+          infoHTML += `<p><strong>Nickname:</strong> ${window.userNickname || "Chưa đặt"}</p>`;
+          profileInfoDiv.innerHTML = infoHTML;
+        } else {
+          profileInfoDiv.innerHTML = "<p>Chưa có thông tin, vui lòng đăng nhập.</p>";
+        }
+      };
+      
+      document.getElementById("update-profile-btn").addEventListener("click", () => {
+        const newNickname = document.getElementById("profile-nickname").value.trim();
+        if(newNickname === "") return;
+        window.userNickname = newNickname;
+        showToast("Nickname đã được cập nhật: " + newNickname);
+        updateProfileSection();
+        pubnub.subscribe({ channels: ["pm-" + newNickname] });
+        logEvent("profile-update", "Cập nhật nickname: " + newNickname);
+      });
+      
+      document.getElementById("theme-select").addEventListener("change", function() {
+        document.body.className = this.value;
+      });
+      
+      document.getElementById("theme-switcher").addEventListener("click", function() {
+        const themeSelect = document.getElementById("theme-select");
+        const nextThemeIndex = (themeSelect.selectedIndex + 1) % themeSelect.options.length;
+        themeSelect.selectedIndex = nextThemeIndex;
+        document.body.className = themeSelect.value = themeSelect.options[nextThemeIndex].value;
+      });
+      
+      /* ---------- Đăng nhập ---------- */
+      firebase.auth().onAuthStateChanged(user => {
+        if(user) {
+          currentUser = user;
+          const userRef = firebase.database().ref("users/" + user.uid);
+          userRef.set({
+            displayName: user.displayName || user.email,
+            status: "online",
+            typing: false
+          });
+          userRef.onDisconnect().update({ status: "offline", typing: false });
+        }
+        updateProfileSection();
+      });
+      
+      document.getElementById("google-login").addEventListener("click", () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithPopup(provider)
+          .then(result => {
+            showToast("Đăng nhập thành công: " + result.user.displayName);
+            currentUser = result.user;
+            updateProfileSection();
+            logEvent("login", "Đăng nhập với Google: " + result.user.displayName);
+          })
+          .catch(error => {
+            console.error("Lỗi đăng nhập Google:", error);
+            showToast("Lỗi đăng nhập Google: " + error.message);
+          });
+      });
+      
+      document.getElementById("email-login").addEventListener("click", () => {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        firebase.auth().signInWithEmailAndPassword(email, password)
+          .then(userCredential => {
+            showToast("Đăng nhập thành công với Email: " + userCredential.user.email);
+            currentUser = userCredential.user;
+            updateProfileSection();
+            logEvent("login", "Đăng nhập với Email: " + userCredential.user.email);
+          })
+          .catch(error => {
+            if (error.code === 'auth/user-not-found') {
+              firebase.auth().createUserWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                  showToast("Tạo tài khoản Email thành công: " + userCredential.user.email);
+                  currentUser = userCredential.user;
+                  updateProfileSection();
+                  logEvent("signup", "Tạo tài khoản Email: " + userCredential.user.email);
+                })
+                .catch(error => {
+                  console.error("Lỗi tạo người dùng Email:", error.message);
+                  showToast("Lỗi tạo người dùng Email: " + error.message);
+                });
+            } else {
+              console.error("Lỗi đăng nhập Email:", error.message);
+              showToast("Lỗi đăng nhập Email: " + error.message);
+            }
+          });
+      });
+      
+      document.getElementById("send-otp").addEventListener("click", () => {
+        const phoneNumber = document.getElementById("phone-number").value;
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' });
+        firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+          .then(confirmationResult => {
+            window.confirmationResult = confirmationResult;
+            showToast("OTP đã được gửi đến số điện thoại: " + phoneNumber);
+            logEvent("otp-send", "Gửi OTP đến số: " + phoneNumber);
+          })
+          .catch(error => {
+            console.error("Lỗi gửi OTP:", error);
+            showToast("Lỗi gửi OTP: " + error.message);
+          });
+      });
+      
+      document.getElementById("verify-otp").addEventListener("click", () => {
+        const otpCode = document.getElementById("otp-code").value;
+        window.confirmationResult.confirm(otpCode)
+          .then(result => {
+            showToast("Xác thực số điện thoại thành công: " + result.user.phoneNumber);
+            currentUser = result.user;
+            updateProfileSection();
+            logEvent("otp-verify", "Xác thực OTP thành công cho số: " + result.user.phoneNumber);
+          })
+          .catch(error => {
+            console.error("OTP không chính xác:", error);
+            showToast("OTP không chính xác: " + error.message);
+          });
+      });
+      
+      /* ---------- Loading Animation for progress-circle ---------- */
+      document.querySelectorAll('.progress-circle').forEach(el => {
+        const circle = el.querySelector('.progress');
+        const text = el.querySelector('.percentage');
+        const radius = circle.getAttribute('r');
+        const circumference = 2 * Math.PI * radius;
+        const percent = parseInt(el.getAttribute('data-percentage'), 10);
+        circle.style.strokeDasharray = `${circumference}`;
+        setTimeout(() => {
+          const offset = circumference - (percent / 100) * circumference;
+          circle.style.strokeDashoffset = offset;
+          text.textContent = `${percent}%`;
+        }, 100);
+      });
+      
+    })();
   </script>
 </body>
 </html>
