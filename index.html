@@ -747,6 +747,56 @@ function appendMessage(message) {
       text.textContent = `${percent}%`;
     }, 100);
   });
+
+// Khởi tạo Social
+    document.getElementById('loginBtn-social').addEventListener('click', function() {
+      var nick = document.getElementById('nickname-social').value.trim();
+      if(!nick){ alert('Vui lòng nhập nickname!'); return; }
+      sessionStorage.setItem('nickname-social', nick);
+      document.getElementById('login-social').style.display = 'none';
+      document.getElementById('postArea-social').style.display = 'block';
+      anime({ targets: '#social-app h3', color: '#FF4500', translateY: -20, duration: 1000, easing: 'easeInOutQuad' });
+    });
+
+    document.getElementById('postBtn-social').addEventListener('click', async function() {
+      var content = document.getElementById('postContent-social').value.trim();
+      var nick = sessionStorage.getItem('nickname-social');
+      if(!content || !nick){ alert('Bạn phải đăng nhập và nhập nội dung!'); return; }
+      var imageUrl = '';
+      var file = document.getElementById('imageUpload-social').files[0];
+      if(file){
+        var formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'YOUR_UPLOAD_PRESET');
+        try {
+          var res = await fetch('https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload', { method: 'POST', body: formData });
+          var data = await res.json(); imageUrl = data.secure_url;
+        } catch(e){ console.error(e);
+        }
+      }
+      db.collection('posts').add({ nickname: nick, content, imageUrl, timestamp: new Date(), likes: [] })
+      .then(function(docRef) {
+        rtdb.ref('comments/' + docRef.id).set({});
+        pubnub.publish({ channel: 'social-feed', message: { text: 'new post' } });
+        document.getElementById('postContent-social').value = '';
+        document.getElementById('imageUpload-social').value = '';
+      });
+    });
+
+    function loadPostsSocial() {
+      db.collection('posts').orderBy('timestamp','desc').get().then(snapshot => {
+        var feed = document.getElementById('feed-social'); feed.innerHTML = '';
+        snapshot.forEach(doc => {
+          var post = doc.data(); var div = document.createElement('div'); div.classList.add('post');
+          var html = `<h4>${post.nickname}</h4><p>${post.content}</p>`;
+          if(post.imageUrl) html += `<img src="${post.imageUrl}" />`;
+          html += `<p>Likes: ${post.likes.length}</p>`;
+          div.innerHTML = html; feed.appendChild(div);
+          anime({ targets: div, opacity:[0,1], translateY:[20,0], duration:800 });
+        });
+      });
+    }
+    pubnub.subscribe({ channels:['social-feed'] });
+    pubnub.addListener({ message: loadPostsSocial });
+    window.addEventListener('load', loadPostsSocial);
     
     function showAlert() {
       alert("Chào bạn! Đây là thông báo về trang web của chúng tôi Một số thông báo về trang web như sau: Đây là một dự án đang được phát triển nên đôi lúc sẽ xảy ra lỗi Khi có lỗi xảy ra, chúng tôi sẽ cố gắng khắc phục sớm nhất có thể Một số cách để xử lý lỗi của chúng tôi như: Tải lại trang web Nếu trang vẫn lỗi, bạn có thể truy cập vào lúc khác Một số điều người dùng cần lưu ý như: Nhắn tin văn minh, nhắn với mục đích tốt vì trang không có kiểm duyệt, vì vậy chúng tôi sẽ cố gắng để kiểm soát để người dùng có một trải nghiệm, môi trường giao tiếp tốt nhất Nếu người dùng sử dụng các mục đích không tốt thì chúng tôi có thể cấm tài khoản Trân trọng cảm ơn người dùng đã tin tưởng sử dụng dịch vụ của chúng tôi");
