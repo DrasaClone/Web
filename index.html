@@ -330,6 +330,9 @@
       measurementId: "G-61XJ390Q30"
     };
     firebase.initializeApp(firebaseConfig);
+    var db = firebase.firestore();
+    var rtdb = firebase.database();
+
     
     /* -------------------- KHỞI TẠO PUBNUB -------------------- */
     var pubnub = new PubNub({
