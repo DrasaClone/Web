@@ -725,7 +725,7 @@
     document.getElementById("upload-chat-btn").addEventListener("click", function() {
       cloudinary.createUploadWidget({
           cloudName: 'dgbux4wzo',
-          uploadPreset: 'ml_default'
+          uploadPreset: 'okeqfdx4'
         }, function(error, result) {
           if(!error && result && result.event === "success") {
             var url = result.info.secure_url;
@@ -852,7 +852,7 @@
     
     document.getElementById("upload-social-btn").addEventListener("click", function() {
       cloudinary.createUploadWidget({
-          cloudName: 'demo',
+          cloudName: 'dgbux4wzo',
           uploadPreset: 'okeqfdx4'
         }, function(error, result) {
           if(!error && result && result.event === "success") {
@@ -1050,9 +1050,6 @@
     });
     
     /* -------------------- THÔNG BÁO -------------------- */
-    function showAlert() {
-      showToast("Chào bạn! Đây là thông báo về trang web của chúng tôi Một số thông báo về trang web như sau: Đây là một dự án đang được phát triển nên đôi lúc sẽ xảy ra lỗi Khi có lỗi xảy ra, chúng tôi sẽ cố gắng khắc phục sớm nhất có thể Một số cách để xử lý lỗi của chúng tôi như: Tải lại trang web Nếu trang vẫn lỗi, bạn có thể truy cập vào lúc khác Một số điều người dùng cần lưu ý như: Nhắn tin văn minh, nhắn với mục đích tốt vì trang không có kiểm duyệt, vì vậy chúng tôi sẽ cố gắng để kiểm soát để người dùng có một trải nghiệm, môi trường giao tiếp tốt nhất Nếu người dùng sử dụng các mục đích không tốt thì chúng tôi có thể cấm tài khoản Trân trọng cảm ơn người dùng đã tin tưởng sử dụng dịch vụ của chúng tôi");
-    }
 
     function showAlertl() {
       alert("Chào bạn! Đây là thông báo về trang web của chúng tôi Một số thông báo về trang web như sau: Đây là một dự án đang được phát triển nên đôi lúc sẽ xảy ra lỗi Khi có lỗi xảy ra, chúng tôi sẽ cố gắng khắc phục sớm nhất có thể Một số cách để xử lý lỗi của chúng tôi như: Tải lại trang web Nếu trang vẫn lỗi, bạn có thể truy cập vào lúc khác Một số điều người dùng cần lưu ý như: Nhắn tin văn minh, nhắn với mục đích tốt vì trang không có kiểm duyệt, vì vậy chúng tôi sẽ cố gắng để kiểm soát để người dùng có một trải nghiệm, môi trường giao tiếp tốt nhất Nếu người dùng sử dụng các mục đích không tốt thì chúng tôi có thể cấm tài khoản Trân trọng cảm ơn người dùng đã tin tưởng sử dụng dịch vụ của chúng tôi");
@@ -1060,7 +1057,11 @@
 
     // Hiển thị thông báo khi trang được tải
     window.onload = showAlertl;
-    
+
+    function showAlert() {
+      showToast("Chào bạn! Đây là thông báo về trang web của chúng tôi Một số thông báo về trang web như sau: Đây là một dự án đang được phát triển nên đôi lúc sẽ xảy ra lỗi Khi có lỗi xảy ra, chúng tôi sẽ cố gắng khắc phục sớm nhất có thể Một số cách để xử lý lỗi của chúng tôi như: Tải lại trang web Nếu trang vẫn lỗi, bạn có thể truy cập vào lúc khác Một số điều người dùng cần lưu ý như: Nhắn tin văn minh, nhắn với mục đích tốt vì trang không có kiểm duyệt, vì vậy chúng tôi sẽ cố gắng để kiểm soát để người dùng có một trải nghiệm, môi trường giao tiếp tốt nhất Nếu người dùng sử dụng các mục đích không tốt thì chúng tôi có thể cấm tài khoản Trân trọng cảm ơn người dùng đã tin tưởng sử dụng dịch vụ của chúng tôi");
+    }
+
     // Loading Animation cho progress-circle
     document.querySelectorAll('.progress-circle').forEach(el => {
       const circle = el.querySelector('.progress');
