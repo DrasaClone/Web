@@ -5,29 +5,29 @@
   <title>Nền tảng Chat Realtime - Phiên bản Nâng Cấp</title>
   <meta name="description" content="Nền tảng Chat Realtime tích hợp chat, forum, private chat, mạng xã hội và trò chơi với Firebase, PubNub, Cloudinary và Anime.js.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <!-- Firebase JS SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-  
+
   <!-- PubNub SDK -->
   <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.9.min.js"></script>
-  
+
   <!-- Anime.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-  
+
   <!-- Cloudinary Upload Widget -->
   <script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>
-  
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&display=swap" rel="stylesheet">
-  
+
   <!-- Facebook SDK -->
   <script async defer crossorigin="anonymous" src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v17.0"></script>
-  
+
   <style>
     /* Các chủ đề giao diện */
     body.theme-default {
@@ -383,11 +383,8 @@
   <!-- Private Chat Section -->
   <div class="section private-chat-section" id="private-chat-section" style="display: none;">
     <h2>Private Chat</h2>
-    <!-- Danh sách người dùng với trạng thái online và thông báo đang nhập -->
     <div id="private-chat-user-list"></div>
-    <!-- Hiển thị thông tin user đang được chọn để chat riêng -->
     <div id="private-chat-selected-indicator"></div>
-    <!-- Lịch sử tin nhắn private chat -->
     <div id="pm-chat-window" style="min-height:300px; overflow-y:auto;"></div>
     <div class="private-chat-input">
       <input type="text" id="pm-message" placeholder="Nhập tin nhắn riêng...">
@@ -451,6 +448,24 @@
   <script>
     "use strict";
     (function(){
+      /* ---------- Helper for Safe Database Calls ---------- */
+      function safeDbRef(path) {
+        try {
+          return firebase.database().ref(path);
+        } catch(error) {
+          console.error("Database error on path:", path, error);
+          // Trả về một đối tượng giả với các phương thức không tác động gì
+          return {
+            push: () => {},
+            set: () => {},
+            on: () => {},
+            once: () => Promise.reject(error),
+            update: () => {},
+            off: () => {}
+          };
+        }
+      }
+      
       /* ---------- Global Variables & Helper Functions ---------- */
       let currentPrivateChatUser = null;
       let currentUser = null;
@@ -469,8 +484,8 @@
         toast.className = "toast";
         toast.textContent = message;
         container.appendChild(toast);
-        setTimeout(() => {
-          toast.classList.add("hide");
+        setTimeout(() => { 
+          toast.classList.add("hide"); 
           toast.addEventListener("transitionend", () => { toast.remove(); });
         }, 3000);
       };
@@ -484,7 +499,7 @@
           timestamp: Date.now(),
           user: currentUser ? (currentUser.displayName || currentUser.email) : "Anonymous"
         };
-        firebase.database().ref('logs').push(logObj);
+        safeDbRef('logs').push(logObj);
       };
       
       /* ---------- Firebase Configuration ---------- */
@@ -683,13 +698,15 @@
       const loadPrivateChat = (convId) => {
         document.getElementById("pm-chat-window").innerHTML = "";
         if(currentConversationListener) currentConversationListener.off();
-        currentConversationListener = firebase.database().ref("privateChats/" + convId);
-        currentConversationListener.on("child_added", snapshot => { appendPrivateMessage(snapshot.val()); });
+        currentConversationListener = safeDbRef("privateChats/" + convId);
+        currentConversationListener.on("child_added", snapshot => { 
+          appendPrivateMessage(snapshot.val());
+        });
       };
       
       window.selectPrivateChat = (uid) => {
         currentPrivateChatUser = uid;
-        firebase.database().ref("users/" + uid).once("value").then(snapshot => {
+        safeDbRef("users/" + uid).once("value").then(snapshot => {
           const userData = snapshot.val();
           const indicator = userData.typing ? " (Đang nhập...)" : "";
           document.getElementById("private-chat-selected-indicator").innerHTML = userData.displayName + indicator;
@@ -700,7 +717,7 @@
         }
       };
       
-      firebase.database().ref("users").on("value", snapshot => {
+      safeDbRef("users").on("value", snapshot => {
         let userListHTML = "";
         snapshot.forEach(childSnapshot => {
           const userData = childSnapshot.val();
@@ -717,9 +734,11 @@
       
       document.getElementById("pm-message").addEventListener("input", () => {
         if(currentUser) {
-          firebase.database().ref("users/" + currentUser.uid).update({ typing: true });
+          safeDbRef("users/" + currentUser.uid).update({ typing: true });
           clearTimeout(typingTimeout);
-          typingTimeout = setTimeout(() => { firebase.database().ref("users/" + currentUser.uid).update({ typing: false }); }, 1000);
+          typingTimeout = setTimeout(() => {
+            safeDbRef("users/" + currentUser.uid).update({ typing: false });
+          }, 1000);
         }
       });
       
@@ -735,9 +754,9 @@
           const senderName = currentUser.displayName || currentUser.email;
           const convId = currentUser.uid < currentPrivateChatUser ? currentUser.uid + "_" + currentPrivateChatUser : currentPrivateChatUser + "_" + currentUser.uid;
           const message = { sender: senderName, text, timestamp: Date.now() };
-          firebase.database().ref("privateChats/" + convId).push(message);
+          safeDbRef("privateChats/" + convId).push(message);
           input.value = "";
-          firebase.database().ref("users/" + currentUser.uid).update({ typing: false });
+          safeDbRef("users/" + currentUser.uid).update({ typing: false });
           logEvent("private-chat-send", "Gửi tin private chat: " + text);
         }
       });
@@ -757,7 +776,7 @@
               const senderName = currentUser.displayName || currentUser.email;
               const convId = currentUser.uid < currentPrivateChatUser ? currentUser.uid + "_" + currentPrivateChatUser : currentPrivateChatUser + "_" + currentUser.uid;
               const message = { sender: senderName, image: url, timestamp: Date.now() };
-              firebase.database().ref("privateChats/" + convId).push(message);
+              safeDbRef("privateChats/" + convId).push(message);
               logEvent("private-chat-upload", "Upload image cho private chat: " + url);
             }
           }
@@ -766,7 +785,7 @@
       
       /* ---------- Social Network Functions ---------- */
       const updateSocialPostLike = (postId) => {
-        firebase.database().ref("socialPosts/" + postId + "/likeCount").transaction(currentLikes => (currentLikes || 0) + 1);
+        safeDbRef("socialPosts/" + postId + "/likeCount").transaction(currentLikes => (currentLikes || 0) + 1);
       };
       
       document.getElementById("submit-social-btn").addEventListener("click", () => {
@@ -774,7 +793,7 @@
         if(socialMsg === "") return;
         const senderName = window.userNickname || "Anonymous";
         const socialPost = { sender: senderName, text: socialMsg, timestamp: Date.now(), likeCount: 0 };
-        firebase.database().ref('socialPosts').push(socialPost);
+        safeDbRef('socialPosts').push(socialPost);
         document.getElementById("social-message").value = "";
         logEvent("social-post", "Đăng bài xã hội: " + socialMsg);
       });
@@ -793,7 +812,7 @@
         }).open();
       });
       
-      firebase.database().ref('socialPosts').on('child_added', snapshot => {
+      safeDbRef('socialPosts').on('child_added', snapshot => {
         const postKey = snapshot.key;
         const post = snapshot.val();
         if(typeof post.likeCount === "undefined") post.likeCount = 0;
@@ -838,14 +857,14 @@
             text: commentText,
             timestamp: Date.now()
           };
-          firebase.database().ref("socialComments/" + postId).push(commentObj);
+          safeDbRef("socialComments/" + postId).push(commentObj);
           commentInput.value = "";
           logEvent("social-comment", "Comment bài social " + postId + ": " + commentText);
         }
       });
       
       const attachSocialCommentsListener = postId => {
-        firebase.database().ref("socialComments/" + postId).on("child_added", snapshot => {
+        safeDbRef("socialComments/" + postId).on("child_added", snapshot => {
           const comment = snapshot.val();
           const commentListDiv = document.getElementById("social-comment-list-" + postId);
           if(commentListDiv) {
@@ -895,7 +914,7 @@
       firebase.auth().onAuthStateChanged(user => {
         if(user) {
           currentUser = user;
-          const userRef = firebase.database().ref("users/" + user.uid);
+          const userRef = safeDbRef("users/" + user.uid);
           userRef.set({
             displayName: user.displayName || user.email,
             status: "online",
@@ -990,7 +1009,7 @@
         const percent = parseInt(el.getAttribute('data-percentage'), 10);
         circle.style.strokeDasharray = `${circumference}`;
         setTimeout(() => {
-          const offset = circumference - (percent / 100) * circumference;
+          const offset = circumference - (percent / 100 * circumference);
           circle.style.strokeDashoffset = offset;
           text.textContent = `${percent}%`;
         }, 100);
