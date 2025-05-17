@@ -160,7 +160,7 @@
       font-weight: bold;
     }
     
-    /* Chat Window: chỉ một khung hiển thị tin nhắn */
+    /* Chat Window: 1 khung chứa tin nhắn với hiển thị riêng tin của mình và của người khác */
     #chat-window {
       border: 1px solid rgba(255,255,255,0.5);
       height: 300px;
@@ -178,19 +178,19 @@
       max-width: 80%;
       word-break: break-word;
     }
-    /* Tin nhắn của "tôi": căn về bên phải, nền xanh lá nhạt */
+    /* Tin nhắn của tôi: căn bên phải */
     .message.mine {
       align-self: flex-end;
       background-color: #a8e6cf;
       text-align: right;
     }
-    /* Tin nhắn của người khác: căn về bên trái, nền xanh dương nhạt */
+    /* Tin nhắn của người khác: căn bên trái */
     .message.other {
       align-self: flex-start;
       background-color: #81d4fa;
       text-align: left;
     }
-    /* Tin hệ thống thông báo online/offline */
+    /* Tin hệ thống hiển thị thông báo online/offline */
     .system-message {
       align-self: center;
       background-color: #ffe082;
@@ -202,7 +202,7 @@
       margin: 10px auto;
     }
     
-    /* Card cho forum & social posts */
+    /* Card cho forum & social posts, bao gồm nút like & comment */
     .post-card {
       background: rgba(255,255,255,0.1);
       border: 1px solid rgba(255,255,255,0.3);
@@ -215,6 +215,25 @@
       max-width: 100%;
       margin-top: 10px;
       border-radius: 5px;
+    }
+    .like-btn, .show-comment-btn, .submit-comment-btn {
+      margin: 5px 2px;
+      padding: 5px 10px;
+      font-size: 0.9rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .comment-section {
+      margin-top: 10px;
+      background: rgba(0,0,0,0.2);
+      padding: 5px;
+      border-radius: 5px;
+    }
+    .comment {
+      margin: 5px 0;
+      font-size: 0.9rem;
+      padding: 5px;
+      border-bottom: 1px dotted #ccc;
     }
     
     /* Facebook comments container */
@@ -280,7 +299,7 @@
     </div>
   </div>
   
-  <!-- Chat Section: hiển thị tin nhắn trong 1 khung với thông báo online/offline -->
+  <!-- Chat Section -->
   <div class="section chat-section active-page" id="chat-section">
     <h2>Phòng Chat</h2>
     <div class="nickname-section">
@@ -299,7 +318,7 @@
     </div>
   </div>
   
-  <!-- Forum Section -->
+  <!-- Forum Section (đã tích hợp Like & Comment) -->
   <div class="section forum-section" id="forum-section" style="display: none;">
     <h2>Forum</h2>
     <div class="forum-input">
@@ -402,7 +421,7 @@
       },
       presence: function(event) {
         updatePresence();
-        // Thông báo khi có người join/leave
+        // Hiển thị thông báo online/offline
         if(event.action === "join") {
           appendSystemMessage(event.uuid + " đã online");
         } else if(event.action === "leave" || event.action === "timeout") {
@@ -542,27 +561,38 @@
     }
     
     /* -------------------- XỬ LÝ TIN NHẮN & HIỆU ỨNG ANIME -------------------- */
-    // Hiển thị tin nhắn của chat chung
     function appendMessage(message) {
       var senderName = message.sender;
       var chatWindow = document.getElementById("chat-window");
       var msgDiv = document.createElement("div");
-      // Nếu tin của tôi dùng class "mine", còn của người khác dùng "other"
-      msgDiv.className = "message " + ((window.userNickname && senderName === window.userNickname) ? "mine" : "other");
+      
+      // Xác định danh tính của tôi
+      var myIdentifier = window.userNickname || (firebase.auth().currentUser ? (firebase.auth().currentUser.displayName || firebase.auth().currentUser.email) : "Anonymous");
+      var messageClass = (senderName === myIdentifier) ? "mine" : "other";
+      
+      msgDiv.className = "message " + messageClass;
+      
       var content = "<strong>" + senderName + ":</strong><br>" + (message.text || "");
-      if(message.image) {
+      if (message.image) {
         content += "<br><img src='" + message.image + "' alt='Uploaded Image' style='max-width:100%; border-radius:5px;'/>";
       }
-      if(message.timestamp) {
+      if (message.timestamp) {
         content += "<br><small>" + formatTime(message.timestamp) + "</small>";
       }
       msgDiv.innerHTML = content;
       chatWindow.appendChild(msgDiv);
       chatWindow.scrollTop = chatWindow.scrollHeight;
-      anime({ targets: msgDiv, opacity: [0, 1], translateY: [20, 0], duration: 500, easing: 'easeOutExpo' });
+      
+      anime({
+        targets: msgDiv,
+        opacity: [0, 1],
+        translateY: [20, 0],
+        duration: 500,
+        easing: 'easeOutExpo'
+      });
     }
     
-    // Hiển thị tin hệ thống (ví dụ thông báo online/offline)
+    // Hiển thị tin hệ thống, ví dụ thông báo online/offline
     function appendSystemMessage(text) {
       var chatWindow = document.getElementById("chat-window");
       var sysDiv = document.createElement("div");
@@ -570,7 +600,13 @@
       sysDiv.innerHTML = text;
       chatWindow.appendChild(sysDiv);
       chatWindow.scrollTop = chatWindow.scrollHeight;
-      anime({ targets: sysDiv, opacity: [0, 1], translateY: [20, 0], duration: 500, easing: 'easeOutExpo' });
+      anime({
+        targets: sysDiv,
+        opacity: [0, 1],
+        translateY: [20, 0],
+        duration: 500,
+        easing: 'easeOutExpo'
+      });
     }
     
     // Tin nhắn riêng
@@ -588,147 +624,83 @@
       msgDiv.innerHTML = content;
       pmWindow.appendChild(msgDiv);
       pmWindow.scrollTop = pmWindow.scrollHeight;
-      anime({ targets: msgDiv, opacity: [0, 1], translateY: [20, 0], duration: 500, easing: 'easeOutExpo' });
+      anime({
+        targets: msgDiv,
+        opacity: [0, 1],
+        translateY: [20, 0],
+        duration: 500,
+        easing: 'easeOutExpo'
+      });
     }
     
-    /* Gửi tin nhắn chat (văn bản) */
+    /* Gửi tin nhắn chat */
     document.getElementById("send-btn").addEventListener("click", function() {
       var input = document.getElementById("message-input");
       var text = input.value.trim();
       if (text === "") return;
       var user = firebase.auth().currentUser;
-      var senderName = window.userNickname ? window.userNickname : (user ? (user.displayName || user.email || user.phoneNumber) : "Anonymous");
+      var senderName = window.userNickname || (user ? (user.displayName || user.email || user.phoneNumber) : "Anonymous");
       var message = { sender: senderName, text: text, timestamp: Date.now() };
       pubnub.publish({ channel: 'chat', message: message });
       firebase.database().ref('messages').push(message);
       input.value = "";
     });
     
-    /* Upload image cho Chat */
+    /* Upload Image cho Chat */
     document.getElementById("upload-chat-btn").addEventListener("click", function() {
-      cloudinary.createUploadWidget(
-        {
+      cloudinary.createUploadWidget({
           cloudName: 'demo',
           uploadPreset: 'ml_default'
-        },
-        function(error, result) {
+        }, function(error, result) {
           if(!error && result && result.event === "success") {
             var url = result.info.secure_url;
             var user = firebase.auth().currentUser;
-            var senderName = window.userNickname ? window.userNickname : (user ? (user.displayName || user.email || user.phoneNumber) : "Anonymous");
+            var senderName = window.userNickname || (user ? (user.displayName || user.email || user.phoneNumber) : "Anonymous");
             var message = { sender: senderName, image: url, timestamp: Date.now() };
             pubnub.publish({ channel: 'chat', message: message });
             firebase.database().ref('messages').push(message);
           }
-        }
-      ).open();
+        }).open();
     });
     
-    /* Upload image cho Forum */
+    /* -------------------- PHẦN FORUM (Like & Comment) -------------------- */
+    // Đăng bài Forum (bao gồm văn bản và/hoặc ảnh)
+    document.getElementById("submit-forum-btn").addEventListener("click", function() {
+      var forumMsg = document.getElementById("forum-message").value.trim();
+      if(forumMsg === "") return;
+      var senderName = window.userNickname || "Anonymous";
+      // Ghi thêm likeCount mặc định = 0 nếu chưa có
+      var forumPost = { sender: senderName, text: forumMsg, timestamp: Date.now(), likeCount: 0 };
+      firebase.database().ref('forumPosts').push(forumPost);
+      document.getElementById("forum-message").value = "";
+    });
+    
+    // Upload Image cho Forum
     document.getElementById("upload-forum-btn").addEventListener("click", function() {
-      cloudinary.createUploadWidget(
-        {
+      cloudinary.createUploadWidget({
           cloudName: 'demo',
           uploadPreset: 'ml_default'
-        },
-        function(error, result) {
+        }, function(error, result) {
           if(!error && result && result.event === "success") {
             var url = result.info.secure_url;
             var forumMsgField = document.getElementById("forum-message");
             forumMsgField.value = forumMsgField.value + " <img src='" + url + "' alt='Image'/>";
           }
-        }
-      ).open();
+        }).open();
     });
     
-    /* Upload image cho Private Chat */
-    document.getElementById("upload-pm-btn").addEventListener("click", function() {
-      cloudinary.createUploadWidget(
-        {
-          cloudName: 'demo',
-          uploadPreset: 'ml_default'
-        },
-        function(error, result) {
-          if(!error && result && result.event === "success") {
-            var url = result.info.secure_url;
-            var user = firebase.auth().currentUser;
-            var senderName = window.userNickname ? window.userNickname : "Anonymous";
-            var message = { sender: senderName, private: true, image: url, timestamp: Date.now() };
-            var pmChannel = "pm-" + document.getElementById("pm-recipient").value.trim();
-            pubnub.publish({ channel: pmChannel, message: message });
-            appendPrivateMessage(message);
-          }
-        }
-      ).open();
-    });
-    
-    /* Upload image cho Mạng Xã Hội */
-    document.getElementById("upload-social-btn").addEventListener("click", function() {
-      cloudinary.createUploadWidget(
-        {
-          cloudName: 'demo',
-          uploadPreset: 'ml_default'
-        },
-        function(error, result) {
-          if(!error && result && result.event === "success") {
-            var url = result.info.secure_url;
-            var socialMsgField = document.getElementById("social-message");
-            socialMsgField.value = socialMsgField.value + " <img src='" + url + "' alt='Image'/>";
-          }
-        }
-      ).open();
-    });
-    
-    /* Lắng nghe tin nhắn từ Firebase (chat công khai) */
-    firebase.database().ref('messages').on('child_added', function(snapshot) {
-      var message = snapshot.val();
-      appendMessage(message);
-    });
-    
-    /* -------------------- NICKNAME & PRESENCE -------------------- */
-    document.getElementById("set-nickname-btn").addEventListener("click", function() {
-      var nickname = document.getElementById("nickname").value.trim();
-      if(nickname === "") return;
-      window.userNickname = nickname;
-      alert("Nickname đã được đặt thành: " + nickname);
-      pubnub.subscribe({ channels: ["pm-" + nickname] });
-      updatePresence();
-      updateProfileSection();
-    });
-    
-    function updatePresence() {
-      pubnub.hereNow(
-        { channels: ['chat'], includeUUIDs: true },
-        function (status, response) {
-          var onlineList = document.getElementById("online-users-list");
-          onlineList.innerHTML = "";
-          if(response.channels.chat && response.channels.chat.occupants) {
-            response.channels.chat.occupants.forEach(function(occupant) {
-              var li = document.createElement("li");
-              li.textContent = occupant.uuid;
-              onlineList.appendChild(li);
-            });
-          }
-        }
-      );
-    }
-    updatePresence();
-    
-    /* -------------------- FORUM FUNCTIONALITY -------------------- */
-    document.getElementById("submit-forum-btn").addEventListener("click", function() {
-      var forumMsg = document.getElementById("forum-message").value.trim();
-      if(forumMsg === "") return;
-      var senderName = window.userNickname ? window.userNickname : "Anonymous";
-      var forumPost = { sender: senderName, text: forumMsg, timestamp: Date.now() };
-      firebase.database().ref('forumPosts').push(forumPost);
-      document.getElementById("forum-message").value = "";
-    });
-    
+    // Lắng nghe và hiển thị bài Forum
     firebase.database().ref('forumPosts').on('child_added', function(snapshot) {
+      var postKey = snapshot.key;
       var post = snapshot.val();
+      // Đảm bảo rằng có likeCount
+      if(typeof post.likeCount === "undefined") post.likeCount = 0;
+      
       var forumPostsDiv = document.getElementById('forum-posts');
       var postDiv = document.createElement('div');
       postDiv.className = "post-card";
+      postDiv.id = "forum-post-" + postKey;
+      
       var content = "<strong>" + post.sender + ":</strong><br>" + (post.text || "");
       if(post.image) {
         content += "<br><img src='" + post.image + "' alt='Forum Image'/>";
@@ -736,18 +708,102 @@
       if(post.timestamp) {
         content += "<br><small>" + formatTime(post.timestamp) + "</small>";
       }
+      // Thêm nút Like và Comment
+      content += "<br><button class='like-btn' data-post-id='" + postKey + "'>Like (<span class='like-count'>" + post.likeCount + "</span>)</button>";
+      content += " <button class='show-comment-btn' data-post-id='" + postKey + "'>Show Comments</button>";
+      
+      // Phần comment (ẩn ban đầu)
+      content += "<div class='comment-section' id='comment-section-" + postKey + "' style='display:none;'>";
+      content += "<input type='text' class='comment-input' placeholder='Write a comment...'>";
+      content += "<button class='submit-comment-btn' data-post-id='" + postKey + "'>Comment</button>";
+      content += "<div class='comment-list' id='comment-list-" + postKey + "'></div>";
+      content += "</div>";
+      
       postDiv.innerHTML = content;
       forumPostsDiv.appendChild(postDiv);
+      
+      // Gắn listener để tự động hiển thị các comment đang có
+      attachForumCommentsListener(postKey);
     });
+    
+    // Xử lý Like (sử dụng event delegation cho các nút Like trong Forum)
+    document.getElementById("forum-posts").addEventListener("click", function(e) {
+      if(e.target && e.target.classList.contains("like-btn")) {
+        var postId = e.target.getAttribute("data-post-id");
+        var likeRef = firebase.database().ref("forumPosts/" + postId + "/likeCount");
+        likeRef.transaction(function(currentLikes) {
+          return (currentLikes || 0) + 1;
+        });
+      }
+    });
+    
+    // Thay đổi trạng thái hiển thị comment (mở/đóng vùng comment)
+    document.getElementById("forum-posts").addEventListener("click", function(e) {
+      if(e.target && e.target.classList.contains("show-comment-btn")) {
+        var postId = e.target.getAttribute("data-post-id");
+        var commentSection = document.getElementById("comment-section-" + postId);
+        if(commentSection.style.display === "none") {
+          commentSection.style.display = "block";
+        } else {
+          commentSection.style.display = "none";
+        }
+      }
+    });
+    
+    // Xử lý Comment (event delegation cho nút submit comment)
+    document.getElementById("forum-posts").addEventListener("click", function(e) {
+      if(e.target && e.target.classList.contains("submit-comment-btn")) {
+        var postId = e.target.getAttribute("data-post-id");
+        var parent = e.target.parentNode;
+        var commentInput = parent.querySelector(".comment-input");
+        var commentText = commentInput.value.trim();
+        if(commentText === "") return;
+        var commentObj = {
+          sender: window.userNickname || (firebase.auth().currentUser ? (firebase.auth().currentUser.displayName || firebase.auth().currentUser.email) : "Anonymous"),
+          text: commentText,
+          timestamp: Date.now()
+        };
+        firebase.database().ref("forumComments/" + postId).push(commentObj);
+        commentInput.value = "";
+      }
+    });
+    
+    // Lắng nghe các comment mới cho mỗi bài Forum
+    function attachForumCommentsListener(postId) {
+      firebase.database().ref("forumComments/" + postId).on("child_added", function(snapshot) {
+        var comment = snapshot.val();
+        var commentListDiv = document.getElementById("comment-list-" + postId);
+        if(commentListDiv) {
+          var commentDiv = document.createElement("div");
+          commentDiv.className = "comment";
+          commentDiv.innerHTML = "<strong>" + comment.sender + ":</strong> " + comment.text +
+                                 "<br><small>" + formatTime(comment.timestamp) + "</small>";
+          commentListDiv.appendChild(commentDiv);
+        }
+      });
+    }
     
     /* -------------------- SOCIAL NETWORK FUNCTIONALITY -------------------- */
     document.getElementById("submit-social-btn").addEventListener("click", function() {
       var socialMsg = document.getElementById("social-message").value.trim();
       if(socialMsg === "") return;
-      var senderName = window.userNickname ? window.userNickname : "Anonymous";
+      var senderName = window.userNickname || "Anonymous";
       var socialPost = { sender: senderName, text: socialMsg, timestamp: Date.now() };
       firebase.database().ref('socialPosts').push(socialPost);
       document.getElementById("social-message").value = "";
+    });
+    
+    document.getElementById("upload-social-btn").addEventListener("click", function() {
+      cloudinary.createUploadWidget({
+          cloudName: 'demo',
+          uploadPreset: 'ml_default'
+        }, function(error, result) {
+          if(!error && result && result.event === "success") {
+            var url = result.info.secure_url;
+            var socialMsgField = document.getElementById("social-message");
+            socialMsgField.value = socialMsgField.value + " <img src='" + url + "' alt='Image'/>";
+          }
+        }).open();
     });
     
     firebase.database().ref('socialPosts').on('child_added', function(snapshot) {
