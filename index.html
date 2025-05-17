@@ -765,7 +765,7 @@ function appendMessage(message) {
       var imageUrl = '';
       var file = document.getElementById('imageUpload-social').files[0];
       if(file){
-        var formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'YOUR_UPLOAD_PRESET');
+        var formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'okeqfdx4');
         try {
           var res = await fetch('https://api.cloudinary.com/v1_1/dgbux4wzo/image/upload', { method: 'POST', body: formData });
           var data = await res.json(); imageUrl = data.secure_url;
