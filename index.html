@@ -401,14 +401,14 @@
   <!-- Scripts -->
   <script>
     /* -------------------- HÀM HỖ TRỢ -------------------- */
-    // Hàm chuyển đổi ký tự đặc biệt thành dạng an toàn
+    // Hàm chuyển đổi ký tự đặc biệt thành dạng an toàn để tránh XSS
     function sanitize(str) {
       var temp = document.createElement('div');
       temp.textContent = str;
       return temp.innerHTML;
     }
     
-    // Hệ thống Toast cho thông báo thay cho alert()
+    // Hệ thống Toast cho thông báo thay thế alert()
     function showToast(message) {
       const container = document.getElementById("toast-container");
       const toast = document.createElement("div");
@@ -677,6 +677,13 @@
       });
     }
     
+    /* ---------- CHỈNH SỬA PHẦN CHAT: LẤY LẠI LỊCH SỬ TIN NHẮN ---------- */
+    // Lắng nghe và hiển thị lại tin nhắn (bao gồm tin cũ và tin mới) từ Firebase
+    firebase.database().ref('messages').on('child_added', function(snapshot) {
+      var message = snapshot.val();
+      appendMessage(message);
+    });
+    
     /* -------------------- GỬI TIN NHẮN CHAT & LOG -------------------- */
     document.getElementById("send-btn").addEventListener("click", function() {
       var input = document.getElementById("message-input");
@@ -809,7 +816,6 @@
     }
     
     /* -------------------- PHẦN MẠNG XÃ HỘI: ĐĂNG BÀI, LIKE, COMMENT & LOG -------------------- */
-    // Khi đăng bài, khởi tạo likeCount = 0 cho bài đăng bên socialPosts
     document.getElementById("submit-social-btn").addEventListener("click", function() {
       var socialMsg = document.getElementById("social-message").value.trim();
       if(socialMsg === "") return;
@@ -849,7 +855,6 @@
       if(post.timestamp) {
         content += "<br><small>" + formatTime(post.timestamp) + "</small>";
       }
-      // Thêm Like & Show Comment cho bài đăng xã hội
       content += "<br><button class='social-like-btn' data-post-id='" + postKey + "'>Like (<span class='social-like-count'>" + post.likeCount + "</span>)</button>";
       content += " <button class='social-show-comment-btn' data-post-id='" + postKey + "'>Show Comments</button>";
       content += "<div class='social-comment-section' id='social-comment-section-" + postKey + "' style='display:none;'>";
