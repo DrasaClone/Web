@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click Counter & Dynamic Cursors</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative; /* For absolute positioning of cursors */
+            overflow: hidden; /* Hide overflowing cursor elements */
+            cursor: default; /* Set default cursor */
+        }
+
+        #clickCounter {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        .cursor-effect {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #007bff;
+            border-radius: 50%;
+            pointer-events: none; /* Prevent interference with clicks */
+            opacity: 0;
+            animation: fadeOut 1s ease-in-out forwards;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.5); }
+        }
+    </style>
+</head>
+<body>
+    <div id="clickCounter">Clicks: 0</div>
+
+    <script>
+        const clickCounterElement = document.getElementById('clickCounter');
+        let clickCount = 0;
+
+        document.addEventListener('click', () => {
+            clickCount++;
+            clickCounterElement.textContent = `Clicks: ${clickCount}`;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            const cursorEffect = document.createElement('div');
+            cursorEffect.classList.add('cursor-effect');
+            cursorEffect.style.left = `${e.clientX - 5}px`; // Adjust for center
+            cursorEffect.style.top = `${e.clientY - 5}px`;   // Adjust for center
+            document.body.appendChild(cursorEffect);
+
+            // Remove the cursor effect element after the animation completes
+            setTimeout(() => {
+                cursorEffect.remove();
+            }, 1000); // Matches the animation duration
+        });
+    </script>
+</body>
+</html>
