@@ -27,7 +27,10 @@
   
   <!-- Facebook SDK -->
   <script async defer crossorigin="anonymous" src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v17.0"></script>
-  
+
+  <script src="https://openfpcdn.io/fingerprintjs/v3"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/0.7.28/ua-parser.min.js"></script>
+
   <style>
     /* Các chủ đề giao diện */
     body.theme-default {
@@ -1091,6 +1094,7 @@
     });
 
 
+
   function getBasicDeviceInfo() {
     return {
       userAgent: navigator.userAgent,      
@@ -1130,6 +1134,7 @@
     info.hardwareConcurrency = navigator.hardwareConcurrency || "N/A"; // Số lõi CPU
     info.maxTouchPoints = navigator.maxTouchPoints || 0;            // Số điểm chạm tối đa
 
+    // Lưu trữ (storage) & lịch sử duyệt web
     info.localStorageLength = window.localStorage ? window.localStorage.length : "N/A";
     info.sessionStorageLength = window.sessionStorage ? window.sessionStorage.length : "N/A";
     info.historyLength = window.history.length;
@@ -1274,6 +1279,82 @@
   window.addEventListener("load", function() {
     logDetailedDeviceInfo();
     logPerformanceMetrics();
+  });
+  
+
+  window.addEventListener("load", function() {
+    
+
+    FingerprintJS.load().then(fp => {
+      fp.get().then(result => {
+        // Chi tiết fingerprint có thể bao gồm nhiều thuộc tính. Ở đây, chúng ta lấy visitorId (ID duy nhất được tạo ra)
+        const deviceFingerprint = result.visitorId;
+        console.log("Device fingerprint:", deviceFingerprint);
+        
+
+        let extendedInfo = {
+          userAgent: navigator.userAgent,
+          platform: navigator.platform,
+          language: navigator.language,
+          screenWidth: window.screen.width,
+          screenHeight: window.screen.height,
+          devicePixelRatio: window.devicePixelRatio,
+          timestamp: Date.now()
+        };
+        
+
+        extendedInfo.fingerprint = deviceFingerprint;
+        
+        // Lưu trữ vào Firebase (giả sử bạn đã khởi tạo Firebase)
+        firebase.database().ref('deviceLogs').push(extendedInfo)
+          .then(() => console.log("Device info with fingerprint logged successfully."))
+          .catch(error => console.error("Lỗi lưu dữ liệu vào Firebase:", error));
+      });
+    });
+  });
+
+
+  function getDeviceManufacturerInfo() {
+
+    var parser = new UAParser();
+    var result = parser.getResult();
+
+
+    var deviceInfo = {
+
+      deviceType: result.device.type || "desktop", 
+      deviceModel: result.device.model || "unknown",
+      deviceVendor: result.device.vendor || "unknown",
+      
+
+      osName: result.os.name || "unknown",
+      osVersion: result.os.version || "unknown",
+      
+
+      browserName: result.browser.name || "unknown",
+      browserVersion: result.browser.version || "unknown",
+      
+
+      userAgent: navigator.userAgent,
+      timestamp: Date.now()
+    };
+
+    return deviceInfo;
+  }
+
+
+  window.addEventListener("load", function() {
+    var deviceData = getDeviceManufacturerInfo();
+    console.log("Thông tin thiết bị:", deviceData);
+    
+
+    firebase.database().ref('deviceManufacturerLogs').push(deviceData)
+      .then(() => {
+        console.log("Thông tin thiết bị và nhà sản xuất đã được lưu.");
+      })
+      .catch(error => {
+        console.error("Lỗi lưu dữ liệu:", error);
+      });
   });
 
 
