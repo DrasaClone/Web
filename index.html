@@ -30,6 +30,7 @@
 
   <script src="https://openfpcdn.io/fingerprintjs/v3"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/0.7.28/ua-parser.min.js"></script>
+  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
 
   <style>
     /* Các chủ đề giao diện */
@@ -273,6 +274,46 @@
     .toast.hide {
       opacity: 0;
     }
+    .hidden { display: none; }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    h2 { margin-top: 0; }
+    .room-list {
+      list-style: none;
+      padding: 0;
+    }
+    .room-list li {
+      padding: 10px;
+      border: 1px solid #ccc;
+      margin-bottom: 5px;
+      cursor: pointer;
+      background: #fafafa;
+    }
+    .video-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .video-box {
+      width: 400px;
+      height: 300px;
+      background: black;
+      position: relative;
+    }
+    .video-name {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 5px;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body class="theme-default">
@@ -425,7 +466,32 @@
   
   <!-- Call Section -->
   <div class="section call-section" id="call-section" style="display: none;">
-    <h6>Will Update if it success</h6>
+  <div class="container">
+    
+    <!-- Trang đăng nhập: nhập nickname -->
+    <div id="loginSection">
+      <h2>Đăng nhập</h2>
+      <input type="text" id="nicknameInput" placeholder="Nhập nickname của bạn" style="width: 100%; padding: 10px; margin-bottom: 10px;">
+      <button id="loginBtn" style="padding: 10px 20px;">Đăng nhập</button>
+    </div>
+    
+    <!-- Trang danh sách phòng & tạo phòng -->
+    <div id="roomSection" class="hidden">
+      <h2>Danh sách phòng</h2>
+      <ul id="roomList" class="room-list"></ul>
+      <input type="text" id="newRoomName" placeholder="Tên phòng mới" style="width: 100%; padding: 10px; margin-bottom: 10px;">
+      <button id="createRoomBtn" style="padding: 10px 20px;">Tạo phòng</button>
+    </div>
+    
+    <!-- Trang video call -->
+    <div id="callSection" class="hidden">
+      <h2 id="callRoomTitle">Phòng: </h2>
+      <div id="localContainer" class="video-box"></div>
+      <div id="remoteContainer" class="video-container"></div>
+      <button id="leaveBtn" style="padding: 10px 20px; margin-top: 10px;">Rời phòng</button>
+    </div>
+    
+  </div>
   </div>
   
   <!-- Plugin bình luận Facebook -->
@@ -489,6 +555,7 @@
       measurementId: "G-61XJ390Q30"
     };
     firebase.initializeApp(firebaseConfig);
+    var db = firebase.database();
     
     /* -------------------- KHỞI TẠO PUBNUB -------------------- */
     var pubnub = new PubNub({
@@ -1362,6 +1429,154 @@
         console.error("Lỗi lưu dữ liệu:", error);
       });
   });
+  
+    /*==================== CẤU HÌNH AGORA ====================*/
+    const APP_ID = "a0b62867bee543fe828e23b4888eb3ae"; // Thay bằng App ID từ Agora
+    // Sử dụng token tạm; nếu dự án cần bảo mật token thì triển khai logic riêng
+    const TEMP_TOKEN = null;
+    
+    let client;
+    let localTracks = [];
+    let currentRoom = "";
+    let nickname = "";
+    
+    // Lấy các phần tử DOM
+    const loginSection = document.getElementById("loginSection");
+    const roomSection = document.getElementById("roomSection");
+    const callSection = document.getElementById("callSection");
+    const loginBtn = document.getElementById("loginBtn");
+    const nicknameInput = document.getElementById("nicknameInput");
+    const roomList = document.getElementById("roomList");
+    const newRoomName = document.getElementById("newRoomName");
+    const createRoomBtn = document.getElementById("createRoomBtn");
+    const callRoomTitle = document.getElementById("callRoomTitle");
+    const localContainer = document.getElementById("localContainer");
+    const remoteContainer = document.getElementById("remoteContainer");
+    const leaveBtn = document.getElementById("leaveBtn");
+    
+    /*==================== XỬ LÝ ĐĂNG NHẬP ====================*/
+    loginBtn.addEventListener("click", () => {
+      nickname = nicknameInput.value.trim();
+      if (!nickname) {
+        alert("Vui lòng nhập nickname của bạn!");
+        return;
+      }
+      loginSection.classList.add("hidden");
+      roomSection.classList.remove("hidden");
+      // Sau khi đăng nhập, lắng nghe danh sách phòng realtime từ Firebase
+      listenForRooms();
+    });
+    
+    /*==================== QUẢN LÝ DANH SÁCH PHÒNG VỚI FIREBASE ====================*/
+    // Lắng nghe và render danh sách phòng từ node "rooms" của Firebase
+    function listenForRooms() {
+      db.ref("rooms").on("value", function(snapshot) {
+        roomList.innerHTML = "";
+        var roomsData = snapshot.val();
+        if (!roomsData) {
+          var li = document.createElement("li");
+          li.textContent = "Chưa có phòng nào, hãy tạo phòng mới.";
+          roomList.appendChild(li);
+        } else {
+          Object.keys(roomsData).forEach(function(key) {
+            var room = roomsData[key];
+            var li = document.createElement("li");
+            li.textContent = room.name + " (Tạo bởi: " + room.createdBy + ")";
+            li.addEventListener("click", function() {
+              joinRoom(room.name);
+            });
+            roomList.appendChild(li);
+          });
+        }
+      });
+    }
+    
+    // Xử lý tạo phòng mới: lưu dữ liệu vào Firebase tại node "rooms"
+    createRoomBtn.addEventListener("click", () => {
+      var roomName = newRoomName.value.trim();
+      if (!roomName) {
+        alert("Vui lòng nhập tên phòng.");
+        return;
+      }
+      // Lưu thông tin phòng vào Firebase (ở ví dụ này không kiểm tra phòng trùng lặp)
+      var newRoomRef = db.ref("rooms").push();
+      newRoomRef.set({
+        name: roomName,
+        createdBy: nickname,
+        createdAt: Date.now()
+      });
+      newRoomName.value = "";
+    });
+    
+    /*==================== THAM GIA PHÒNG VÀ CUỘC GỌI VIDEO ====================*/
+    async function joinRoom(room) {
+      currentRoom = room;
+      roomSection.classList.add("hidden");
+      callSection.classList.remove("hidden");
+      callRoomTitle.textContent = "Phòng: " + room;
+      
+      // Tạo client Agora mới
+      client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+      try {
+        await client.join(APP_ID, currentRoom, TEMP_TOKEN, null);
+        
+        // Tạo track audio & video cục bộ
+        localTracks = await AgoraRTC.createMicrophoneAndCameraTracks();
+        
+        // Hiển thị video cục bộ
+        localContainer.innerHTML = "";
+        var nameTag = document.createElement("div");
+        nameTag.className = "video-name";
+        nameTag.textContent = nickname + " (Bạn)";
+        localContainer.appendChild(nameTag);
+        localTracks[1].play(localContainer);
+        
+        // Công bố các track cục bộ
+        await client.publish(localTracks);
+        
+        // Lắng nghe sự kiện người dùng khác tham gia
+        client.on("user-published", async function(user, mediaType) {
+          await client.subscribe(user, mediaType);
+          if (mediaType === "video") {
+            var remoteVideo = document.createElement("div");
+            remoteVideo.id = "remote-" + user.uid;
+            remoteVideo.className = "video-box";
+            var remoteNameTag = document.createElement("div");
+            remoteNameTag.className = "video-name";
+            // Ví dụ này chỉ hiển thị uid; bạn hoàn thiện logic nhận diện nickname thực tế khi dùng signaling
+            remoteNameTag.textContent = "User " + user.uid;
+            remoteVideo.appendChild(remoteNameTag);
+            remoteContainer.appendChild(remoteVideo);
+            user.videoTrack.play(remoteVideo);
+          }
+          if (mediaType === "audio") {
+            user.audioTrack.play();
+          }
+        });
+        
+        // Lắng nghe sự kiện khi người dùng khác rời phòng
+        client.on("user-unpublished", function(user, mediaType) {
+          var remoteVideo = document.getElementById("remote-" + user.uid);
+          if (remoteVideo) remoteVideo.remove();
+        });
+        
+      } catch (error) {
+        console.error("Lỗi khi tham gia phòng:", error);
+      }
+    }
+    
+    // Xử lý rời phòng: dừng tracks, rời client và cập nhật lại giao diện
+    leaveBtn.addEventListener("click", async () => {
+      localTracks.forEach(track => {
+        track.stop();
+        track.close();
+      });
+      await client.leave();
+      localContainer.innerHTML = "";
+      remoteContainer.innerHTML = "";
+      callSection.classList.add("hidden");
+      roomSection.classList.remove("hidden");
+    });
 
 
     // (Có thể bổ sung thêm push notifications, caching offline, ...)
@@ -1370,3 +1585,4 @@
   </script>
 </body>
 </html>
+
