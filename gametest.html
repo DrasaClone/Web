@@ -2,424 +2,314 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>2D Shooter Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Pháo Hoa Nâng Cao</title>
   <style>
-    /* Reset định dạng cơ bản cho trang */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #000;
+    /* Đảm bảo trang web chiếm toàn bộ màn hình, không có scroll */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
       overflow: hidden;
+      background: #000;
       font-family: Arial, sans-serif;
     }
+
+    /* Canvas vẽ pháo hoa */
     canvas {
       display: block;
+      background-color: transparent;
     }
-    /* Menu overlay */
-    #menuOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 10;
-      flex-direction: column;
-      color: white;
-      text-align: center;
-      padding: 20px;
-    }
-    #menuOverlay h1 {
-      font-size: 36px;
-      margin-bottom: 20px;
-    }
-    .modeButton {
-      padding: 10px 20px;
-      margin: 5px;
-      border: none;
-      background: #1a73e8;
-      color: white;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .modeButton:hover {
-      background: #1558b0;
-    }
-    .instructions {
+
+    /* Control-panel với giao diện rõ ràng */
+    #control-panel {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 10px;
+      color: #fff;
+      max-width: 220px;
       font-size: 14px;
-      margin-top: 10px;
-      line-height: 1.5;
+      z-index: 100;
     }
-    /* Mobile Controls */
-    #mobileControls {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: none;
-      z-index: 5;
+    #control-panel h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      text-align: center;
     }
-    #mobileControls button {
-      flex: 1;
-      margin: 0 5px;
-      padding: 15px;
-      font-size: 18px;
-      border-radius: 5px;
+    #control-panel label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    #control-panel input[type="range"],
+    #control-panel select,
+    #control-panel input[type="color"] {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 2px;
+      border-radius: 4px;
       border: none;
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
+    }
+    #control-panel input[type="checkbox"] {
+      margin-right: 5px;
+    }
+    #control-panel button {
+      width: 100%;
+      padding: 5px;
+      border: none;
+      border-radius: 4px;
+      background-color: #555;
+      color: #fff;
       cursor: pointer;
     }
-    /* Hiển thị nút điều khiển trên điện thoại */
-    @media (max-width: 768px) {
-      #mobileControls {
-        display: flex;
-        width: calc(100% - 40px);
-        justify-content: space-around;
-        padding: 0 20px;
-      }
+    #control-panel button:hover {
+      background-color: #666;
     }
   </style>
 </head>
 <body>
-  <!-- Canvas dùng để vẽ game -->
-  <canvas id="gameCanvas"></canvas>
-  
-  <!-- Menu Overlay: chọn chế độ chơi hoặc thông báo Game Over -->
-  <div id="menuOverlay">
-    <h1>2D Shooter Game</h1>
-    <p id="menuMessage">Chọn chế độ chơi</p>
-    <div id="modeButtons">
-      <button class="modeButton" data-mode="normal">Chơi Bình Thường</button>
-      <button class="modeButton" data-mode="hard">Chơi Khó</button>
-    </div>
-    <p class="instructions">
-      Dùng bàn phím: Mũi tên trái/phải hoặc A/D để di chuyển, phím cách để bắn.<br>
-      Trên điện thoại: Sử dụng nút điều khiển bên dưới.
-    </p>
-  </div>
-  
-  <!-- Mobile control buttons: chỉ hiển thị khi màn hình nhỏ -->
-  <div id="mobileControls">
-    <button id="leftButton">Trái</button>
-    <button id="shootButton">Bắn</button>
-    <button id="rightButton">Phải</button>
+  <!-- Canvas để vẽ pháo hoa -->
+  <canvas id="fireworksCanvas"></canvas>
+
+  <!-- Control panel với nhiều tùy chọn -->
+  <div id="control-panel">
+    <h2>Điều chỉnh Pháo Hoa</h2>
+    <label for="colorSelect">Màu pháo hoa:</label>
+    <select id="colorSelect">
+      <option value="random">Ngẫu nhiên</option>
+      <option value="red">Đỏ</option>
+      <option value="green">Xanh lá</option>
+      <option value="blue">Xanh dương</option>
+      <option value="yellow">Vàng</option>
+    </select>
+
+    <label for="intensityInput">Cường độ (số hạt):</label>
+    <input id="intensityInput" type="range" min="10" max="200" value="50">
+
+    <label for="speedInput">Tốc độ hạt:</label>
+    <input id="speedInput" type="range" min="1" max="10" step="0.5" value="5">
+
+    <label for="gravityInput">Trọng lực:</label>
+    <input id="gravityInput" type="range" min="0" max="0.2" step="0.005" value="0.05">
+
+    <label for="minSizeInput">Kích thước hạt tối thiểu:</label>
+    <input id="minSizeInput" type="range" min="1" max="5" step="0.5" value="2">
+
+    <label for="maxSizeInput">Kích thước hạt tối đa:</label>
+    <input id="maxSizeInput" type="range" min="3" max="10" step="0.5" value="4">
+
+    <label for="fireworkStyle">Kiểu pháo hoa:</label>
+    <select id="fireworkStyle">
+      <option value="round">Tròn</option>
+      <option value="spiral">Xoắn</option>
+    </select>
+
+    <label>
+      <input type="checkbox" id="trailCheckbox" checked>
+      Hiệu ứng Dấu Vết
+    </label>
+
+    <label>
+      <input type="checkbox" id="autoFireworksCheckbox" checked>
+      Pháo hoa tự động
+    </label>
+
+    <label for="backgroundColor">Màu nền:</label>
+    <input id="backgroundColor" type="color" value="#000000">
+
+    <button id="resetButton">Reset</button>
   </div>
 
   <script>
-    // Lấy canvas và context
-    const canvas = document.getElementById('gameCanvas');
+    // Cấu hình canvas
+    const canvas = document.getElementById('fireworksCanvas');
     const ctx = canvas.getContext('2d');
+    let cw = window.innerWidth;
+    let ch = window.innerHeight;
+    canvas.width = cw;
+    canvas.height = ch;
 
-    // Thiết lập kích thước canvas theo cửa sổ
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      initStars();
+    window.addEventListener('resize', () => {
+      cw = window.innerWidth;
+      ch = window.innerHeight;
+      canvas.width = cw;
+      canvas.height = ch;
+    });
+
+    // Hàm chuyển màu hex sang rgba với mức alpha xác định
+    function hexToRGBA(hex, alpha) {
+      let r = parseInt(hex.slice(1, 3), 16);
+      let g = parseInt(hex.slice(3, 5), 16);
+      let b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
 
-    // Các biến game cơ bản
-    let gameStarted = false;
-    let gameOver = false;
-    let gameMode = "normal"; // normal: chơi bình thường, hard: chơi khó
-    let enemySpawnChance = 0.02; // Tỉ lệ xuất hiện enemy (sẽ tăng trong mode hard)
-    let score = 0;
-    let lastFireTime = 0;
+    // Lưu trữ ID của setInterval cho chế độ pháo hoa tự động
+    let autoFireworksInterval = null;
 
-    // Đối tượng player
-    const player = {
-      x: canvas.width / 2,
-      y: canvas.height - 50,
-      width: 40,
-      height: 40,
-      speed: 5,
-      movingLeft: false,
-      movingRight: false
-    };
-
-    // Mảng chứa đạn và enemy
-    let bullets = [];
-    let enemies = [];
-
-    // Hệ thống background: các hạt sao tạo không gian
-    const stars = [];
-    const numStars = 100;
-    function initStars() {
-      stars.length = 0;
-      for (let i = 0; i < numStars; i++) {
-        stars.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          radius: Math.random() * 1.5 + 0.5,
-          speed: Math.random() * 0.5 + 0.2
-        });
+    // Lớp Particle mô phỏng một hạt pháo hoa
+    class Particle {
+      constructor(x, y, color, angle, speed, radius, decay, angularVelocity = 0) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.angle = angle;
+        this.speed = speed;
+        this.radius = radius;
+        this.opacity = 1;
+        this.decay = decay;
+        this.angularVelocity = angularVelocity; // Dùng cho hiệu ứng xoắn
       }
-    }
-    initStars();
-
-    function updateStars() {
-      stars.forEach(star => {
-        star.y += star.speed;
-        if (star.y > canvas.height) {
-          star.y = 0;
-          star.x = Math.random() * canvas.width;
+      
+      update(gravity) {
+        // Nếu có hiệu ứng xoắn, cập nhật góc theo angularVelocity
+        if (this.angularVelocity !== 0) {
+          this.angle += this.angularVelocity;
         }
-      });
-    }
-
-    function drawStars() {
-      ctx.fillStyle = "white";
-      stars.forEach(star => {
+        this.x += Math.cos(this.angle) * this.speed;
+        this.y += Math.sin(this.angle) * this.speed + gravity;
+        this.opacity -= this.decay;
+      }
+      
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.opacity;
         ctx.beginPath();
-        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
         ctx.fill();
-      });
-    }
-
-    // Vẽ nền dạng gradient
-    function drawBackground() {
-      let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      gradient.addColorStop(0, "#010130");
-      gradient.addColorStop(1, "#000");
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-
-    // Vẽ người chơi theo hình phi thuyền (tam giác)
-    function drawPlayer() {
-      ctx.fillStyle = "cyan";
-      ctx.beginPath();
-      ctx.moveTo(player.x, player.y - player.height / 2);
-      ctx.lineTo(player.x - player.width / 2, player.y + player.height / 2);
-      ctx.lineTo(player.x + player.width / 2, player.y + player.height / 2);
-      ctx.closePath();
-      ctx.fill();
-      ctx.strokeStyle = "white";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
-
-    // Vẽ đạn (hình chữ nhật nhỏ)
-    function drawBullets() {
-      ctx.fillStyle = "yellow";
-      bullets.forEach(bullet => {
-        ctx.fillRect(bullet.x - bullet.width / 2, bullet.y - bullet.height / 2, bullet.width, bullet.height);
-      });
-    }
-
-    // Vẽ enemy (hình tròn với viền)
-    function drawEnemies() {
-      enemies.forEach(enemy => {
-        ctx.beginPath();
-        ctx.fillStyle = "red";
-        ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = "darkred";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      });
-    }
-
-    // Vẽ điểm số
-    function drawScore() {
-      ctx.fillStyle = "white";
-      ctx.font = "20px Arial";
-      ctx.fillText("Điểm: " + score, 20, 30);
-    }
-
-    // Cập nhật trạng thái game
-    function update() {
-      if (!gameStarted) return;
-
-      // Di chuyển người chơi
-      if (player.movingLeft && player.x - player.width / 2 > 0) {
-        player.x -= player.speed;
+        ctx.restore();
       }
-      if (player.movingRight && player.x + player.width / 2 < canvas.width) {
-        player.x += player.speed;
-      }
+    }
 
-      // Cập nhật đạn
-      for (let i = bullets.length - 1; i >= 0; i--) {
-        bullets[i].y -= bullets[i].speed;
-        if (bullets[i].y < 0) bullets.splice(i, 1);
-      }
+    let particles = [];
 
-      // Cập nhật enemy
-      enemies.forEach(enemy => {
-        enemy.y += enemy.speed;
-      });
-      for (let i = enemies.length - 1; i >= 0; i--) {
-        if (enemies[i].y - enemies[i].radius > canvas.height) {
-          enemies.splice(i, 1);
+    // Hàm tạo vụ pháo hoa tại vị trí (x, y)
+    function createFirework(x, y) {
+      // Lấy giá trị cài đặt từ panel
+      const intensity = parseInt(document.getElementById('intensityInput').value);
+      const colorChoice = document.getElementById('colorSelect').value;
+      const speedMultiplier = parseFloat(document.getElementById('speedInput').value);
+      const gravity = parseFloat(document.getElementById('gravityInput').value);
+      const minSize = parseFloat(document.getElementById('minSizeInput').value);
+      const maxSize = parseFloat(document.getElementById('maxSizeInput').value);
+      const fireworkStyle = document.getElementById('fireworkStyle').value;
+      
+      // Lựa chọn màu sắc
+      let color;
+      if (colorChoice === 'random') {
+        color = 'rgb(' +
+          Math.floor(Math.random() * 256) + ',' +
+          Math.floor(Math.random() * 256) + ',' +
+          Math.floor(Math.random() * 256) + ')';
+      } else {
+        color = colorChoice;
+      }
+      
+      // Với kiểu xoắn, chọn một góc cơ sở ngẫu nhiên
+      let baseAngle = Math.random() * Math.PI * 2;
+      
+      for (let i = 0; i < intensity; i++) {
+        let angle, angularVelocity = 0;
+        if (fireworkStyle === 'round') {
+          // Góc ngẫu nhiên cho vụ pháo hoa truyền thống
+          angle = Math.random() * Math.PI * 2;
+        } else if (fireworkStyle === 'spiral') {
+          // Phân bố đều quanh vòng tròn kèm thêm hiệu ứng xoắn theo thời gian
+          angle = baseAngle + (i / intensity) * Math.PI * 2;
+          angularVelocity = Math.random() * 0.05 + 0.02;
+        } else {
+          angle = Math.random() * Math.PI * 2;
+        }
+        
+        let speed = Math.random() * speedMultiplier + 1;
+        let radius = Math.random() * (maxSize - minSize) + minSize;
+        let decay = Math.random() * 0.015 + 0.005;
+        particles.push(new Particle(x, y, color, angle, speed, radius, decay, angularVelocity));
+      }
+    }
+
+    // Vòng lặp hoạt ảnh
+    function animate() {
+      let bgColor = document.getElementById('backgroundColor').value;
+      let trail = document.getElementById('trailCheckbox').checked;
+      let gravity = parseFloat(document.getElementById('gravityInput').value);
+      
+      if (trail) {
+        // Với hiệu ứng dấu vết: dùng globalCompositeOperation để “xóa mờ”
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.fillStyle = hexToRGBA(bgColor, 0.2);
+        ctx.fillRect(0, 0, cw, ch);
+        ctx.globalCompositeOperation = 'lighter';
+      } else {
+        // Nếu tắt hiệu ứng trail, xóa sạch canvas và vẽ nền mới
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, cw, ch);
+      }
+      
+      // Cập nhật và vẽ từng hạt pháo hoa
+      for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+        p.update(gravity);
+        p.draw();
+        if (p.opacity <= 0) {
+          particles.splice(i, 1);
         }
       }
+      
+      requestAnimationFrame(animate);
+    }
+    animate();
 
-      // Va chạm: đạn và enemy
-      for (let i = enemies.length - 1; i >= 0; i--) {
-        let enemy = enemies[i];
-        for (let j = bullets.length - 1; j >= 0; j--) {
-          let bullet = bullets[j];
-          let dx = bullet.x - enemy.x;
-          let dy = bullet.y - enemy.y;
-          let dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < enemy.radius + 5) {
-            enemies.splice(i, 1);
-            bullets.splice(j, 1);
-            score += (gameMode === "hard") ? 20 : 10;
-            break;
-          }
-        }
-      }
-
-      // Va chạm: enemy chạm người chơi
-      for (let i = enemies.length - 1; i >= 0; i--) {
-        let enemy = enemies[i];
-        let dx = player.x - enemy.x;
-        let dy = player.y - enemy.y;
-        let distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < enemy.radius + Math.max(player.width, player.height) / 3) {
-          endGame();
-          break;
-        }
-      }
-
-      // Sinh enemy mới
-      if (Math.random() < enemySpawnChance) {
-        let enemyRadius = Math.random() * 15 + 15;
-        enemies.push({
-          x: Math.random() * (canvas.width - enemyRadius * 2) + enemyRadius,
-          y: -enemyRadius,
-          radius: enemyRadius,
-          speed: (gameMode === "hard") ? (Math.random() * 2 + 2) : (Math.random() * 2 + 1)
-        });
-      }
-      updateStars();
+    // Hàm khởi động chế độ pháo hoa tự động
+    function startAutoFireworks() {
+      if (autoFireworksInterval) return;
+      autoFireworksInterval = setInterval(() => {
+        let x = Math.random() * cw * 0.8 + cw * 0.1;
+        let y = Math.random() * ch * 0.5 + ch * 0.1;
+        createFirework(x, y);
+      }, 800);
+    }
+    
+    function stopAutoFireworks() {
+      clearInterval(autoFireworksInterval);
+      autoFireworksInterval = null;
     }
 
-    // Vẽ tất cả các đối tượng
-    function render() {
-      drawBackground();
-      drawStars();
-      drawPlayer();
-      drawBullets();
-      drawEnemies();
-      drawScore();
+    // Theo dõi checkbox “Pháo hoa tự động” để bật/tắt interval
+    const autoFireworksCheckbox = document.getElementById('autoFireworksCheckbox');
+    autoFireworksCheckbox.addEventListener('change', () => {
+      if (autoFireworksCheckbox.checked) {
+        startAutoFireworks();
+      } else {
+        stopAutoFireworks();
+      }
+    });
+    if (autoFireworksCheckbox.checked) {
+      startAutoFireworks();
     }
 
-    // Vòng lặp game chính
-    function gameLoop() {
-      update();
-      render();
-      if (gameStarted) requestAnimationFrame(gameLoop);
-    }
-
-    // Xử lý bắn đạn
-    function shootBullet() {
-      let now = Date.now();
-      if (now - lastFireTime > 300) {
-        bullets.push({
-          x: player.x,
-          y: player.y - player.height / 2,
-          width: 5,
-          height: 10,
-          speed: 7
-        });
-        lastFireTime = now;
-      }
-    }
-
-    // Sự kiện bàn phím
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-        player.movingLeft = true;
-      }
-      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-        player.movingRight = true;
-      }
-      if (e.key === ' ') {
-        shootBullet();
-      }
-    });
-    document.addEventListener('keyup', (e) => {
-      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-        player.movingLeft = false;
-      }
-      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-        player.movingRight = false;
-      }
+    // Cho phép click chuột để tạo vụ pháo hoa tại vị trí click
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      createFirework(x, y);
     });
 
-    // Xử lý nút điều khiển trên điện thoại (touch và mouse)
-    const leftButton = document.getElementById('leftButton');
-    const rightButton = document.getElementById('rightButton');
-    const shootButton = document.getElementById('shootButton');
-
-    leftButton.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      player.movingLeft = true;
+    // Nút Reset: Xóa sạch các hạt và vẽ lại nền
+    document.getElementById('resetButton').addEventListener('click', () => {
+      particles = [];
+      const bgColor = document.getElementById('backgroundColor').value;
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, cw, ch);
     });
-    leftButton.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      player.movingLeft = false;
-    });
-    rightButton.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      player.movingRight = true;
-    });
-    rightButton.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      player.movingRight = false;
-    });
-    shootButton.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      shootBullet();
-    });
-    leftButton.addEventListener('mousedown', () => { player.movingLeft = true; });
-    leftButton.addEventListener('mouseup', () => { player.movingLeft = false; });
-    rightButton.addEventListener('mousedown', () => { player.movingRight = true; });
-    rightButton.addEventListener('mouseup', () => { player.movingRight = false; });
-    shootButton.addEventListener('mousedown', () => { shootBullet(); });
-
-    // Xử lý menu: chọn chế độ chơi và khởi động game
-    const menuOverlay = document.getElementById('menuOverlay');
-    const modeButtons = document.querySelectorAll('.modeButton');
-    const menuMessage = document.getElementById('menuMessage');
-
-    modeButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        let mode = btn.getAttribute('data-mode');
-        startGame(mode);
-      });
-    });
-
-    function startGame(mode) {
-      gameMode = mode;
-      enemySpawnChance = (gameMode === "hard") ? 0.04 : 0.02;
-      score = 0;
-      lastFireTime = 0;
-      bullets = [];
-      enemies = [];
-      player.x = canvas.width / 2;
-      player.y = canvas.height - 50;
-      gameOver = false;
-      gameStarted = true;
-      menuOverlay.style.display = 'none';
-      initStars();
-      gameLoop();
-    }
-
-    function endGame() {
-      gameStarted = false;
-      gameOver = true;
-      menuMessage.innerText = "Game Over! Điểm của bạn: " + score + "\nChọn chế độ chơi lại";
-      menuOverlay.style.display = 'flex';
-    }
   </script>
 </body>
 </html>
