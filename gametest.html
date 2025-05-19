@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fireworks Simulator - Siêu Thực</title>
+  <title>Fireworks Simulator</title>
   <style>
     /* Reset & cơ bản */
     html, body {
@@ -15,7 +15,7 @@
       background: #000;
       font-family: Arial, sans-serif;
     }
-    /* Canvas toàn màn hình với high-DPI support */
+    /* Canvas toàn màn hình với High-DPI support */
     canvas {
       display: block;
       background: transparent;
@@ -172,8 +172,9 @@
       <div>
         <label for="qualitySelect">Chất lượng đồ họa:</label>
         <select id="qualitySelect">
-          <option value="low">Thấp</option>
-          <option value="medium" selected>Trung bình</option>
+          <!-- Mặc định là chất lượng thấp để giảm tải cho máy yếu -->
+          <option value="low" selected>Thấp</option>
+          <option value="medium">Trung bình</option>
           <option value="high">Cao</option>
           <option value="ultra">Siêu thực</option>
         </select>
@@ -237,7 +238,6 @@
       draw() {
         ctx.save();
         ctx.globalAlpha = this.opacity;
-        // Điều chỉnh hiệu ứng glow dựa trên checkbox & chất lượng đồ họa
         if(document.getElementById('glowCheckbox').checked) {
           const quality = document.getElementById('qualitySelect').value;
           let blurAmount = 8;
@@ -248,7 +248,6 @@
         } else {
           ctx.shadowBlur = 0;
         }
-        // Dùng radial gradient tạo hiệu ứng glow siêu thực (nếu ultra)
         if(document.getElementById('qualitySelect').value === 'ultra' &&
            document.getElementById('glowCheckbox').checked) {
           let gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 4);
@@ -279,7 +278,6 @@
         this.angle = Math.random() * Math.PI * 2;
         this.angularVelocity = Math.random() * 0.02 - 0.01;
         this.opacity = 0.8;
-        // Màu nền của hình đa giác
         this.color = 'rgba(' + Math.floor(Math.random()*256) + ',' +
                               Math.floor(Math.random()*256) + ',' +
                               Math.floor(Math.random()*256) + ',';
@@ -288,7 +286,6 @@
         this.age += delta;
         this.angle += this.angularVelocity;
         if(this.age > this.maxAge * 0.5) {
-          // Dần mờ đi ở nửa sau tuổi thọ
           this.opacity = 0.8 * (1 - (this.age - this.maxAge * 0.5) / (this.maxAge * 0.5));
         }
       }
@@ -298,7 +295,6 @@
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
         ctx.globalAlpha = this.opacity;
-        // Vẽ hình đa giác 6 cạnh
         ctx.beginPath();
         const sides = 6;
         for (let i = 0; i < sides; i++) {
@@ -328,7 +324,6 @@
       const maxSize = parseFloat(document.getElementById('maxSizeInput').value);
       const fireworkStyle = document.getElementById('fireworkStyle').value;
       
-      // Điều chỉnh cường độ dựa trên chất lượng đồ họa
       const quality = document.getElementById('qualitySelect').value;
       if(quality === 'low'){
         intensity = Math.floor(intensity * 0.75);
@@ -369,8 +364,8 @@
         frameCount = 0,
         fps = 0,
         previousFrameTime = performance.now();
+        
     function drawUltraOverlay() {
-      // Overlay vignette tạo cảm giác siêu thực
       const gradient = ctx.createRadialGradient(cw/2, ch/2, cw/8, cw/2, ch/2, cw/2);
       gradient.addColorStop(0, 'rgba(255,255,255,0)');
       gradient.addColorStop(0.7, 'rgba(0,0,0,0.05)');
@@ -411,7 +406,6 @@
         ctx.fillRect(0, 0, cw, ch);
       }
       
-      // Cập nhật và vẽ các hạt pháo hoa
       for (let i = particles.length - 1; i >= 0; i--) {
         let p = particles[i];
         p.update(gravity);
@@ -421,14 +415,11 @@
         }
       }
       
-      // Nếu chất lượng là siêu thực, cập nhật hiệu ứng siêu thực
       if(quality === 'ultra') {
-        // Tạo mới SurrealElement cách đều mỗi khoảng thời gian
         if(now - lastSurrealSpawnTime > 1500) {
           surrealElements.push(new SurrealElement());
           lastSurrealSpawnTime = now;
         }
-        // Cập nhật và vẽ các yếu tố siêu thực
         for (let i = surrealElements.length - 1; i >= 0; i--) {
           let se = surrealElements[i];
           se.update(delta);
@@ -437,7 +428,6 @@
             surrealElements.splice(i, 1);
           }
         }
-        // Vẽ overlay bóng mờ
         drawUltraOverlay();
       }
       
