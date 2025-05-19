@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>2D Shooter Game</title>
+  <style>
+    /* Reset định dạng cơ bản cho trang */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #000;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      display: block;
+    }
+    /* Menu overlay */
+    #menuOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      flex-direction: column;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    #menuOverlay h1 {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+    .modeButton {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      background: #1a73e8;
+      color: white;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .modeButton:hover {
+      background: #1558b0;
+    }
+    .instructions {
+      font-size: 14px;
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+    /* Mobile Controls */
+    #mobileControls {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      z-index: 5;
+    }
+    #mobileControls button {
+      flex: 1;
+      margin: 0 5px;
+      padding: 15px;
+      font-size: 18px;
+      border-radius: 5px;
+      border: none;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      cursor: pointer;
+    }
+    /* Hiển thị nút điều khiển trên điện thoại */
+    @media (max-width: 768px) {
+      #mobileControls {
+        display: flex;
+        width: calc(100% - 40px);
+        justify-content: space-around;
+        padding: 0 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Canvas dùng để vẽ game -->
+  <canvas id="gameCanvas"></canvas>
+  
+  <!-- Menu Overlay: chọn chế độ chơi hoặc thông báo Game Over -->
+  <div id="menuOverlay">
+    <h1>2D Shooter Game</h1>
+    <p id="menuMessage">Chọn chế độ chơi</p>
+    <div id="modeButtons">
+      <button class="modeButton" data-mode="normal">Chơi Bình Thường</button>
+      <button class="modeButton" data-mode="hard">Chơi Khó</button>
+    </div>
+    <p class="instructions">
+      Dùng bàn phím: Mũi tên trái/phải hoặc A/D để di chuyển, phím cách để bắn.<br>
+      Trên điện thoại: Sử dụng nút điều khiển bên dưới.
+    </p>
+  </div>
+  
+  <!-- Mobile control buttons: chỉ hiển thị khi màn hình nhỏ -->
+  <div id="mobileControls">
+    <button id="leftButton">Trái</button>
+    <button id="shootButton">Bắn</button>
+    <button id="rightButton">Phải</button>
+  </div>
+
+  <script>
+    // Lấy canvas và context
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Thiết lập kích thước canvas theo cửa sổ
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initStars();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Các biến game cơ bản
+    let gameStarted = false;
+    let gameOver = false;
+    let gameMode = "normal"; // normal: chơi bình thường, hard: chơi khó
+    let enemySpawnChance = 0.02; // Tỉ lệ xuất hiện enemy (sẽ tăng trong mode hard)
+    let score = 0;
+    let lastFireTime = 0;
+
+    // Đối tượng player
+    const player = {
+      x: canvas.width / 2,
+      y: canvas.height - 50,
+      width: 40,
+      height: 40,
+      speed: 5,
+      movingLeft: false,
+      movingRight: false
+    };
+
+    // Mảng chứa đạn và enemy
+    let bullets = [];
+    let enemies = [];
+
+    // Hệ thống background: các hạt sao tạo không gian
+    const stars = [];
+    const numStars = 100;
+    function initStars() {
+      stars.length = 0;
+      for (let i = 0; i < numStars; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.5 + 0.5,
+          speed: Math.random() * 0.5 + 0.2
+        });
+      }
+    }
+    initStars();
+
+    function updateStars() {
+      stars.forEach(star => {
+        star.y += star.speed;
+        if (star.y > canvas.height) {
+          star.y = 0;
+          star.x = Math.random() * canvas.width;
+        }
+      });
+    }
+
+    function drawStars() {
+      ctx.fillStyle = "white";
+      stars.forEach(star => {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    // Vẽ nền dạng gradient
+    function drawBackground() {
+      let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, "#010130");
+      gradient.addColorStop(1, "#000");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Vẽ người chơi theo hình phi thuyền (tam giác)
+    function drawPlayer() {
+      ctx.fillStyle = "cyan";
+      ctx.beginPath();
+      ctx.moveTo(player.x, player.y - player.height / 2);
+      ctx.lineTo(player.x - player.width / 2, player.y + player.height / 2);
+      ctx.lineTo(player.x + player.width / 2, player.y + player.height / 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // Vẽ đạn (hình chữ nhật nhỏ)
+    function drawBullets() {
+      ctx.fillStyle = "yellow";
+      bullets.forEach(bullet => {
+        ctx.fillRect(bullet.x - bullet.width / 2, bullet.y - bullet.height / 2, bullet.width, bullet.height);
+      });
+    }
+
+    // Vẽ enemy (hình tròn với viền)
+    function drawEnemies() {
+      enemies.forEach(enemy => {
+        ctx.beginPath();
+        ctx.fillStyle = "red";
+        ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "darkred";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+    }
+
+    // Vẽ điểm số
+    function drawScore() {
+      ctx.fillStyle = "white";
+      ctx.font = "20px Arial";
+      ctx.fillText("Điểm: " + score, 20, 30);
+    }
+
+    // Cập nhật trạng thái game
+    function update() {
+      if (!gameStarted) return;
+
+      // Di chuyển người chơi
+      if (player.movingLeft && player.x - player.width / 2 > 0) {
+        player.x -= player.speed;
+      }
+      if (player.movingRight && player.x + player.width / 2 < canvas.width) {
+        player.x += player.speed;
+      }
+
+      // Cập nhật đạn
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        bullets[i].y -= bullets[i].speed;
+        if (bullets[i].y < 0) bullets.splice(i, 1);
+      }
+
+      // Cập nhật enemy
+      enemies.forEach(enemy => {
+        enemy.y += enemy.speed;
+      });
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        if (enemies[i].y - enemies[i].radius > canvas.height) {
+          enemies.splice(i, 1);
+        }
+      }
+
+      // Va chạm: đạn và enemy
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        let enemy = enemies[i];
+        for (let j = bullets.length - 1; j >= 0; j--) {
+          let bullet = bullets[j];
+          let dx = bullet.x - enemy.x;
+          let dy = bullet.y - enemy.y;
+          let dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < enemy.radius + 5) {
+            enemies.splice(i, 1);
+            bullets.splice(j, 1);
+            score += (gameMode === "hard") ? 20 : 10;
+            break;
+          }
+        }
+      }
+
+      // Va chạm: enemy chạm người chơi
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        let enemy = enemies[i];
+        let dx = player.x - enemy.x;
+        let dy = player.y - enemy.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < enemy.radius + Math.max(player.width, player.height) / 3) {
+          endGame();
+          break;
+        }
+      }
+
+      // Sinh enemy mới
+      if (Math.random() < enemySpawnChance) {
+        let enemyRadius = Math.random() * 15 + 15;
+        enemies.push({
+          x: Math.random() * (canvas.width - enemyRadius * 2) + enemyRadius,
+          y: -enemyRadius,
+          radius: enemyRadius,
+          speed: (gameMode === "hard") ? (Math.random() * 2 + 2) : (Math.random() * 2 + 1)
+        });
+      }
+      updateStars();
+    }
+
+    // Vẽ tất cả các đối tượng
+    function render() {
+      drawBackground();
+      drawStars();
+      drawPlayer();
+      drawBullets();
+      drawEnemies();
+      drawScore();
+    }
+
+    // Vòng lặp game chính
+    function gameLoop() {
+      update();
+      render();
+      if (gameStarted) requestAnimationFrame(gameLoop);
+    }
+
+    // Xử lý bắn đạn
+    function shootBullet() {
+      let now = Date.now();
+      if (now - lastFireTime > 300) {
+        bullets.push({
+          x: player.x,
+          y: player.y - player.height / 2,
+          width: 5,
+          height: 10,
+          speed: 7
+        });
+        lastFireTime = now;
+      }
+    }
+
+    // Sự kiện bàn phím
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        player.movingLeft = true;
+      }
+      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        player.movingRight = true;
+      }
+      if (e.key === ' ') {
+        shootBullet();
+      }
+    });
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        player.movingLeft = false;
+      }
+      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        player.movingRight = false;
+      }
+    });
+
+    // Xử lý nút điều khiển trên điện thoại (touch và mouse)
+    const leftButton = document.getElementById('leftButton');
+    const rightButton = document.getElementById('rightButton');
+    const shootButton = document.getElementById('shootButton');
+
+    leftButton.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      player.movingLeft = true;
+    });
+    leftButton.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      player.movingLeft = false;
+    });
+    rightButton.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      player.movingRight = true;
+    });
+    rightButton.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      player.movingRight = false;
+    });
+    shootButton.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      shootBullet();
+    });
+    leftButton.addEventListener('mousedown', () => { player.movingLeft = true; });
+    leftButton.addEventListener('mouseup', () => { player.movingLeft = false; });
+    rightButton.addEventListener('mousedown', () => { player.movingRight = true; });
+    rightButton.addEventListener('mouseup', () => { player.movingRight = false; });
+    shootButton.addEventListener('mousedown', () => { shootBullet(); });
+
+    // Xử lý menu: chọn chế độ chơi và khởi động game
+    const menuOverlay = document.getElementById('menuOverlay');
+    const modeButtons = document.querySelectorAll('.modeButton');
+    const menuMessage = document.getElementById('menuMessage');
+
+    modeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        let mode = btn.getAttribute('data-mode');
+        startGame(mode);
+      });
+    });
+
+    function startGame(mode) {
+      gameMode = mode;
+      enemySpawnChance = (gameMode === "hard") ? 0.04 : 0.02;
+      score = 0;
+      lastFireTime = 0;
+      bullets = [];
+      enemies = [];
+      player.x = canvas.width / 2;
+      player.y = canvas.height - 50;
+      gameOver = false;
+      gameStarted = true;
+      menuOverlay.style.display = 'none';
+      initStars();
+      gameLoop();
+    }
+
+    function endGame() {
+      gameStarted = false;
+      gameOver = true;
+      menuMessage.innerText = "Game Over! Điểm của bạn: " + score + "\nChọn chế độ chơi lại";
+      menuOverlay.style.display = 'flex';
+    }
+  </script>
+</body>
+</html>
