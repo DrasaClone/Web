@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fireworks Simulator</title>
+  <title>Fireworks Simulator - Siêu Thực</title>
   <style>
     /* Reset & cơ bản */
     html, body {
@@ -22,7 +22,7 @@
       width: 100%;
       height: 100%;
     }
-    /* Thanh điều chỉnh đặt cố định ở đầu */
+    /* Thanh điều chỉnh cố định ở đầu */
     #control-panel {
       position: fixed;
       top: 0;
@@ -33,7 +33,7 @@
       color: #fff;
       z-index: 200;
     }
-    /* Thanh header của control panel: nhấn vào đây để thu gọn/mở rộng */
+    /* Thanh header của control panel: nhấn để thu gọn/mở rộng */
     #control-header {
       padding: 10px;
       background-color: #333;
@@ -46,7 +46,7 @@
     #control-header span {
       font-size: 18px;
     }
-    /* Nội dung bên trong control panel, bố cục theo flex cho nhiều ô */
+    /* Nội dung của control panel, bố cục theo flex */
     #control-content {
       padding: 10px;
       display: flex;
@@ -85,7 +85,7 @@
     #control-content button:hover {
       background-color: #666;
     }
-    /* FPS Counter hiển thị số FPS ở góc dưới bên phải */
+    /* FPS Counter hiển thị ở góc dưới bên phải */
     #fpsCounter {
       position: fixed;
       bottom: 10px;
@@ -103,7 +103,7 @@
   <!-- Canvas hiển thị pháo hoa -->
   <canvas id="fireworksCanvas"></canvas>
   
-  <!-- Thanh điều chỉnh cài đặt (Control Panel) -->
+  <!-- Thanh điều chỉnh cài đặt -->
   <div id="control-panel">
     <div id="control-header">
       <span>Cài Đặt Pháo Hoa</span>
@@ -169,6 +169,15 @@
         <label for="backgroundColor">Màu nền:</label>
         <input id="backgroundColor" type="color" value="#000000">
       </div>
+      <div>
+        <label for="qualitySelect">Chất lượng đồ họa:</label>
+        <select id="qualitySelect">
+          <option value="low">Thấp</option>
+          <option value="medium" selected>Trung bình</option>
+          <option value="high">Cao</option>
+          <option value="ultra">Siêu thực</option>
+        </select>
+      </div>
       <div style="flex-basis: 100%;">
         <button id="resetButton">Reset</button>
       </div>
@@ -179,7 +188,7 @@
   <div id="fpsCounter">FPS: 0</div>
   
   <script>
-    // --- CÀI ĐẶT CANVAS & HIGH-DPI ---
+    // --- CANVAS & HIGH-DPI SETUP ---
     const canvas = document.getElementById('fireworksCanvas');
     const ctx = canvas.getContext('2d');
     let cw = window.innerWidth, ch = window.innerHeight;
@@ -197,7 +206,6 @@
     window.addEventListener('resize', resizeCanvas);
     
     // --- HÀM TIỆN ÍCH ---
-    // Chuyển đổi hex sang rgba
     function hexToRGBA(hex, alpha) {
       let r = parseInt(hex.slice(1, 3), 16);
       let g = parseInt(hex.slice(3, 5), 16);
@@ -229,8 +237,20 @@
       draw() {
         ctx.save();
         ctx.globalAlpha = this.opacity;
-        if (document.getElementById('glowCheckbox').checked) {
-          // Vẽ hạt với hiệu ứng glow dùng radial gradient
+        // Điều chỉnh hiệu ứng glow dựa trên checkbox & chất lượng đồ họa
+        if(document.getElementById('glowCheckbox').checked) {
+          const quality = document.getElementById('qualitySelect').value;
+          let blurAmount = 8;
+          if(quality === 'high') blurAmount = 12;
+          else if(quality === 'ultra') blurAmount = 16;
+          ctx.shadowColor = this.color;
+          ctx.shadowBlur = blurAmount;
+        } else {
+          ctx.shadowBlur = 0;
+        }
+        // Dùng radial gradient tạo hiệu ứng glow siêu thực (nếu ultra)
+        if(document.getElementById('qualitySelect').value === 'ultra' &&
+           document.getElementById('glowCheckbox').checked) {
           let gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 4);
           gradient.addColorStop(0, this.color);
           gradient.addColorStop(0.2, this.color);
@@ -248,15 +268,73 @@
     
     let particles = [];
     
+    // --- LỚP SurrealElement cho hiệu ứng siêu thực bổ sung ---
+    class SurrealElement {
+      constructor() {
+        this.x = Math.random() * cw;
+        this.y = Math.random() * ch;
+        this.size = Math.random() * 50 + 20;
+        this.age = 0;
+        this.maxAge = Math.random() * 5000 + 3000; // từ 3-8 giây
+        this.angle = Math.random() * Math.PI * 2;
+        this.angularVelocity = Math.random() * 0.02 - 0.01;
+        this.opacity = 0.8;
+        // Màu nền của hình đa giác
+        this.color = 'rgba(' + Math.floor(Math.random()*256) + ',' +
+                              Math.floor(Math.random()*256) + ',' +
+                              Math.floor(Math.random()*256) + ',';
+      }
+      update(delta) {
+        this.age += delta;
+        this.angle += this.angularVelocity;
+        if(this.age > this.maxAge * 0.5) {
+          // Dần mờ đi ở nửa sau tuổi thọ
+          this.opacity = 0.8 * (1 - (this.age - this.maxAge * 0.5) / (this.maxAge * 0.5));
+        }
+      }
+      draw(ctx) {
+        if(this.opacity <= 0) return;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        ctx.globalAlpha = this.opacity;
+        // Vẽ hình đa giác 6 cạnh
+        ctx.beginPath();
+        const sides = 6;
+        for (let i = 0; i < sides; i++) {
+          let theta = (i / sides) * Math.PI * 2;
+          let x = Math.cos(theta) * this.size;
+          let y = Math.sin(theta) * this.size;
+          if(i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = this.color + this.opacity + ')';
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+    
+    let surrealElements = [];
+    let lastSurrealSpawnTime = performance.now();
+    
     // --- HÀM TẠO PHÁO HOA ---
     function createFirework(x, y) {
-      const intensity = parseInt(document.getElementById('intensityInput').value);
+      let intensity = parseInt(document.getElementById('intensityInput').value);
       const colorChoice = document.getElementById('colorSelect').value;
       const speedMultiplier = parseFloat(document.getElementById('speedInput').value);
       const gravity = parseFloat(document.getElementById('gravityInput').value);
       const minSize = parseFloat(document.getElementById('minSizeInput').value);
       const maxSize = parseFloat(document.getElementById('maxSizeInput').value);
       const fireworkStyle = document.getElementById('fireworkStyle').value;
+      
+      // Điều chỉnh cường độ dựa trên chất lượng đồ họa
+      const quality = document.getElementById('qualitySelect').value;
+      if(quality === 'low'){
+        intensity = Math.floor(intensity * 0.75);
+      } else if(quality === 'ultra'){
+        intensity = Math.floor(intensity * 1.5);
+      }
       
       let color;
       if (colorChoice === 'random') {
@@ -269,7 +347,6 @@
       }
       
       let baseAngle = Math.random() * Math.PI * 2;
-      
       for (let i = 0; i < intensity; i++) {
         let angle, angularVelocity = 0;
         if (fireworkStyle === 'round') {
@@ -288,9 +365,28 @@
     }
     
     // --- VÒNG LẶP HOẠT ẢNH & FPS COUNTER ---
-    let lastTime = performance.now(), frameCount = 0, fps = 0;
+    let lastTime = performance.now(),
+        frameCount = 0,
+        fps = 0,
+        previousFrameTime = performance.now();
+    function drawUltraOverlay() {
+      // Overlay vignette tạo cảm giác siêu thực
+      const gradient = ctx.createRadialGradient(cw/2, ch/2, cw/8, cw/2, ch/2, cw/2);
+      gradient.addColorStop(0, 'rgba(255,255,255,0)');
+      gradient.addColorStop(0.7, 'rgba(0,0,0,0.05)');
+      gradient.addColorStop(1, 'rgba(0,0,0,0.3)');
+      ctx.save();
+      ctx.globalAlpha = 0.3;
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, cw, ch);
+      ctx.restore();
+    }
+    
     function animate() {
       let now = performance.now();
+      let delta = now - previousFrameTime;
+      previousFrameTime = now;
+      
       frameCount++;
       if (now - lastTime >= 1000) {
         fps = Math.round((frameCount * 1000) / (now - lastTime));
@@ -302,6 +398,7 @@
       const bgColor = document.getElementById('backgroundColor').value;
       const trail = document.getElementById('trailCheckbox').checked;
       const gravity = parseFloat(document.getElementById('gravityInput').value);
+      const quality = document.getElementById('qualitySelect').value;
       
       if (trail) {
         ctx.globalCompositeOperation = 'destination-out';
@@ -314,6 +411,7 @@
         ctx.fillRect(0, 0, cw, ch);
       }
       
+      // Cập nhật và vẽ các hạt pháo hoa
       for (let i = particles.length - 1; i >= 0; i--) {
         let p = particles[i];
         p.update(gravity);
@@ -321,6 +419,26 @@
         if (p.opacity <= 0) {
           particles.splice(i, 1);
         }
+      }
+      
+      // Nếu chất lượng là siêu thực, cập nhật hiệu ứng siêu thực
+      if(quality === 'ultra') {
+        // Tạo mới SurrealElement cách đều mỗi khoảng thời gian
+        if(now - lastSurrealSpawnTime > 1500) {
+          surrealElements.push(new SurrealElement());
+          lastSurrealSpawnTime = now;
+        }
+        // Cập nhật và vẽ các yếu tố siêu thực
+        for (let i = surrealElements.length - 1; i >= 0; i--) {
+          let se = surrealElements[i];
+          se.update(delta);
+          se.draw(ctx);
+          if(se.age > se.maxAge) {
+            surrealElements.splice(i, 1);
+          }
+        }
+        // Vẽ overlay bóng mờ
+        drawUltraOverlay();
       }
       
       requestAnimationFrame(animate);
@@ -341,18 +459,12 @@
       clearInterval(autoFireworksInterval);
       autoFireworksInterval = null;
     }
-    
     const autoFireworksCheckbox = document.getElementById('autoFireworksCheckbox');
     autoFireworksCheckbox.addEventListener('change', () => {
-      if (autoFireworksCheckbox.checked) {
-        startAutoFireworks();
-      } else {
-        stopAutoFireworks();
-      }
+      if (autoFireworksCheckbox.checked) startAutoFireworks();
+      else stopAutoFireworks();
     });
-    if (autoFireworksCheckbox.checked) {
-      startAutoFireworks();
-    }
+    if (autoFireworksCheckbox.checked) startAutoFireworks();
     
     // --- TẠO PHÁO HOA KHI CLICK ---
     canvas.addEventListener('click', (e) => {
@@ -365,6 +477,7 @@
     // --- NÚT RESET ---
     document.getElementById('resetButton').addEventListener('click', () => {
       particles = [];
+      surrealElements = [];
       const bgColor = document.getElementById('backgroundColor').value;
       ctx.globalCompositeOperation = 'source-over';
       ctx.fillStyle = bgColor;
