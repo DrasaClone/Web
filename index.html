@@ -522,7 +522,7 @@
         toast.addEventListener("transitionend", () => {
           toast.remove();
         });
-      }, 3000);
+      }, 10000);
     }
     
     // Hàm format thời gian
@@ -1578,6 +1578,56 @@
       roomSection.classList.remove("hidden");
     });
 
+    // --- Yêu cầu quyền sử dụng thông báo từ trình duyệt ---
+    if ("Notification" in window) {
+      if (Notification.permission === "default" || Notification.permission === "denied") {
+        Notification.requestPermission().then(function(permission) {
+          console.log("Quyền thông báo:", permission);
+        });
+      }
+    } else {
+      console.warn("Trình duyệt của bạn không hỗ trợ Web Notifications.");
+    }
+
+    // --- Hàm hiển thị thông báo qua Web Notification API ---
+    function showNotification(title, body) {
+      if (Notification.permission === "granted") {
+        new Notification(title, {
+          body: body,
+          icon: "https://yourdomain.com/youricon.png" // Thay đường dẫn icon nếu có
+        });
+      } else {
+        console.log("Không có quyền hiển thị thông báo.");
+      }
+    }
+
+    // --- Lắng nghe sự kiện tin nhắn mới trong Firebase trên node "messages" ---
+    var messagesRef = db.ref("messages");
+    messagesRef.on("child_added", function(snapshot) {
+      var data = snapshot.val();
+      // Giả định tin nhắn được lưu tại thuộc tính "message"
+      if (data && data.message) {
+        showNotification("Tin nhắn mới", data.message);
+      }
+    });
+
+    // --- Lắng nghe các sự kiện từ PubNub ---
+    pubnub.addListener({
+      // Khi nhận được tin nhắn mới
+      message: function(event) {
+        var messageData = event.message;
+        showNotification("Tin nhắn mới", messageData.message || "Có tin nhắn đến");
+      },
+      // Khi có thay đổi trạng thái người dùng tham gia/rời kênh
+      presence: function(event) {
+        if (event.action === "join" || event.action === "leave") {
+          showNotification(
+            "Cập nhật trạng thái",
+            "Người dùng " + event.uuid + " đã " + event.action
+          );
+        }
+      }
+    });
 
     // (Có thể bổ sung thêm push notifications, caching offline, ...)
 
@@ -1585,4 +1635,3 @@
   </script>
 </body>
 </html>
-
