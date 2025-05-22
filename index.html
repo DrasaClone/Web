@@ -314,6 +314,27 @@
       padding: 5px;
       border-radius: 4px;
     }
+    h1 {
+      color: #333;
+    }
+    #upload_widget_opener {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #007bff;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      cursor: pointer;
+    }
+    #uploadedImage {
+      margin-top: 20px;
+    }
+    #uploadedImage img {
+      max-width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    
   </style>
 </head>
 <body class="theme-default">
@@ -330,6 +351,7 @@
       <button class="nav-btn" data-target="profile-section">Hồ sơ</button>
       <button class="nav-btn" data-target="settings-section">Cài đặt</button>
       <button class="nav-btn" data-target="call-section">Call</button>
+      <button class="nav-btn" data-target="img-section">Image</button>
     </div>
   </header>
   
@@ -492,6 +514,13 @@
     </div>
     
   </div>
+  </div>
+  
+  <!-- Image Section -->
+  <div class="section img-section" id="img-section" style="display: none;">
+  <h1>Ảnh</h1>
+  <button id="upload_widget_opener">Upload Ảnh</button>
+  <div id="uploadedImage"></div>
   </div>
   
   <!-- Plugin bình luận Facebook -->
@@ -831,8 +860,8 @@
     
     document.getElementById("upload-forum-btn").addEventListener("click", function() {
       cloudinary.createUploadWidget({
-          cloudName: 'demo',
-          uploadPreset: 'ml_default'
+          cloudName: 'dgbux4wzo',
+          uploadPreset: 'okeqfdx4'
         }, function(error, result) {
           if(!error && result && result.event === "success") {
             var url = result.info.secure_url;
@@ -1628,6 +1657,32 @@
         }
       }
     });
+
+    // Thay thế thông tin sau bằng thông tin Cloudinary của bạn
+    const cloudName = 'your_cloud_name';
+    const uploadPreset = 'your_upload_preset';
+
+    // Tạo Cloudinary upload widget
+    var myWidget = cloudinary.createUploadWidget({
+      cloudName: 'dgbux4wzo',
+      uploadPreset: 'okeqfdx4',
+      sources: ['local', 'url', 'camera'],
+      multiple: true,   // Nếu bạn muốn cho phép upload nhiều ảnh cùng lúc: đổi thành true
+      cropping: true,   // Nếu bạn muốn cho phép crop ảnh: đổi thành true và cấu hình thêm
+      resourceType: 'image'
+    }, (error, result) => {
+      if (!error && result && result.event === "success") {
+        console.log('Ảnh upload thành công: ', result.info);
+        const imageUrl = result.info.secure_url;
+        // Hiển thị ảnh đã upload
+        document.getElementById("uploadedImage").innerHTML = `<img src="${imageUrl}" alt="Uploaded Image">`;
+      }
+    });
+
+    // Mở widget khi click vào nút
+    document.getElementById("upload_widget_opener").addEventListener("click", function(){
+      myWidget.open();
+    }, false);
 
     // (Có thể bổ sung thêm push notifications, caching offline, ...)
 
