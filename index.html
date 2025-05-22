@@ -314,27 +314,42 @@
       padding: 5px;
       border-radius: 4px;
     }
-    h1 {
-      color: #333;
-    }
     #upload_widget_opener {
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #007bff;
-      border: none;
-      border-radius: 4px;
+      padding: 10px 15px;
+      background-color: #4285f4;
       color: #fff;
+      border: none;
       cursor: pointer;
+      margin-bottom: 20px;
     }
-    #uploadedImage {
-      margin-top: 20px;
-    }
-    #uploadedImage img {
-      max-width: 100%;
+    .image-container {
       border: 1px solid #ccc;
-      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 15px;
+      width: 300px;
+      position: relative;
     }
-    
+    .image-container img {
+      max-width: 100%;
+      display: block;
+    }
+    .buttons {
+      margin-top: 10px;
+    }
+    .buttons button {
+      margin-right: 5px;
+      padding: 5px 8px;
+    }
+    .comments {
+      margin-top: 10px;
+      border-top: 1px dashed #ccc;
+      padding-top: 5px;
+    }
+    .user-comment {
+      font-size: 0.9em;
+      margin: 3px 0;
+    }
+
   </style>
 </head>
 <body class="theme-default">
@@ -518,9 +533,11 @@
   
   <!-- Image Section -->
   <div class="section img-section" id="img-section" style="display: none;">
-  <h1>Ảnh</h1>
+  <h1>Trang Ảnh</h1>
+  <!-- Nút mở Cloudinary Upload Widget -->
   <button id="upload_widget_opener">Upload Ảnh</button>
-  <div id="uploadedImage"></div>
+  <!-- Phần hiển thị danh sách ảnh -->
+  <div id="images_section"></div>
   </div>
   
   <!-- Plugin bình luận Facebook -->
@@ -585,6 +602,7 @@
     };
     firebase.initializeApp(firebaseConfig);
     var db = firebase.database();
+    
     
     /* -------------------- KHỞI TẠO PUBNUB -------------------- */
     var pubnub = new PubNub({
@@ -1658,31 +1676,114 @@
       }
     });
 
-    // Thay thế thông tin sau bằng thông tin Cloudinary của bạn
-    const cloudName = 'your_cloud_name';
-    const uploadPreset = 'your_upload_preset';
-
-    // Tạo Cloudinary upload widget
+    /************* CẤU HÌNH VÀ KHỞI TẠO Cloudinary *************/
+    // Thay thế cloudName và uploadPreset bằng thông tin của bạn
     var myWidget = cloudinary.createUploadWidget({
       cloudName: 'dgbux4wzo',
-      uploadPreset: 'okeqfdx4',
-      sources: ['local', 'url', 'camera'],
-      multiple: true,   // Nếu bạn muốn cho phép upload nhiều ảnh cùng lúc: đổi thành true
-      cropping: true,   // Nếu bạn muốn cho phép crop ảnh: đổi thành true và cấu hình thêm
-      resourceType: 'image'
+      uploadPreset: 'okeqfdx4'
     }, (error, result) => {
       if (!error && result && result.event === "success") {
-        console.log('Ảnh upload thành công: ', result.info);
-        const imageUrl = result.info.secure_url;
-        // Hiển thị ảnh đã upload
-        document.getElementById("uploadedImage").innerHTML = `<img src="${imageUrl}" alt="Uploaded Image">`;
+        console.log('Upload thành công! URL:', result.info.secure_url);
+        // Tạo đối tượng chứa thông tin ảnh upload (số like, bình luận có thể được cập nhật sau)
+        var imageData = {
+          url: result.info.secure_url,
+          likes: 0,
+          comments: []
+        };
+        // Lưu thông tin vào Firebase Realtime Database dưới node "images"
+        var newImageRef = db.ref('images').push();
+        newImageRef.set(imageData);
       }
     });
 
-    // Mở widget khi click vào nút
+    // Mở widget khi nhấn nút upload
     document.getElementById("upload_widget_opener").addEventListener("click", function(){
       myWidget.open();
     }, false);
+
+    /************* HIỂN THỊ ẢNH VÀ TÍNH NĂNG LIKE, DOWNLOAD, BÌNH LUẬN *************/
+    // Hàm tạo giao diện cho mỗi ảnh cùng với nút chức năng
+    function createImageElement(key, data) {
+      var container = document.createElement('div');
+      container.classList.add('image-container');
+      container.setAttribute('data-key', key);
+      
+      // Hiển thị ảnh
+      var img = document.createElement('img');
+      img.src = data.url;
+      container.appendChild(img);
+  
+      // Các nút chức năng
+      var buttonsDiv = document.createElement('div');
+      buttonsDiv.classList.add('buttons');
+  
+      // Nút Like
+      var likeBtn = document.createElement('button');
+      likeBtn.textContent = "Like (" + data.likes + ")";
+      likeBtn.addEventListener('click', function(){
+        var newLikes = data.likes + 1;
+        // Cập nhật số lượng like trên Firebase
+        db.ref('images/' + key).update({ likes: newLikes });
+      });
+      buttonsDiv.appendChild(likeBtn);
+  
+      // Nút Download
+      var downloadBtn = document.createElement('button');
+      downloadBtn.textContent = "Download";
+      downloadBtn.addEventListener('click', function(){
+        var link = document.createElement('a');
+        link.href = data.url;
+        link.download = 'downloaded_image.jpg';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+      buttonsDiv.appendChild(downloadBtn);
+  
+      // Nút Bình luận
+      var commentBtn = document.createElement('button');
+      commentBtn.textContent = "Bình luận";
+      commentBtn.addEventListener('click', function(){
+        var comment = prompt("Nhập bình luận của bạn:");
+        if (comment && comment.trim() !== "") {
+          var updatedComments = data.comments || [];
+          updatedComments.push(comment);
+          // Cập nhật bình luận trên Firebase
+          db.ref('images/' + key).update({ comments: updatedComments });
+        }
+      });
+      buttonsDiv.appendChild(commentBtn);
+  
+      container.appendChild(buttonsDiv);
+  
+      // Phần hiển thị danh sách bình luận
+      var commentsDiv = document.createElement('div');
+      commentsDiv.classList.add('comments');
+      if(data.comments && data.comments.length > 0) {
+        data.comments.forEach(function(cmt) {
+          var p = document.createElement('p');
+          p.classList.add('user-comment');
+          p.textContent = cmt;
+          commentsDiv.appendChild(p);
+        });
+      }
+      container.appendChild(commentsDiv);
+  
+      return container;
+    }
+  
+    // Lắng nghe sự thay đổi từ Firebase Realtime Database
+    db.ref('images').on('value', function(snapshot) {
+      var imagesSection = document.getElementById('images_section');
+      imagesSection.innerHTML = ''; // Xóa giao diện cũ
+      var images = snapshot.val();
+      for (var key in images) {
+        if (images.hasOwnProperty(key)) {
+          var imageElement = createImageElement(key, images[key]);
+          imagesSection.appendChild(imageElement);
+        }
+      }
+    });
 
     // (Có thể bổ sung thêm push notifications, caching offline, ...)
 
