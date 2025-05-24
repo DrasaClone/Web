@@ -31,6 +31,8 @@
   <script src="https://openfpcdn.io/fingerprintjs/v3"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/0.7.28/ua-parser.min.js"></script>
   <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+  <!-- Axios để upload video lên Cloudinary -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"></script>
 
   <style>
     /* Các chủ đề giao diện */
@@ -349,6 +351,50 @@
       font-size: 0.9em;
       margin: 3px 0;
     }
+    /* Đổi tên class ở đây */
+    .upload-video {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .video-item {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 20px;
+      max-width: 400px;
+      margin: 15px auto;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    video {
+      max-width: 100%;
+      display: block;
+      margin-bottom: 10px;
+      border-radius: 4px;
+    }
+    button {
+      margin: 5px 2px;
+      padding: 7px 12px;
+      border: none;
+      border-radius: 4px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .comments-container {
+      background: #f9f9f9;
+      padding: 5px 10px;
+      margin-top: 10px;
+      max-height: 100px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 13px;
+    }
 
   </style>
 </head>
@@ -366,7 +412,8 @@
       <button class="nav-btn" data-target="profile-section">Hồ sơ</button>
       <button class="nav-btn" data-target="settings-section">Cài đặt</button>
       <button class="nav-btn" data-target="call-section">Call</button>
-      <button class="nav-btn" data-target="img-section">Image</button>
+      <button class="nav-btn" data-target="img-section">Ảnh</button>
+      <button class="nav-btn" data-target="video-section">Video</button>
     </div>
   </header>
   
@@ -538,6 +585,19 @@
   <button id="upload_widget_opener">Upload Ảnh</button>
   <!-- Phần hiển thị danh sách ảnh -->
   <div id="images_section"></div>
+  </div>
+  
+  <!-- Video Section -->
+  <div class="section video-section" id="video-section" style="display: none;">
+  <h1>Trang Video</h1>
+  <!-- Sử dụng upload-video thay vì upload-section -->
+  <div class="upload-video">
+    <input type="file" id="videoFile" accept="video/*"><br><br>
+    <button id="uploadButton">Upload Video</button>
+  </div>
+
+  <div id="videoContainer"></div>
+
   </div>
   
   <!-- Plugin bình luận Facebook -->
@@ -1785,9 +1845,155 @@
       }
     });
 
+    var cloudName = 'dgbux4wzo';
+    var uploadPreset = 'okeqfdx4';
+
+    // Hàm upload video lên Cloudinary
+    async function uploadToCloudinary(file) {
+      var url = `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`;
+      var formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', uploadPreset);
+      
+      try {
+        var response = await axios.post(url, formData, {
+          headers: { "Content-Type": "multipart/form-data" }
+        });
+        return response.data.secure_url;
+      } catch (error) {
+        console.error('Lỗi upload lên Cloudinary:', error);
+        alert('Có lỗi xảy ra khi upload video.');
+      }
+    }
+
+    // Lưu URL video (với thông tin tương tác ban đầu) vào Firebase Realtime Database
+    function saveVideoUrl(url) {
+      var newVideoRef = db.ref('videos').push();
+      newVideoRef.set({
+        url: url,
+        likes: 0,
+        timestamp: Date.now()
+      });
+    }
+
+    // Sự kiện khi bấm Upload Video
+    document.getElementById('uploadButton').addEventListener('click', async function() {
+      var fileInput = document.getElementById('videoFile');
+      if (fileInput.files.length === 0) {
+        alert('Vui lòng chọn 1 file video.');
+        return;
+      }
+      var file = fileInput.files[0];
+      // Upload video lên Cloudinary
+      var videoUrl = await uploadToCloudinary(file);
+      if (videoUrl) {
+        saveVideoUrl(videoUrl);
+        alert('Upload video thành công!');
+        fileInput.value = ''; // reset input
+      }
+    });
+
+    // Hàm tạo cấu trúc hiển thị video kèm các nút tương tác
+    function renderVideo(videoId, videoData) {
+      var videoDiv = document.createElement('div');
+      videoDiv.className = 'video-item';
+      videoDiv.id = videoId;
+
+      // Phần video
+      var videoEl = document.createElement('video');
+      videoEl.src = videoData.url;
+      videoEl.controls = true;
+      videoEl.loop = true;
+      videoDiv.appendChild(videoEl);
+
+      // Nút Like
+      var likeBtn = document.createElement('button');
+      likeBtn.textContent = 'Like (' + videoData.likes + ')';
+      likeBtn.addEventListener('click', function() {
+        var likesRef = db.ref('videos/' + videoId + '/likes');
+        likesRef.transaction(function(currentLikes) {
+          return (currentLikes || 0) + 1;
+        });
+      });
+      videoDiv.appendChild(likeBtn);
+
+      // Nút Download
+      var downloadBtn = document.createElement('button');
+      downloadBtn.textContent = 'Download';
+      downloadBtn.addEventListener('click', function() {
+        var a = document.createElement('a');
+        a.href = videoData.url;
+        a.download = 'video.mp4';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+      videoDiv.appendChild(downloadBtn);
+
+      // Nút Comment
+      var commentBtn = document.createElement('button');
+      commentBtn.textContent = 'Bình luận';
+      commentBtn.addEventListener('click', function() {
+        var commentText = prompt('Nhập bình luận của bạn:');
+        if (commentText) {
+          var commentsRef = db.ref('videos/' + videoId + '/comments');
+          commentsRef.push({
+            text: commentText,
+            timestamp: Date.now()
+          });
+        }
+      });
+      videoDiv.appendChild(commentBtn);
+
+      // Container hiển thị các bình luận
+      var commentsContainer = document.createElement('div');
+      commentsContainer.className = 'comments-container';
+      commentsContainer.innerHTML = '<strong>Bình luận:</strong><br>';
+      videoDiv.appendChild(commentsContainer);
+
+      // Lắng nghe thay đổi bình luận theo thời gian thực
+      var commentsRef = db.ref('videos/' + videoId + '/comments');
+      commentsRef.on('value', function(snapshot) {
+        commentsContainer.innerHTML = '<strong>Bình luận:</strong><br>';
+        snapshot.forEach(function(childSnapshot) {
+          var commentData = childSnapshot.val();
+          var commentEl = document.createElement('div');
+          commentEl.textContent = commentData.text;
+          commentsContainer.appendChild(commentEl);
+        });
+      });
+
+      // Cập nhật số like theo realtime database
+      var likesRef = db.ref('videos/' + videoId + '/likes');
+      likesRef.on('value', function(snapshot) {
+        var likes = snapshot.val() || 0;
+        likeBtn.textContent = 'Like (' + likes + ')';
+      });
+
+      document.getElementById('videoContainer').appendChild(videoDiv);
+    }
+
+    // Hàm load video từ Firebase Realtime Database khi trang được tải
+    function loadVideos() {
+      var videosRef = db.ref('videos').orderByChild('timestamp');
+      videosRef.on('value', function(snapshot) {
+        var container = document.getElementById('videoContainer');
+        container.innerHTML = ''; // làm mới danh sách video
+        snapshot.forEach(function(childSnapshot) {
+          var videoId = childSnapshot.key;
+          var videoData = childSnapshot.val();
+          renderVideo(videoId, videoData);
+        });
+      });
+    }
+
+    // Gọi hàm load video ngay khi trang được tải
+    loadVideos();
+
     // (Có thể bổ sung thêm push notifications, caching offline, ...)
 
     // (Hàm updatePresence có thể được định nghĩa thêm nếu cần để quản lý danh sách online)
   </script>
 </body>
 </html>
+
