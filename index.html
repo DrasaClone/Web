@@ -2077,6 +2077,9 @@
       });
     }
 
+    // Gọi hàm load video ngay khi trang được tải
+    loadVideos();
+
     // Hiển thị/ẩn khối đánh giá dựa theo lựa chọn của người dùng
     var typeSelect = document.getElementById("type");
     var ratingBlock = document.getElementById("ratingBlock");
@@ -2144,8 +2147,6 @@
       });
     });
 
-    // Gọi hàm load video ngay khi trang được tải
-    loadVideos();
 
     // (Có thể bổ sung thêm push notifications, caching offline, ...)
 
