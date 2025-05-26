@@ -395,6 +395,53 @@
       border-radius: 4px;
       font-size: 13px;
     }
+      form {
+          max-width: 600px;
+          margin: auto;
+          background: #fff;
+          padding: 20px;
+          border-radius: 5px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      label {
+          display: block;
+          margin-top: 10px;
+      }
+      /* Áp dụng định dạng cho các phần tử nhập liệu dựa trên lớp */
+      .custom-input,
+      .custom-textarea,
+      .custom-select {
+          width: 100%;
+          padding: 8px;
+          margin-top: 5px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+      }
+      /* Định dạng riêng cho nút submit */
+      .custom-button {
+          margin-top: 15px;
+          padding: 10px 15px;
+          border: none;
+          background-color: #007bff;
+          color: #fff;
+          cursor: pointer;
+          border-radius: 4px;
+      }
+      .custom-button:hover {
+          background-color: #0056b3;
+      }
+      .feedback {
+          background: #fff;
+          padding: 15px;
+          margin: 10px auto;
+          max-width: 600px;
+          border-radius: 5px;
+          box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      }
+      .feedback .meta {
+          font-size: 0.9em;
+          color: #555;
+      }
 
   </style>
 </head>
@@ -414,6 +461,7 @@
       <button class="nav-btn" data-target="call-section">Call</button>
       <button class="nav-btn" data-target="img-section">Ảnh</button>
       <button class="nav-btn" data-target="video-section">Video</button>
+      <button class="nav-btn" data-target="help-section">Help</button>
     </div>
   </header>
   
@@ -598,6 +646,48 @@
 
   <div id="videoContainer"></div>
 
+  </div>
+  
+  <!-- Help Section -->
+  <div class="section help-section" id="help-section" style="display: none;">
+  <h1>Trang Đánh Giá, Feedback & Q&A</h1>
+  <form id="userFeedbackForm">
+      <label for="userFullName">Họ và tên:</label>
+      <input type="text" id="userFullName" class="custom-input" placeholder="Nhập họ và tên của bạn" required>
+      
+      <label for="type">Chọn loại phản hồi:</label>
+      <select id="type" class="custom-select">
+         <option value="feedback">Feedback</option>
+         <option value="evaluation">Đánh giá</option>
+         <option value="qna">Q&A</option>
+      </select>
+      
+      <!-- Khối đánh giá (chỉ hiển thị khi chọn 'Đánh giá') -->
+      <div id="ratingBlock" style="display: none;">
+         <label>Đánh giá (1-5 sao):</label>
+         <div id="stars">
+             <input type="radio" id="star1" name="rating" value="1">
+             <label for="star1">1</label>
+             <input type="radio" id="star2" name="rating" value="2">
+             <label for="star2">2</label>
+             <input type="radio" id="star3" name="rating" value="3">
+             <label for="star3">3</label>
+             <input type="radio" id="star4" name="rating" value="4">
+             <label for="star4">4</label>
+             <input type="radio" id="star5" name="rating" value="5" checked>
+             <label for="star5">5</label>
+         </div>
+      </div>
+      
+      <label for="userMessage">Chi tiết:</label>
+      <textarea id="userMessage" class="custom-textarea" rows="4" placeholder="Nhập nội dung của bạn" required></textarea>
+      
+      <button type="submit" class="custom-button">Gửi ý kiến</button>
+  </form>
+  
+  <h2>Tất cả đánh giá và câu hỏi</h2>
+  <div id="feedbackContainer"></div>
+  
   </div>
   
   <!-- Plugin bình luận Facebook -->
@@ -1987,6 +2077,73 @@
       });
     }
 
+    // Hiển thị/ẩn khối đánh giá dựa theo lựa chọn của người dùng
+    var typeSelect = document.getElementById("type");
+    var ratingBlock = document.getElementById("ratingBlock");
+    typeSelect.addEventListener("change", function() {
+        if (this.value === "evaluation") {
+            ratingBlock.style.display = "block";
+        } else {
+            ratingBlock.style.display = "none";
+        }
+    });
+
+    // Xử lý gửi form để lưu dữ liệu vào Firebase Realtime Database dưới nút "feedback"
+    document.getElementById("userFeedbackForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      var userFullName = document.getElementById("userFullName").value;
+      var type = document.getElementById("type").value;
+      var userMessage = document.getElementById("userMessage").value;
+      
+      // Nếu chọn đánh giá thì lấy giá trị rating
+      var rating = null;
+      if (type === "evaluation") {
+          var ratingElements = document.getElementsByName("rating");
+          for (var i = 0; i < ratingElements.length; i++) {
+              if (ratingElements[i].checked) {
+                  rating = ratingElements[i].value;
+                  break;
+              }
+          }
+      }
+      
+      // Đẩy dữ liệu lên Firebase, lưu trữ tất cả thông tin vào nút "feedback"
+      var newFeedbackRef = db.ref("feedback").push();
+      newFeedbackRef.set({
+         name: userFullName,
+         type: type,
+         feedback: userMessage,
+         rating: rating,
+         date: new Date().toLocaleString()
+      });
+      
+      // Reset form và ẩn khối đánh giá nếu cần
+      this.reset();
+      ratingBlock.style.display = "none";
+    });
+
+    // Lắng nghe và hiển thị dữ liệu theo thời gian thực từ Firebase
+    var feedbackRef = db.ref("feedback");
+    feedbackRef.on("value", function(snapshot) {
+      var feedbackContainer = document.getElementById("feedbackContainer");
+      feedbackContainer.innerHTML = "";
+      snapshot.forEach(function(childSnapshot) {
+          var data = childSnapshot.val();
+          var feedbackDiv = document.createElement("div");
+          feedbackDiv.classList.add("feedback");
+          
+          // Hiển thị thông tin bài đăng
+          var contentHtml = "<strong>" + data.name + "</strong> (" + data.date + ")<br>";
+          contentHtml += "<em>Loại: " + data.type + "</em><br>";
+          if (data.type === "evaluation" && data.rating) {
+              contentHtml += "<span>Đánh giá: " + data.rating + " sao</span><br>";
+          }
+          contentHtml += "<p>" + data.feedback + "</p>";
+          feedbackDiv.innerHTML = contentHtml;
+          feedbackContainer.appendChild(feedbackDiv);
+      });
+    });
+
     // Gọi hàm load video ngay khi trang được tải
     loadVideos();
 
@@ -1996,4 +2153,5 @@
   </script>
 </body>
 </html>
+
 
