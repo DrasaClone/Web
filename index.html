@@ -2155,6 +2155,19 @@
       });
     });
 
+  // Kiểm tra xem trình duyệt có hỗ trợ service worker không
+  if ('serviceWorker' in navigator) {
+    // Đăng ký service worker khi trang đã tải xong
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('Service Worker registered successfully:', registration);
+        })
+        .catch(error => {
+          console.log('Service Worker registration failed:', error);
+        });
+    });
+  }
 
     // (Có thể bổ sung thêm push notifications, caching offline, ...)
 
