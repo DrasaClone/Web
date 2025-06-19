@@ -3,21 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASCII-NET v3.0 - Full Feature Integration</title>
+    <title>ASCII-NET v2.1 - Enhanced Edition</title>
     
-    <!-- ================== TÍCH HỢP SDK TỪ index++.html ================== -->
-    <!-- Firebase JS SDK -->
+    <!-- ================== SDKs ================== -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
-    <!-- PubNub SDK -->
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.9.min.js"></script>
-    
-    <!-- Cloudinary Upload Widget -->
     <script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>
-    
-    <!-- Agora RTC SDK -->
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
     <!-- ================================================================= -->
 
@@ -55,15 +48,14 @@
 
         .header-title { text-align: center; margin-bottom: 20px; text-shadow: 0 0 5px var(--main-color), 0 0 10px var(--main-color); }
         pre { white-space: pre-wrap; word-wrap: break-word; margin: 0; font-family: inherit; color: inherit; font-size: inherit; }
-        .ascii-art { color: var(--accent-color); }
+        .ascii-art { color: var(--accent-color); text-align: center; }
         .ascii-box { border: 1px solid var(--main-color); padding: 10px; margin-bottom: 15px; }
         .ascii-button {
             display: inline-block; border: 1px solid var(--main-color); padding: 5px 10px; margin: 5px;
-            cursor: pointer; background-color: transparent; color: var(--main-color); font-family: inherit;
+            cursor: pointer; background-color: transparent; color: var(--main-color); font-family: inherit; font-size: 0.9em;
         }
         .ascii-button:hover, .ascii-button.active { background-color: var(--main-color); color: var(--bg-color); }
         .ascii-button:disabled { cursor: not-allowed; opacity: 0.5; }
-
         input[type="text"], input[type="password"], textarea {
             background-color: transparent; border: none; border-bottom: 1px solid var(--main-color);
             color: var(--main-color); font-family: inherit; font-size: 1em; width: 250px;
@@ -73,25 +65,38 @@
         .blinking-cursor { animation: blink 1s step-end infinite; }
         @keyframes blink { from, to { color: transparent; } 50% { color: var(--main-color); } }
         #main-nav { display: flex; justify-content: center; flex-wrap: wrap; margin: 10px 0; border-top: 1px dashed var(--main-color); border-bottom: 1px dashed var(--main-color); padding: 5px 0; }
-        .status-online { color: #23d160; } .status-offline { color: #ff3860; }
-        .loader { display: inline-block; font-size: 1em; text-align: center; width: 100%; }
         a { color: var(--main-color); text-decoration: underline; cursor: pointer; }
-        .comment, .social-comment { border-bottom: 1px dotted var(--border-color); padding: 5px 0; margin-top: 5px; }
+        
+        .avatar-img { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--main-color); margin-right: 10px; vertical-align: middle; }
+        .post-content-img { max-width: 90%; border: 1px solid var(--border-color); margin-top: 10px; }
+        .comment, .social-comment { border-bottom: 1px dotted var(--border-color); padding: 5px 0; margin-top: 5px; display: flex; align-items: center; }
         
         /* Video Call Specific Styles */
         .video-call-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;}
-        .video-box { border: 1px solid var(--main-color); background: #000; width: 320px; height: 240px; position: relative; }
+        .video-box { border: 1px solid var(--main-color); background: #000; width: 320px; height: 240px; position: relative; display: flex; align-items: center; justify-content: center;}
         .video-box video { width: 100%; height: 100%; object-fit: cover; }
         .video-name { position: absolute; bottom: 5px; left: 5px; background: rgba(0,0,0,0.7); padding: 3px; font-size: 0.9em; }
+        .video-controls { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.7); display: flex; gap: 5px; padding: 3px;}
+        .control-btn.muted { text-decoration: line-through; color: var(--error-color); }
 
+        /* Toast & Misc */
         #toast-container { position: fixed; bottom: 10px; left: 10px; z-index: 9999; }
         .toast { border: 1px solid var(--main-color); background: var(--bg-color); padding: 10px; margin-top: 5px; }
+        #boot-progress-bar { width: 0; height: 5px; background-color: var(--main-color); transition: width 0.5s ease-out; margin: 10px 0;}
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            #main-nav { flex-direction: column; align-items: center; }
+            .ascii-button { width: 80%; text-align: center; }
+            #chat-public-page > div { flex-direction: column; }
+            .video-box { width: 90vw; height: 67.5vw; }
+            input[type="text"], input[type="password"] { width: 90%; }
+        }
     </style>
 </head>
 <body>
 
 <div id="terminal">
-
     <!-- TRANG 0: KHỞI ĐỘNG HỆ THỐNG -->
     <div id="boot-page" class="page active">
         <pre class="ascii-art">
@@ -100,34 +105,30 @@
          / _ \| | (_|(_| \__ \ |__ | | 
         /_/ \_\_|\___\___\___/____|___|
                                    
-        [ ASCII-NET v3.0 - Full Feature Integration ]
+      [ ASCII-NET v2.1 - Enhanced Edition ]
         </pre>
         <pre id="boot-log"></pre>
+        <div id="boot-progress-bar-container"><div id="boot-progress-bar"></div></div>
     </div>
 
 
     <!-- TRANG 1: ĐĂNG NHẬP -->
     <div id="login-page" class="page">
-        <div class="header-title">
-            <pre>===================== TRUY CẬP HỆ THỐNG =====================</pre>
-        </div>
+        <div class="header-title"><pre>===================== TRUY CẬP HỆ THỐNG =====================</pre></div>
         <div id="login-form">
              <div class="ascii-box">
                 <pre>
 > Nhập Email:   [ <input type="text" id="email" placeholder="user@domain.com" required> ]
 > Mật khẩu:     [ <input type="password" id="password" placeholder="ít nhất 6 ký tự" required> ]<span class="blinking-cursor">_</span>
-                </pre>
-                <br>
-                <button id="email-login" class="ascii-button">[//> ĐĂNG NHẬP / ĐĂNG KÝ BẰNG EMAIL <//]</button>
+                </pre><br>
+                <button id="email-login" class="ascii-button">[//> ĐĂNG NHẬP / ĐĂNG KÝ <//]</button>
              </div>
              <div class="ascii-box">
                 <pre>> Phương thức khác:</pre>
                 <button id="google-login" class="ascii-button">[G]> ĐĂNG NHẬP VỚI GOOGLE <[G]</button>
             </div>
         </div>
-        <div id="login-loader" style="display: none; margin-top: 20px;">
-            <pre class="loader">Đang kết nối đến hệ thống chính... [|]</pre>
-        </div>
+        <div id="login-loader" style="display: none; margin-top: 20px;"><pre class="loader">Đang kết nối đến hệ thống chính...</pre></div>
     </div>
 
 
@@ -140,7 +141,6 @@
             <div id="main-nav">
                 <a class="ascii-button active" data-target="newsfeed-page">[Bảng tin]</a>
                 <a class="ascii-button" data-target="chat-public-page">[Chat Chung]</a>
-                <a class="ascii-button" data-target="private-chat-page">[Tin Nhắn Riêng]</a>
                 <a class="ascii-button" data-target="video-call-page">[Gọi Video]</a>
                 <a class="ascii-button" data-target="profile-page">[Hồ sơ]</a>
                 <a class="ascii-button" data-target="help-page">[Trợ giúp]</a>
@@ -149,7 +149,6 @@
             </div>
         </div>
         
-        <!-- NỘI DUNG CÁC TRANG CON -->
         <div id="page-content">
         
             <!-- Trang con: BẢNG TIN -->
@@ -157,13 +156,11 @@
                 <pre class="header-title">+++ BẢNG TIN HỆ THỐNG +++</pre>
                 <div class="ascii-box">
                     <pre>Tạo bài đăng mới:</pre>
-                    <textarea id="social-message" rows="3" placeholder="Chia sẻ suy nghĩ của bạn ở đây..."></textarea>
+                    <textarea id="social-message" rows="3" placeholder="Chia sẻ suy nghĩ của bạn..."></textarea>
                     <button id="submit-social-btn" class="ascii-button">[ Đăng ]</button>
-                    <button id="upload-social-btn" class="ascii-button">[ Tải Lên Ảnh ]</button>
+                    <button id="upload-social-btn" class="ascii-button">[ Tải Ảnh ]</button>
                 </div>
-                <div id="social-posts-container">
-                    <pre class="loader">Đang tải bảng tin... [-]</pre>
-                </div>
+                <div id="social-posts-container"><pre class="loader">Đang tải bảng tin...</pre></div>
             </div>
 
             <!-- Trang con: CHAT CHUNG -->
@@ -171,57 +168,38 @@
                 <pre class="header-title">### KÊNH CHAT CHUNG TOÀN MẠNG ###</pre>
                 <div style="display: flex; gap: 15px;">
                     <div class="ascii-box" style="flex-grow: 3;">
-                        <pre><u><b>Cửa sổ chat (Gõ /help để xem lệnh):</b></u></pre>
-                        <div id="public-chat-window" style="height: 300px; overflow-y: auto; padding-top: 5px;"></div>
+                        <pre><u><b>Cửa sổ chat:</b></u></pre>
+                        <div id="public-chat-window" style="height: 300px; overflow-y: auto; padding: 5px;"></div>
                         <div style="display: flex; margin-top: 10px;">
-                            <pre style="flex-grow: 1;">[<input type="text" id="public-chat-input" style="width: 95%;" placeholder="Nhập tin nhắn hoặc lệnh..."><span class="blinking-cursor">_</span>]</pre>
+                            <pre style="flex-grow: 1;">[<input type="text" id="public-chat-input" style="width: 95%;" placeholder="Nhập tin nhắn..."><span class="blinking-cursor">_</span>]</pre>
                             <button id="send-chat-btn" class="ascii-button">[ Gửi ]</button>
-                            <button id="upload-chat-image-btn" class="ascii-button">[> UPLOAD IMG <]</button>
                         </div>
                     </div>
                     <div class="ascii-box" style="flex-grow: 1;">
-                         <pre><u><b>Online Users (Click để chat riêng):</b></u></pre>
+                         <pre><u><b>Đang Online:</b></u></pre>
                          <div id="online-users-list" style="height: 350px; overflow-y: auto;"></div>
-                    </div>
-                </div>
-            </div>
-
-             <!-- Trang con: TIN NHẮN RIÊNG -->
-            <div id="private-chat-page" class="sub-page">
-                <pre class="header-title">@@@ TIN NHẮN RIÊNG TƯ @@@</pre>
-                <div id="private-chat-start-prompt" class="ascii-box">
-                    <pre>
-                        Chọn một người dùng từ danh sách Online bên trang "Chat Chung" để bắt đầu.
-                    </pre>
-                </div>
-                <div id="private-chat-interface" class="ascii-box" style="display:none;">
-                    <pre>Đang chat với: <b id="pm-partner-name"></b> <button id="pm-back-btn" class="ascii-button" style="float: right;">[< Quay lại]</button></pre>
-                    <div id="pm-chat-window" style="height: 300px; overflow-y: auto; padding-top: 5px; border-top: 1px dashed; border-bottom: 1px dashed; margin: 10px 0;"></div>
-                    <div style="display: flex; margin-top: 10px;">
-                        <pre style="flex-grow: 1;">[<input type="text" id="pm-chat-input" style="width: 95%;" placeholder="Gửi tin nhắn riêng..."><span class="blinking-cursor">_</span>]</pre>
-                        <button id="pm-send-btn" class="ascii-button">[ Gửi ]</button>
                     </div>
                 </div>
             </div>
 
             <!-- Trang con: GỌI VIDEO -->
             <div id="video-call-page" class="sub-page">
-                <pre class="header-title">📞 TRUNG TÂM GỌI VIDEO AGORA 📞</pre>
-                <!-- Room List & Creation -->
+                <pre class="header-title">@@@ TRUNG TÂM GỌI VIDEO AGORA @@@</pre>
                 <div id="room-selection" class="ascii-box">
                     <pre><b>Danh sách phòng hiện có:</b></pre>
-                    <div id="room-list">Chưa có phòng nào.</div>
-                    <hr>
+                    <div id="room-list">Chưa có phòng nào.</div><hr>
                     <pre>Tạo phòng mới: [ <input type="text" id="new-room-name" placeholder="Tên phòng..."> ] <button id="create-room-btn" class="ascii-button">[ Tạo ]</button></pre>
                 </div>
-                <!-- Call Interface -->
                 <div id="call-interface" style="display:none;">
                     <pre id="call-room-title">Đang trong phòng: </pre>
                     <div class="video-call-container">
                         <div class="video-box" id="local-stream">
                            <div class="video-name">You (Local)</div>
+                           <div class="video-controls">
+                                <button id="mic-btn" class="ascii-button control-btn">[Tắt Mic]</button>
+                                <button id="cam-btn" class="ascii-button control-btn">[Ẩn Cam]</button>
+                           </div>
                         </div>
-                        <!-- Remote streams will be added here by JS -->
                         <div id="remote-streams"></div>
                     </div>
                     <div style="text-align: center; margin-top: 10px;">
@@ -230,17 +208,16 @@
                 </div>
             </div>
 
-            <!-- Các trang còn lại: Profile, Help, Settings -->
-            <!-- ... Giữ nguyên như phiên bản trước ... -->
-
             <!-- Trang con: HỒ SƠ -->
             <div id="profile-page" class="sub-page">
                  <pre class="header-title">*** HỒ SƠ NGƯỜI DÙNG ***</pre>
-                 <div class="ascii-box" id="profile-info-container">
-                    <pre>Đang tải thông tin hồ sơ...</pre>
-                 </div>
+                 <div class="ascii-box" id="profile-info-container"><pre>Đang tải thông tin...</pre></div>
                  <div class="ascii-box">
                     <pre>Cập nhật nickname:<br>[ <input type="text" id="profile-nickname-input" placeholder="Nhập nickname mới..."> ] <button id="update-nickname-btn" class="ascii-button">[ Cập nhật ]</button></pre>
+                 </div>
+                 <div class="ascii-box">
+                    <pre>Cập nhật ảnh đại diện (avatar):</pre>
+                    <button id="upload-avatar-btn" class="ascii-button">[ Tải Lên Ảnh Đại Diện ]</button>
                  </div>
             </div>
 
@@ -256,7 +233,7 @@
                     </form>
                  </div>
                  <div class="ascii-box">
-                     <pre><b>Danh sách các phản hồi:</b></pre>
+                     <pre><b>Danh sách các phản hồi đã gửi:</b></pre>
                      <div id="feedback-container"></div>
                  </div>
             </div>
@@ -265,29 +242,44 @@
             <div id="settings-page" class="sub-page">
                 <pre class="header-title">⚙️ CÀI ĐẶT HỆ THỐNG ⚙️</pre>
                  <div class="ascii-box">
-                    <pre><b>[Chủ đề (Theme)]</b> - Thay đổi màu sắc giao diện</pre>
-                    <br>
+                    <pre><b>[Chủ đề (Theme)]</b> - Thay đổi màu sắc giao diện (Lựa chọn sẽ được lưu lại)</pre><br>
                     <button class="ascii-button theme-btn" data-theme="green">Terminal (Mặc định)</button>
                     <button class="ascii-button theme-btn" data-theme="amber">Amber</button>
                     <button class="ascii-button theme-btn" data-theme="blue">Matrix Blue</button>
                     <button class="ascii-button theme-btn" data-theme="white">Classic DOS</button>
                  </div>
             </div>
-
         </div>
     </div>
-    
 </div>
 <div id="toast-container"></div>
-<div id="recaptcha-container" style="display:none;"></div>
 
 <script>
-// Prevent FOUC
+// Prevent FOUC and apply stored theme
 document.body.style.display = "none";
+const themes = {
+    green: { bg: '#0d0d0d', main: '#00ff41', accent: '#f0f0f0', error: '#ff3860'},
+    amber: { bg: '#2E2519', main: '#FFB000', accent: '#FFEca1', error: '#FF4136'},
+    blue:  { bg: '#051025', main: '#33A1FF', accent: '#AedFFF', error: '#FF6347'},
+    white: { bg: '#0000AA', main: '#FFFFFF', accent: '#CCCCCC', error: '#FFFF55'}
+};
+function applyTheme(themeName) {
+    const selectedTheme = themes[themeName] || themes.green;
+    const root = document.documentElement;
+    root.style.setProperty('--bg-color', selectedTheme.bg);
+    root.style.setProperty('--main-color', selectedTheme.main);
+    root.style.setProperty('--accent-color', selectedTheme.accent);
+    root.style.setProperty('--error-color', selectedTheme.error);
+    localStorage.setItem('ascii-net-theme', themeName);
+}
+const savedTheme = localStorage.getItem('ascii-net-theme');
+if (savedTheme) applyTheme(savedTheme);
+
 
 document.addEventListener('DOMContentLoaded', () => {
     document.body.style.display = "block";
-    // === CẤU HÌNH FIREBASE, PUBNUB, AGORA ===
+    
+    // === CONFIGURATIONS ===
     const firebaseConfig = {
       apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
       authDomain: "webai-7642b.firebaseapp.com",
@@ -304,289 +296,475 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const AGORA_APP_ID = "a0b62867bee543fe828e23b4888eb3ae";
-    const socialCloudinaryWidget = cloudinary.createUploadWidget({
-        cloudName: 'dgbux4wzo',
-        uploadPreset: 'okeqfdx4'
-    }, (error, result) => {
-        if (!error && result && result.event === "success") {
-            const socialMsgField = document.getElementById("social-message");
-            socialMsgField.value += `\n[image]${result.info.secure_url}[/image]`;
-            showToast(`> Ảnh đã được thêm vào bài đăng.`);
-        }
-    });
-    // UPGRADE: New widget instance for chat
-    const chatCloudinaryWidget = cloudinary.createUploadWidget({
-        cloudName: 'dgbux4wzo',
-        uploadPreset: 'okeqfdx4'
-    }, (error, result) => {
-        if (!error && result && result.event === "success") {
-             const message = {
-                sender: userNickname,
-                imageUrl: result.info.secure_url,
-                timestamp: Date.now()
-            };
-            pubnub.publish({ channel: 'ascii_chat', message: message });
-            db.ref('publicChatMessages').push(message); // Save to Firebase for history
-        }
-    });
 
-    // === BIẾN TOÀN CỤC & DOM ELEMENTS ===
+    // === GLOBAL VARIABLES & DOM ELEMENTS ===
+    const terminal = document.getElementById('terminal');
     let currentUser = null;
-    let userNickname = 'anonymous';
-    // UPGRADE: Variables for Private Chat
-    let currentPrivateChannel = null;
-    
-    // === HÀM TIỆN ÍCH ===
-    function showToast(message) { /* ... Giữ nguyên ... */ }
-    function sanitize(str) { /* ... Giữ nguyên ... */ }
-    function formatTime(timestamp) { return new Date(timestamp).toLocaleTimeString(); }
-    function showPage(pageId) { /* ... Giữ nguyên ... */ }
-    function showSubPage(subPageId) { /* ... Gi-/iữ nguyên ... */ }
+    let userProfile = { nickname: 'anonymous', avatarUrl: 'https://i.imgur.com/83wS136.png' }; // Default avatar
 
-    // === XỬ LÝ KHỞI ĐỘNG HỆ THỐNG & LOGIN/LOGOUT ===
-    function runBootSequence() { /* ... Giữ nguyên ... */ }
-    function initializeApp() {
+    // === UTILITY FUNCTIONS ===
+    const showToast = (message) => {
+        const container = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.innerHTML = `<pre>${message}</pre>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    };
+
+    const sanitize = (str) => {
+      const temp = document.createElement('div');
+      temp.textContent = str;
+      return temp.innerHTML;
+    };
+    
+    const showPage = (pageId) => {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId)?.classList.add('active');
+        terminal.scrollTop = 0;
+    };
+    
+    const showSubPage = (subPageId) => {
+        document.querySelectorAll('.sub-page').forEach(sp => sp.style.display = 'none');
+        document.getElementById(subPageId).style.display = 'block';
+        document.querySelectorAll('#main-nav .ascii-button').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-target') === subPageId);
+        });
+    };
+
+    // === BOOT SEQUENCE ===
+    const runBootSequence = () => {
+        const bootLog = document.getElementById('boot-log');
+        const progressBar = document.getElementById('boot-progress-bar');
+        const bootSteps = [ "Initializing Kernel...", "Loading System Drivers...", "Establishing Network Interface...", "Connecting to ASCII-NET Mainframe...", "Authentication Layer Ready."];
+        let stepIndex = 0;
+        function nextStep() {
+            if (stepIndex < bootSteps.length) {
+                bootLog.innerHTML += `<pre>[ OK ] ${bootSteps[stepIndex]}</pre>`;
+                progressBar.style.width = `${((stepIndex + 1) / bootSteps.length) * 100}%`;
+                stepIndex++;
+                setTimeout(nextStep, Math.random() * 300 + 100);
+            } else {
+                setTimeout(() => auth.onAuthStateChanged(handleAuthStateChange), 500);
+            }
+        }
+        nextStep();
+    };
+
+    // === AUTHENTICATION & USER PROFILE MANAGEMENT ===
+    const handleAuthStateChange = async (user) => {
+        if (user) {
+            currentUser = user;
+            await loadUserProfile(user); // Load or create user profile
+            initializeApp();
+        } else {
+            currentUser = null;
+            userProfile = { nickname: 'anonymous', avatarUrl: 'https://i.imgur.com/83wS136.png' };
+            showPage('login-page');
+        }
+    };
+    
+    const loadUserProfile = async (user) => {
+        const userRef = db.ref('users/' + user.uid);
+        const snapshot = await userRef.once('value');
+        if (snapshot.exists()) {
+            userProfile = snapshot.val();
+        } else { // Create a profile for new users
+            userProfile = {
+                uid: user.uid,
+                email: user.email,
+                nickname: user.displayName || user.email.split('@')[0],
+                avatarUrl: user.photoURL || 'https://i.imgur.com/83wS136.png'
+            };
+            await userRef.set(userProfile);
+        }
+        pubnub.setUUID(userProfile.nickname); // Set PubNub UUID to nickname for clarity
+    };
+
+    const initializeApp = () => {
         showPage('main-interface');
         showSubPage('newsfeed-page');
-        document.getElementById('welcome-message').textContent = `USER: ${userNickname} | STATUS: Online`;
-
-        loadChatHistory(); // UPGRADE: Load history before subscribing
+        document.getElementById('welcome-message').textContent = `USER: ${userProfile.nickname} | STATUS: Online`;
+        
+        // Start all realtime listeners
         subscribeToPubNub();
         loadSocialPosts();
         loadFeedback();
         listenForAgoraRooms();
         updateProfilePage();
-    }
-    // All login/logout functions ... Giữ nguyên ...
+    };
     
-    // === CHỨC NĂNG CHAT CHUNG (PUBNUB + FIREBASE) ===
-    const publicChatInput = document.getElementById('public-chat-input');
-    const publicChatWindow = document.getElementById('public-chat-window');
-
-    // UPGRADE: Load last 50 messages from Firebase on start
-    function loadChatHistory() {
-        db.ref('publicChatMessages').limitToLast(50).once('value', snapshot => {
-            snapshot.forEach(child => {
-                appendChatMessage(child.val(), publicChatWindow);
-            });
-            publicChatWindow.innerHTML += `<pre><i>--- Lịch sử chat đã tải. Chào mừng tới kênh chung. ---</i></pre>`;
-            publicChatWindow.scrollTop = publicChatWindow.scrollHeight;
-        });
-    }
-
-    function subscribeToPubNub() {
-        const channelsToSubscribe = ['ascii_chat'];
-        if (userNickname) {
-            channelsToSubscribe.push(`pm-${userNickname}`); // Subscribe to own private channel
-        }
-        pubnub.subscribe({ channels: channelsToSubscribe, withPresence: true });
-        
-        pubnub.addListener({
-            message: (event) => {
-                if (event.channel === 'ascii_chat') {
-                    appendChatMessage(event.message, publicChatWindow);
-                } else if (event.channel.startsWith('pm-')) {
-                    handlePrivateMessage(event);
-                }
-            },
-            presence: (event) => {
-                 updateOnlineUsers();
-                 if (event.action === "join") {
-                     appendSystemMessage(`${event.uuid} has connected.`);
-                 } else if (event.action === "leave" || event.action === "timeout") {
-                     appendSystemMessage(`${event.uuid} has disconnected.`);
-                 }
+    // Login Handlers
+    document.getElementById('email-login').addEventListener('click', () => {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        auth.signInWithEmailAndPassword(email, password).catch(error => {
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                showToast(`> Đăng nhập thất bại. Thử tạo tài khoản mới...`);
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then(() => showToast(`> Tài khoản mới đã được tạo với email này.`))
+                    .catch(err => showToast(`> Lỗi: ${err.message}`));
             }
         });
-        updateOnlineUsers();
-    }
-    
-    function appendChatMessage(msg, windowElement) {
-        const line = document.createElement('pre');
-        let content;
-        if (msg.text) {
-            content = sanitize(msg.text);
-        } else if (msg.imageUrl) {
-            content = `chia sẻ một ảnh: <a href="${msg.imageUrl}" target="_blank">[LINK_TO_IMAGE]</a>`;
+    });
+    document.getElementById('google-login').addEventListener('click', () => {
+        auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    });
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        // Before signing out, remove user from Agora rooms if they are in one
+        if (currentRoomName) {
+            db.ref(`agoraRooms/${currentRoomName}/participants/${currentUser.uid}`).remove();
         }
-        line.innerHTML = `[${formatTime(msg.timestamp)}] <b><${sanitize(msg.sender)}></b>: ${content}`;
-        windowElement.appendChild(line);
-        windowElement.scrollTop = windowElement.scrollHeight;
-    }
-    
-    function appendSystemMessage(text, isCommand = false) {
-        const line = document.createElement('pre');
-        const style = isCommand ? `style="color: var(--accent-color)"` : 'style="font-style: italic"';
-        line.innerHTML = `<span ${style}>--- ${sanitize(text)} ---</span>`;
-        publicChatWindow.appendChild(line);
-        publicChatWindow.scrollTop = publicChatWindow.scrollHeight;
-    }
-
-    function sendChatMessage() {
-        const text = publicChatInput.value.trim();
-        if (!text) return;
-        
-        // UPGRADE: Command handler
-        if (text.startsWith('/')) {
-            handleCommand(text);
-            publicChatInput.value = '';
-            return;
-        }
-
-        const message = { sender: userNickname, text: text, timestamp: Date.now() };
-        pubnub.publish({ channel: 'ascii_chat', message: message });
-        db.ref('publicChatMessages').push(message); // UPGRADE: Save to Firebase for history
-        publicChatInput.value = '';
-    }
-    document.getElementById('send-chat-btn').addEventListener('click', sendChatMessage);
-    publicChatInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendChatMessage(); });
-    // UPGRADE: Bind click to the new image upload button
-    document.getElementById('upload-chat-image-btn').addEventListener('click', () => chatCloudinaryWidget.open());
-
-    function updateOnlineUsers(){
-        pubnub.hereNow({ channels: ["ascii_chat"], includeUUIDs: true }, (status, response) => {
-            const onlineUsersList = document.getElementById('online-users-list');
-            onlineUsersList.innerHTML = '';
-            if (response && response.channels.ascii_chat) {
-                response.channels.ascii_chat.occupants.forEach(user => {
-                    const userPre = document.createElement('pre');
-                    if (user.uuid === userNickname) {
-                         userPre.innerHTML = `> <b>${user.uuid} (You)</b>`;
-                    } else {
-                        // UPGRADE: Make username clickable for private chat
-                        userPre.innerHTML = `> <a class="pm-user-link" data-user="${user.uuid}">${user.uuid}</a>`;
-                    }
-                    onlineUsersList.appendChild(userPre);
-                });
-                // Re-bind click events
-                 document.querySelectorAll('.pm-user-link').forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        const targetUser = e.target.getAttribute('data-user');
-                        startPrivateChat(targetUser);
-                    });
-                });
-            }
-        });
-    }
-
-    // UPGRADE: Command handling function
-    function handleCommand(commandText) {
-        const [command, ...args] = commandText.split(' ');
-        switch (command) {
-            case '/clear':
-                publicChatWindow.innerHTML = '';
-                appendSystemMessage("Cửa sổ chat đã được xóa.", true);
-                break;
-            case '/help':
-                const helpText = `Lệnh có sẵn:\n`+
-                                 `  /clear         - Xóa cửa sổ chat.\n` +
-                                 `  /help          - Hiển thị thông báo này.\n` +
-                                 `  /who           - Hiển thị danh sách online.\n` +
-                                 `  /theme [name]  - Đổi theme (green, amber, blue, white).`;
-                appendSystemMessage(helpText, true);
-                break;
-            case '/who':
-                updateOnlineUsers();
-                appendSystemMessage("Đã làm mới danh sách online.", true);
-                break;
-            case '/theme':
-                const themeBtn = document.querySelector(`.theme-btn[data-theme="${args[0]}"]`);
-                if (themeBtn) {
-                    themeBtn.click();
-                    appendSystemMessage(`Theme đã đổi thành ${args[0]}.`, true);
-                } else {
-                    appendSystemMessage(`Lỗi: Theme '${args[0]}' không tồn tại.`, true);
-                }
-                break;
-            default:
-                appendSystemMessage(`Lỗi: Lệnh '${command}' không được nhận dạng.`, true);
-                break;
-        }
-    }
-    
-    // === UPGRADE: CHỨC NĂNG TIN NHẮN RIÊNG (PRIVATE MESSAGING) ===
-    function getPrivateChannelName(user1, user2) {
-        return `pm-${[user1, user2].sort().join('-')}`;
-    }
-
-    function startPrivateChat(partnerNickname) {
-        if (partnerNickname === userNickname) {
-            showToast('> Bạn không thể tự chat với chính mình.');
-            return;
-        }
-        
-        currentPrivateChannel = getPrivateChannelName(userNickname, partnerNickname);
-        showSubPage('private-chat-page');
-        document.getElementById('private-chat-start-prompt').style.display = 'none';
-        document.getElementById('private-chat-interface').style.display = 'block';
-        document.getElementById('pm-partner-name').textContent = partnerNickname;
-
-        const pmWindow = document.getElementById('pm-chat-window');
-        pmWindow.innerHTML = ''; // Clear previous chat
-        
-        // Load history for this PM channel from Firebase
-        db.ref(`privateMessages/${currentPrivateChannel}`).limitToLast(50).once('value', snapshot => {
-             snapshot.forEach(child => {
-                appendChatMessage(child.val(), pmWindow);
-            });
-             pmWindow.scrollTop = pmWindow.scrollHeight;
-        });
-
-        showToast(`> Bắt đầu chat riêng với ${partnerNickname}`);
-    }
-
-    function handlePrivateMessage(event) {
-        // Only append if the user is currently viewing the correct PM window
-        if (event.channel === currentPrivateChannel) {
-            appendChatMessage(event.message, document.getElementById('pm-chat-window'));
-        } else {
-            // Otherwise, just show a toast notification
-            showToast(`> Tin nhắn mới từ ${event.message.sender}`);
-        }
-    }
-    
-    function sendPrivateMessage() {
-        const partner = document.getElementById('pm-partner-name').textContent;
-        const channel = getPrivateChannelName(userNickname, partner);
-        const input = document.getElementById('pm-chat-input');
-        const text = input.value.trim();
-
-        if (text && channel) {
-            const message = { sender: userNickname, text: text, timestamp: Date.now() };
-            // Publish to PubNub for both users
-            pubnub.publish({ channel: channel, message: message });
-            // Save to Firebase for history
-            db.ref(`privateMessages/${channel}`).push(message);
-            input.value = '';
-        }
-    }
-
-    document.getElementById('pm-send-btn').addEventListener('click', sendPrivateMessage);
-    document.getElementById('pm-chat-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendPrivateMessage(); });
-    document.getElementById('pm-back-btn').addEventListener('click', () => {
-         currentPrivateChannel = null; // Exit the private chat state
-         document.getElementById('private-chat-interface').style.display = 'none';
-         document.getElementById('private-chat-start-prompt').style.display = 'block';
-         showSubPage('chat-public-page'); // Go back to public chat
+        pubnub.unsubscribeAll();
+        auth.signOut().then(() => location.reload());
     });
 
+    // === MAIN INTERFACE NAVIGATION ===
+    document.querySelectorAll('#main-nav a.ascii-button').forEach(link => {
+        link.addEventListener('click', (e) => showSubPage(link.getAttribute('data-target')));
+    });
 
-    // === ALL OTHER FUNCTIONS (BẢNG TIN, PROFILE, AGORA, SETTINGS, etc.) ===
-    // ... Giữ nguyên như phiên bản trước, không cần thay đổi.
-    // Logic for:
-    // loadSocialPosts()
-    // createPostElement()
-    // document.getElementById('submit-social-btn').addEventListener('click',...)
-    // document.getElementById('upload-social-btn').addEventListener('click',...)
-    // updateProfilePage()
-    // document.getElementById('update-nickname-btn').addEventListener('click',...)
-    // feedbackForm.addEventListener('submit', ...)
-    // loadFeedback()
-    // document.querySelectorAll('.theme-btn').forEach(...)
-    // Agora logic: listenForAgoraRooms(), joinRoom(), leaveRoom(), etc.
-    // ... (Toàn bộ các hàm này được sao chép và giữ nguyên)
+    // === PUBNUB CHAT ===
+    const subscribeToPubNub = () => {
+        pubnub.subscribe({ channels: ['ascii_chat'], withPresence: true });
+        // Set user state as soon as they subscribe
+        pubnub.setState({ state: { nickname: userProfile.nickname, avatar: userProfile.avatarUrl } });
+        pubnub.addListener({
+            message: (event) => appendChatMessage(event.message),
+            presence: () => updateOnlineUsers(),
+        });
+        updateOnlineUsers();
+    };
 
-    // === BẮT ĐẦU CHƯƠG TRÌNH ===
+    const appendChatMessage = (msg) => {
+        const chatWindow = document.getElementById('public-chat-window');
+        const line = document.createElement('div');
+        line.classList.add('comment');
+        line.innerHTML = `<img src="${sanitize(msg.avatarUrl)}" class="avatar-img" style="width:25px;height:25px;">
+                          <pre><b><${sanitize(msg.sender)}></b>: ${sanitize(msg.text)}</pre>`;
+        chatWindow.appendChild(line);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    };
+    
+    const sendChatMessage = () => {
+        const chatInput = document.getElementById('public-chat-input');
+        if (!chatInput.value.trim()) return;
+        pubnub.publish({
+            channel: 'ascii_chat',
+            message: { sender: userProfile.nickname, text: chatInput.value, avatarUrl: userProfile.avatarUrl }
+        });
+        chatInput.value = '';
+    };
+    document.getElementById('send-chat-btn').addEventListener('click', sendChatMessage);
+    document.getElementById('public-chat-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendChatMessage(); });
+    
+    const updateOnlineUsers = () => {
+        pubnub.hereNow({ channels: ["ascii_chat"], includeUUIDs: true, includeState: true }, (status, response) => {
+            const onlineUsersList = document.getElementById('online-users-list');
+            onlineUsersList.innerHTML = '';
+            response.channels.ascii_chat.occupants.forEach(user => {
+                const nick = user.state?.nickname || user.uuid;
+                const avatar = user.state?.avatar || 'https://i.imgur.com/83wS136.png';
+                const userDiv = document.createElement('div');
+                userDiv.classList.add('comment'); // Reuse comment style
+                userDiv.innerHTML = `<img src="${sanitize(avatar)}" class="avatar-img" style="width:25px;height:25px;"><pre>> ${sanitize(nick)}</pre>`;
+                onlineUsersList.appendChild(userDiv);
+            });
+        });
+    };
+
+    // === FIREBASE NEWSFEED ===
+    const socialPostsContainer = document.getElementById('social-posts-container');
+    const loadSocialPosts = () => {
+        const postsRef = db.ref('socialPosts').orderByChild('timestamp').limitToLast(30);
+        postsRef.on('value', snapshot => {
+            socialPostsContainer.innerHTML = '';
+            let posts = [];
+            snapshot.forEach(child => { posts.push({ key: child.key, ...child.val() }); });
+            posts.reverse().forEach(post => {
+                 socialPostsContainer.appendChild(createPostElement(post.key, post));
+            });
+        });
+    };
+
+    const createPostElement = (key, post) => {
+        const postBox = document.createElement('div');
+        postBox.className = 'ascii-box';
+        
+        let content = sanitize(post.text);
+        content = content.replace(/\[image\](.*?)\[\/image\]/g, `<br><a href="$1" target="_blank"><img src="$1" class="post-content-img" alt="User uploaded image"></a><br>`);
+        
+        postBox.innerHTML = `
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                 <img src="${sanitize(post.avatarUrl)}" class="avatar-img">
+                 <div>
+                    <pre><b>@${sanitize(post.sender)}</b></pre>
+                    <pre><small>${new Date(post.timestamp).toLocaleString()}</small></pre>
+                 </div>
+            </div>
+            <hr>
+            <pre>${content}</pre>
+            <hr>
+            <div class="post-actions">
+                <button class="ascii-button like-btn" data-key="${key}">[Thích (${post.likeCount || 0})]</button>
+                ${post.uid === currentUser.uid ? `<button class="ascii-button delete-post-btn" data-key="${key}" style="color:var(--error-color);">[Xóa]</button>` : ''}
+            </div>`;
+
+        postBox.querySelector('.like-btn').addEventListener('click', () => {
+            db.ref(`socialPosts/${key}/likeCount`).transaction(count => (count || 0) + 1);
+        });
+
+        if (post.uid === currentUser.uid) {
+            postBox.querySelector('.delete-post-btn').addEventListener('click', () => {
+                if(confirm('Bạn có chắc muốn xóa bài đăng này?')) {
+                    db.ref(`socialPosts/${key}`).remove()
+                      .then(() => showToast("> Bài đăng đã được xóa."))
+                      .catch(e => showToast(`> Lỗi: ${e.message}`));
+                }
+            });
+        }
+        return postBox;
+    };
+
+    document.getElementById('submit-social-btn').addEventListener('click', () => {
+        const text = document.getElementById('social-message').value.trim();
+        if (!text) { showToast('> Nội dung không thể trống.'); return; }
+        db.ref('socialPosts').push({
+            uid: currentUser.uid,
+            sender: userProfile.nickname,
+            avatarUrl: userProfile.avatarUrl,
+            text: text,
+            timestamp: firebase.database.ServerValue.TIMESTAMP,
+            likeCount: 0
+        });
+        document.getElementById('social-message').value = '';
+    });
+    
+    // Cloudinary for social posts
+    const socialImageWidget = cloudinary.createUploadWidget({ cloudName: 'dgbux4wzo', uploadPreset: 'okeqfdx4' }, (error, result) => {
+        if (!error && result && result.event === "success") {
+            document.getElementById("social-message").value += `\n[image]${result.info.secure_url}[/image]`;
+            showToast(`> Ảnh đã được thêm vào bài đăng.`);
+        }
+    });
+    document.getElementById('upload-social-btn').addEventListener('click', () => socialImageWidget.open());
+
+    // === PROFILE MANAGEMENT ===
+    const updateProfilePage = () => {
+        const container = document.getElementById('profile-info-container');
+        if (currentUser) {
+            container.innerHTML = `
+            <div style="display: flex; align-items: center;">
+                 <img src="${sanitize(userProfile.avatarUrl)}" class="avatar-img" style="width:80px;height:80px;">
+                 <pre>
+Email.......: ${currentUser.email || 'N/A'}
+User ID.....: ${currentUser.uid}
+Nickname....: ${userProfile.nickname}
+                 </pre>
+            </div>`;
+        }
+    };
+    
+    document.getElementById('update-nickname-btn').addEventListener('click', () => {
+        const newNickname = document.getElementById('profile-nickname-input').value.trim();
+        if (newNickname && newNickname !== userProfile.nickname) {
+            db.ref('users/' + currentUser.uid).update({ nickname: newNickname }).then(() => {
+                showToast('> Cập nhật nickname thành công. Trang sẽ tải lại để áp dụng thay đổi.');
+                setTimeout(() => location.reload(), 2000);
+            }).catch(error => showToast(`> Lỗi: ${error.message}`));
+        }
+    });
+    
+    // Cloudinary for Avatar
+    const avatarWidget = cloudinary.createUploadWidget({ cloudName: 'dgbux4wzo', uploadPreset: 'okeqfdx4', multiple: false }, (error, result) => {
+        if (!error && result && result.event === "success") {
+            const avatarUrl = result.info.secure_url;
+            db.ref('users/' + currentUser.uid).update({ avatarUrl }).then(() => {
+                userProfile.avatarUrl = avatarUrl;
+                updateProfilePage();
+                showToast('> Avatar đã được cập nhật.');
+            });
+        }
+    });
+    document.getElementById('upload-avatar-btn').addEventListener('click', () => avatarWidget.open());
+
+
+    // === FEEDBACK SYSTEM (Largely unchanged, but ensured sanitize is used) ===
+    document.getElementById('feedback-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        db.ref('feedback').push({
+            name: document.getElementById('feedback-name').value,
+            message: document.getElementById('feedback-message').value,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        }).then(() => {
+            showToast('> Cảm ơn phản hồi của bạn!');
+            e.target.reset();
+        });
+    });
+
+    const loadFeedback = () => {
+        db.ref('feedback').orderByChild('timestamp').limitToLast(20).on('value', snap => {
+            const feedbackContainer = document.getElementById('feedback-container');
+            feedbackContainer.innerHTML = '';
+            let feedbacks = [];
+            snap.forEach(child => feedbacks.push(child.val()));
+            feedbacks.reverse().forEach(fb => {
+                 feedbackContainer.innerHTML += `<pre class="comment">> [${new Date(fb.timestamp).toLocaleDateString()}] <b>${sanitize(fb.name)}</b>: ${sanitize(fb.message)}</pre>`;
+            });
+        });
+    };
+
+    // === SETTINGS & THEME ===
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.addEventListener('click', () => applyTheme(btn.getAttribute('data-theme')));
+    });
+
+    // === AGORA VIDEO CALL LOGIC ===
+    let agoraClient;
+    let localTracks = { videoTrack: null, audioTrack: null };
+    let currentRoomName = '';
+    let roomParticipants = {}; // To store nickname/avatar of room members
+
+    const listenForAgoraRooms = () => {
+        db.ref("agoraRooms").on("value", snapshot => {
+            const roomListDiv = document.getElementById("room-list");
+            roomListDiv.innerHTML = "";
+            const roomsData = snapshot.val();
+            if (!roomsData) {
+                roomListDiv.innerHTML = "<pre>Chưa có phòng nào. Hãy tạo một phòng!</pre>";
+            } else {
+                Object.keys(roomsData).forEach(key => {
+                    const room = roomsData[key];
+                    const participantCount = room.participants ? Object.keys(room.participants).length : 0;
+                    const roomEl = document.createElement('pre');
+                    roomEl.innerHTML = `> ${sanitize(room.name)} (${participantCount} người) [ <a data-room-name="${room.name}">Tham gia</a> ]`;
+                    roomEl.querySelector('a').onclick = () => joinRoom(room.name);
+                    roomListDiv.appendChild(roomEl);
+                });
+            }
+        });
+    };
+    document.getElementById("create-room-btn").addEventListener("click", () => {
+        const roomName = document.getElementById("new-room-name").value.trim();
+        if (!roomName) { showToast('> Tên phòng không hợp lệ'); return; }
+        const newRoomRef = db.ref("agoraRooms").push();
+        newRoomRef.set({ name: roomName, createdBy: userProfile.nickname, createdAt: firebase.database.ServerValue.TIMESTAMP });
+        document.getElementById("new-room-name").value = "";
+    });
+
+    const joinRoom = async (roomName) => {
+        currentRoomName = roomName;
+        document.getElementById('room-selection').style.display = 'none';
+        document.getElementById('call-interface').style.display = 'block';
+        document.getElementById("call-room-title").textContent = `Đang trong phòng: ${roomName}`;
+        
+        agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+        agoraClient.on("user-published", handleUserPublished);
+        agoraClient.on("user-left", handleUserLeft);
+        
+        // Listen for participants changes
+        db.ref(`agoraRooms/${currentRoomName}/participants`).on('value', snapshot => {
+            roomParticipants = snapshot.val() || {};
+        });
+
+        try {
+            await agoraClient.join(AGORA_APP_ID, currentRoomName, null, currentUser.uid);
+            
+            // Announce presence in Firebase
+            db.ref(`agoraRooms/${currentRoomName}/participants/${currentUser.uid}`).set(userProfile);
+
+            [localTracks.audioTrack, localTracks.videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
+            
+            const localPlayerContainer = document.getElementById('local-stream');
+            localPlayerContainer.innerHTML = `<div class="video-name">You (${userProfile.nickname})</div>`;
+             localPlayerContainer.insertAdjacentHTML('beforeend', `
+                <div class="video-controls">
+                    <button id="mic-btn" class="ascii-button control-btn">[ Tắt Mic ]</button>
+                    <button id="cam-btn" class="ascii-button control-btn">[ Ẩn Cam ]</button>
+                </div>`);
+
+            localTracks.videoTrack.play('local-stream');
+            await agoraClient.publish(Object.values(localTracks));
+
+            // Attach controls
+            document.getElementById('mic-btn').onclick = toggleMic;
+            document.getElementById('cam-btn').onclick = toggleCam;
+
+        } catch (error) {
+            console.error("Agora Join/Publish Error:", error);
+            showToast('> Lỗi tham gia phòng. Kiểm tra console.');
+            await leaveRoom();
+        }
+    };
+    
+    const handleUserPublished = async (user, mediaType) => {
+        await agoraClient.subscribe(user, mediaType);
+        const participantInfo = roomParticipants[user.uid] || { nickname: `User ${user.uid}`, avatarUrl:'' };
+
+        if (mediaType === "video") {
+            let remotePlayerContainer = document.getElementById(`player-container-${user.uid}`);
+            if (!remotePlayerContainer) {
+                 remotePlayerContainer = document.createElement('div');
+                 remotePlayerContainer.id = `player-container-${user.uid}`;
+                 remotePlayerContainer.className = 'video-box';
+                 remotePlayerContainer.innerHTML = `<div class="video-name">${sanitize(participantInfo.nickname)}</div>`;
+                 document.getElementById('remote-streams').appendChild(remotePlayerContainer);
+            }
+            user.videoTrack.play(remotePlayerContainer);
+        }
+        if (mediaType === "audio") {
+            user.audioTrack.play();
+        }
+    };
+
+    const handleUserLeft = (user) => {
+        db.ref(`agoraRooms/${currentRoomName}/participants/${user.uid}`).remove();
+        document.getElementById(`player-container-${user.uid}`)?.remove();
+    };
+    
+    const leaveRoom = async () => {
+        db.ref(`agoraRooms/${currentRoomName}/participants/${currentUser.uid}`).remove();
+        db.ref(`agoraRooms/${currentRoomName}/participants`).off(); // Stop listening
+        
+        for (let trackType in localTracks) {
+            localTracks[trackType]?.stop();
+            localTracks[trackType]?.close();
+            localTracks[trackType] = null;
+        }
+        await agoraClient?.leave();
+
+        document.getElementById('local-stream').innerHTML = ''; // Clear local stream
+        document.getElementById('remote-streams').innerHTML = '';
+        document.getElementById('room-selection').style.display = 'block';
+        document.getElementById('call-interface').style.display = 'none';
+        showToast(`> Đã rời phòng ${currentRoomName}`);
+        currentRoomName = '';
+    };
+    document.getElementById("leave-btn").addEventListener("click", leaveRoom);
+    
+    // Video Controls Logic
+    const toggleMic = () => {
+        const micBtn = document.getElementById('mic-btn');
+        if(localTracks.audioTrack.muted){
+            localTracks.audioTrack.setMuted(false);
+            micBtn.textContent = '[ Tắt Mic ]'; micBtn.classList.remove('muted');
+        } else {
+            localTracks.audioTrack.setMuted(true);
+            micBtn.textContent = '[ Bật Mic ]'; micBtn.classList.add('muted');
+        }
+    };
+    const toggleCam = () => {
+        const camBtn = document.getElementById('cam-btn');
+         if(localTracks.videoTrack.muted){
+            localTracks.videoTrack.setMuted(false);
+            camBtn.textContent = '[ Ẩn Cam ]'; camBtn.classList.remove('muted');
+        } else {
+            localTracks.videoTrack.setMuted(true);
+            camBtn.textContent = '[ Hiện Cam ]'; camBtn.classList.add('muted');
+        }
+    };
+    
+    // === START PROGRAM ===
     runBootSequence();
 
 });
