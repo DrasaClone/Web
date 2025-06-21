@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Card Wars</title>
+  <title>Advanced Card Wars: Multiplayer & 3D Board Upgrade (White Board, Light Blue Surroundings)</title>
   <style>
     /* Tổng thể */
     body {
@@ -173,14 +173,13 @@
     /* -------------------- Firebase Setup -------------------- */
     // Thay các giá trị dưới đây bằng cấu hình dự án Firebase của bạn
     const firebaseConfig = {
-      apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
-      authDomain: "webai-7642b.firebaseapp.com",
-      databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "webai-7642b",
-      storageBucket: "webai-7642b.firebasestorage.app",
-      messagingSenderId: "967881370128",
-      appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
-      measurementId: "G-61XJ390Q30"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
@@ -190,7 +189,9 @@
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setSize(canvas.clientWidth, canvas.clientHeight);
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x228822); // nền bàn cờ xanh mộc
+    // Không gian xung quanh: màu xanh dương nhạt (light blue)
+    scene.background = new THREE.Color(0xADD8E6);
+    
     const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth/canvas.clientHeight, 0.1, 1000);
     camera.position.set(0, 15, 15);
     camera.lookAt(0, 0, 0);
@@ -199,19 +200,18 @@
     directionalLight.position.set(0, 20, 10);
     scene.add(directionalLight);
     
-    // Tạo bàn cờ với texture (dùng nguồn công khai)
+    // Tạo bàn cờ: nền trắng thay vì texture
     const tableGeometry = new THREE.PlaneGeometry(20, 20);
-    const textureLoader = new THREE.TextureLoader();
-    const tableTexture = textureLoader.load("https://i.imgur.com/4y0QWty.jpg");
-    tableTexture.wrapS = tableTexture.wrapT = THREE.RepeatWrapping;
-    tableTexture.repeat.set(4, 4);
-    const tableMaterial = new THREE.MeshLambertMaterial({ map: tableTexture, side: THREE.DoubleSide });
+    const tableMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide });
     const tableMesh = new THREE.Mesh(tableGeometry, tableMaterial);
     tableMesh.rotation.x = - Math.PI / 2;
     scene.add(tableMesh);
     
+    // Texture loader cho lá bài
+    const textureLoader = new THREE.TextureLoader();
+    
     /* -------------------- 3D Card & Animation Helpers -------------------- */
-    // Hàm tạo lá bài 3D, có mặt bài (faceUp) hoặc ngược (back)
+    // Hàm tạo lá bài 3D (faceUp: hiển thị nội dung bài, faceDown: mặt bài úp)
     function createCardMesh(card, faceUp=true) {
       const cardText = card.name;
       const url = faceUp 
@@ -232,7 +232,7 @@
       return mesh;
     }
     
-    // Helper: animation di chuyển đối tượng đến vị trí target trong duration (ms)
+    // Helper: animate di chuyển đối tượng đến vị trí target trong duration (ms)
     function animateMovement(object, targetPos, duration, callback) {
       const startPos = object.position.clone();
       const startTime = performance.now();
@@ -270,7 +270,7 @@
     let selectedCardIndex = null;
     let playedCards = { player: null, opponent: null };
     
-    // Mảng chứa các mesh của bài ở tay (cho animation)
+    // Mảng chứa các mesh của bài trong tay (để animate)
     let playerHandMeshes = [];
     let opponentHandMeshes = [];
     
@@ -303,7 +303,7 @@
       return shuffle(deck);
     }
     
-    // Chia bài cho mỗi bên, cập nhật UI HTML và tạo mesh 3D
+    // Chia bài cho mỗi bên, cập nhật UI và tạo mesh 3D
     function dealHands() {
       playerHand = playerDeck.splice(0, 5);
       opponentHand = opponentDeck.splice(0, 5);
@@ -330,9 +330,9 @@
         playedContainer.innerHTML += `<div class="card"><b>${playedCards.opponent.name}</b><br>${playedCards.opponent.value}</div>`;
     }
     
-    // Tạo các mesh cho bài trong tay và xòe chúng theo dạng fan (người chơi và đối thủ)
+    // Tạo các mesh cho bài trong tay theo dạng fan (người chơi và đối thủ)
     function createHandMeshes() {
-      // Xóa các mesh cũ nếu có
+      // Loại bỏ các mesh cũ
       playerHandMeshes.forEach(mesh => scene.remove(mesh));
       opponentHandMeshes.forEach(mesh => scene.remove(mesh));
       playerHandMeshes = [];
@@ -358,7 +358,7 @@
       }
     }
     
-    // Cập nhật vị trí của các mesh của bài trong tay sau khi một lá bị loại bỏ
+    // Cập nhật vị trí các mesh bài trong tay sau khi đánh bài
     function updateHandMeshPositions() {
       let n = playerHandMeshes.length, spacing = 3;
       let startX = -((n - 1) * spacing) / 2;
@@ -377,7 +377,7 @@
       document.getElementById("playCardBtn").disabled = false;
     }
     
-    // Khi đánh bài, animate lá bài chuyển từ tay lên trung tâm bàn cờ
+    // Khi đánh bài, animate lá bài di chuyển từ tay lên trung tâm bàn
     function animatePlayedCard(fromMesh, callback) {
       const targetPos = centerZone.clone();
       animateMovement(fromMesh, targetPos, 1000, () => {
@@ -419,7 +419,7 @@
       }
     }
     
-    // Chế độ multiplayer: khi đánh bài, update bài đã đánh qua Firebase
+    // Chế độ multiplayer: khi đánh bài, update trạng thái qua Firebase
     function playTurnMultiplayer() {
       if (selectedCardIndex === null) return;
       const playedCard = playerHand.splice(selectedCardIndex, 1)[0];
