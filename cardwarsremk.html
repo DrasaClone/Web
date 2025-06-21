@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Wars 3D - Firebase Realtime</title>
+    
+    <!-- CSS - All in one file -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Roboto:wght@400;700&display=swap');
+
+        :root {
+            --card-width: 80px;
+            --card-height: 112px;
+            --player-color: #4a90e2;
+            --opponent-color: #d0021b;
+            --neutral-color: #f5a623;
+            --board-color: #3e8a4f;
+            --font-main: 'Bangers', cursive;
+            --font-body: 'Roboto', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a2e;
+            color: white;
+            font-family: var(--font-body);
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #threejs-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* UI Overlays */
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Allow clicks to pass through to canvas */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .player-info, .opponent-info {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.5);
+            pointer-events: all;
+        }
+        .opponent-info {
+            justify-content: flex-end;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            background-color: #ccc;
+            border-radius: 50%;
+            border: 2px solid white;
+            margin-right: 15px;
+        }
+        .opponent-info .avatar {
+            margin-right: 0;
+            margin-left: 15px;
+        }
+
+        .stats div {
+            font-family: var(--font-main);
+            font-size: 24px;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 2px #000;
+        }
+        .hp::before { content: '❤️ '; }
+        .mana::before { content: '💧 '; }
+
+        .opponent-info { background-color: rgba(90, 10, 20, 0.6); }
+        .player-info { background-color: rgba(20, 50, 90, 0.6); }
+
+        /* Hand & Turn Button Area */
+        .bottom-ui {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 10px;
+            pointer-events: all;
+        }
+
+        #player-hand {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding: 10px 0;
+            flex-grow: 1;
+        }
+
+        .card-ui {
+            width: var(--card-width);
+            height: var(--card-height);
+            border: 2px solid #fff;
+            border-radius: 8px;
+            background-color: #2c3e50;
+            margin: 0 5px;
+            transition: transform 0.2s ease-out, box-shadow 0.2s;
+            cursor: pointer;
+            pointer-events: all;
+            position: relative;
+            user-select: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            transform-origin: bottom center;
+            background-size: cover;
+            background-position: center;
+        }
+        .card-ui.selected {
+            transform: translateY(-20px) scale(1.1);
+            box-shadow: 0 0 20px var(--neutral-color);
+            border-color: var(--neutral-color);
+        }
+        .card-ui:hover {
+            transform: translateY(-15px);
+        }
+
+        .card-ui .cost {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background-color: var(--player-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: var(--font-main);
+            font-size: 16px;
+            border: 1px solid white;
+            text-shadow: 1px 1px 1px #000;
+        }
+        
+        .card-ui .stats-bar {
+            position: absolute;
+            bottom: 2px;
+            left: 2px;
+            right: 2px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .card-ui .atk, .card-ui .hp-stat {
+            width: 24px; height: 24px;
+            color: white; font-family: var(--font-main); font-size: 16px;
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            border: 1px solid white;
+            text-shadow: 1px 1px 1px #000;
+        }
+        .card-ui .atk { background-color: var(--opponent-color); }
+        .card-ui .hp-stat { background-color: #27ae60; }
+
+        /* End Turn Button */
+        #end-turn-btn {
+            padding: 15px 25px;
+            font-family: var(--font-main);
+            font-size: 28px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border: 3px solid var(--neutral-color);
+            background-color: #e67e22;
+            color: white;
+            border-radius: 10px;
+            text-shadow: 2px 2px 2px #000;
+            transition: all 0.2s;
+            pointer-events: all;
+        }
+        #end-turn-btn:hover {
+            background-color: #d35400;
+            transform: scale(1.05);
+        }
+        #end-turn-btn.disabled {
+            background-color: #95a5a6;
+            color: #bdc3c7;
+            border-color: #7f8c8d;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .turn-indicator {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            padding: 10px 20px;
+            font-family: var(--font-main);
+            font-size: 32px;
+            border-radius: 10px;
+            text-shadow: 2px 2px 2px #000;
+        }
+        .my-turn {
+             background-color: #2ecc71;
+             color: white;
+        }
+        .opponent-turn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+
+        /* Modal styles */
+        .modal-backdrop {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background-color: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: all;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background-color: #34495e;
+            padding: 30px;
+            border-radius: 15px;
+            border: 5px solid var(--neutral-color);
+            text-align: center;
+            max-width: 500px;
+        }
+        .modal-content h1, .modal-content h2 {
+            font-family: var(--font-main);
+            color: var(--neutral-color);
+            letter-spacing: 2px;
+        }
+        .modal-content p {
+            font-size: 18px;
+        }
+        .modal-content button {
+            margin-top: 20px;
+            padding: 12px 24px;
+            font-family: var(--font-main);
+            font-size: 24px;
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .modal-content button:hover {
+            background-color: #d35400;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- 3D Canvas -->
+        <canvas id="threejs-canvas"></canvas>
+        
+        <!-- UI -->
+        <div class="ui-overlay">
+            <!-- Opponent Info -->
+            <div class="opponent-info">
+                <div class="stats">
+                    <div id="opponent-name">Đối thủ</div>
+                    <div id="opponent-hp" class="hp">25</div>
+                    <div id="opponent-mana" class="mana">0/0</div>
+                </div>
+                <div class="avatar" style="background-color: var(--opponent-color);"></div>
+            </div>
+
+            <div id="turn-indicator" class="turn-indicator"></div>
+
+            <!-- Player Info & Hand -->
+            <div class="bottom-ui">
+                 <div id="player-hand">
+                    <!-- Cards will be populated by JS -->
+                 </div>
+                 <button id="end-turn-btn">Kết thúc Lượt</button>
+            </div>
+            
+            <div class="player-info">
+                <div class="avatar" style="background-color: var(--player-color);"></div>
+                <div class="stats">
+                    <div id="player-name">Bạn</div>
+                    <div id="player-hp" class="hp">25</div>
+                    <div id="player-mana" class="mana">0/0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login/Matchmaking Modal -->
+        <div id="login-modal" class="modal-backdrop">
+            <div class="modal-content">
+                <h1 style="font-size: 48px;">CARD WARS 3D</h1>
+                <p id="login-status">Đang kết nối đến máy chủ...</p>
+                <button id="find-game-btn" style="display:none;">Tìm trận</button>
+            </div>
+        </div>
+
+        <!-- Game Over Modal -->
+        <div id="game-over-modal" class="modal-backdrop" style="display:none;">
+            <div class="modal-content">
+                <h1 id="game-over-title" style="font-size: 64px;">BẠN THẮNG!</h1>
+                <p id="game-over-message">Chúc mừng! Bạn đã floop a pig!</p>
+                <button id="play-again-btn">Chơi Lại</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Libraries from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script type="module">
+        // ############################################
+        // #           FIREBASE CONFIG                #
+        // ############################################
+        const firebaseConfig = {
+            // PASTE YOUR FIREBASE CONFIG HERE
+            // Example:
+            // apiKey: "...",
+            // authDomain: "...",
+            // databaseURL: "...",
+            // projectId: "...",
+            // storageBucket: "...",
+            // messagingSenderId: "...",
+            // appId: "..."
+        };
+
+        if (!firebaseConfig.apiKey) {
+            document.getElementById('login-status').textContent = "Lỗi: Chưa cấu hình Firebase! Hãy làm theo hướng dẫn trong code.";
+            alert("Bạn chưa cấu hình Firebase. Vui lòng chỉnh sửa file HTML và dán firebaseConfig của bạn vào.");
+        }
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+        
+        // ############################################
+        // #         GAME DATA & CONSTANTS            #
+        // ############################################
+        
+        const CARD_DATABASE = {
+            'corn_knight': { name: "Corn Knight", cost: 2, atk: 2, hp: 3, img: 'https://i.imgur.com/uShcDNp.png' },
+            'cool_dog': { name: "Cool Dog", cost: 1, atk: 2, hp: 1, img: 'https://i.imgur.com/gKCyFmB.png' },
+            'husker_knight': { name: "Husker Knight", cost: 4, atk: 4, hp: 5, img: 'https://i.imgur.com/XUem3jI.png' },
+            'pig': { name: "Pig", cost: 3, atk: 3, hp: 3, img: 'https://i.imgur.com/97nCTd5.png' },
+            'ancient_scholar': { name: "Ancient Scholar", cost: 5, atk: 2, hp: 7, img: 'https://i.imgur.com/xHddrP9.png' },
+            'blue_plains_walker': { name: "Blue Plains Walker", cost: 3, atk: 4, hp: 2, img: 'https://i.imgur.com/RkIAl1X.png' },
+        };
+        
+        const NUM_LANES = 4;
+        const INITIAL_HP = 25;
+        const INITIAL_HAND_SIZE = 3;
+
+        // ############################################
+        // #      3D SCENE SETUP (THREE.JS)           #
+        // ############################################
+
+        let scene, camera, renderer, raycaster, mouse;
+        let board, laneMeshes = [], cardMeshes = {}; // { card_uid: mesh }
+        const textureLoader = new THREE.TextureLoader();
+
+        function initThree() {
+            const canvas = document.getElementById('threejs-canvas');
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x1a1a2e, 20, 40);
+
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 15, 12);
+            camera.rotation.x = -0.8;
+
+            renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(-5, 10, 5);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 1024;
+            directionalLight.shadow.mapSize.height = 1024;
+            scene.add(directionalLight);
+            
+            // Interaction
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            createBoard();
+            animate();
+
+            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('click', onCanvasClick);
+        }
+
+        function createBoard() {
+            // Ground
+            const groundGeo = new THREE.PlaneGeometry(30, 30);
+            const groundMat = new THREE.MeshPhongMaterial({ color: 0x1a1a2e });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+            
+            // Board
+            const boardGeo = new THREE.BoxGeometry(10, 8, 0.2);
+            const boardMat = new THREE.MeshPhongMaterial({ color: var(--board-color) });
+            board = new THREE.Mesh(boardGeo, boardMat);
+            board.rotation.x = -Math.PI / 2;
+            board.position.y = 0.1;
+            board.receiveShadow = true;
+            scene.add(board);
+            
+            // Lanes
+            const laneGeo = new THREE.PlaneGeometry(2.3, 3.8);
+            const playerLaneMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.1 });
+            const opponentLaneMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.05 });
+            
+            for (let i = 0; i < NUM_LANES * 2; i++) {
+                const isPlayerLane = i < NUM_LANES;
+                const lane = new THREE.Mesh(laneGeo, isPlayerLane ? playerLaneMat : opponentLaneMat);
+                lane.rotation.x = -Math.PI / 2;
+                lane.position.y = 0.21;
+                lane.position.x = (i % NUM_LANES - (NUM_LANES-1)/2.0) * 2.5;
+                lane.position.z = isPlayerLane ? 2 : -2;
+                lane.userData = { type: 'lane', laneIndex: i % NUM_LANES, owner: isPlayerLane ? 'player' : 'opponent' };
+                laneMeshes.push(lane);
+                scene.add(lane);
+            }
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+
+        // ############################################
+        // #             GAME STATE & LOGIC           #
+        // ############################################
+        let gameState = {};
+        let myPlayerId, opponentPlayerId;
+        let myRole; // 'player1' or 'player2'
+        let gameId;
+        let selectedCardInHand = null; // { card_uid, index }
+
+        function createNewGame(player1Id, player2Id) {
+            let deck1 = createDeck();
+            let deck2 = createDeck();
+            
+            return {
+                players: {
+                    player1: { id: player1Id, hp: INITIAL_HP, mana: 1, maxMana: 1, hand: [], deck: deck1 },
+                    player2: { id: player2Id, hp: INITIAL_HP, mana: 0, maxMana: 0, hand: [], deck: deck2 }
+                },
+                lanes: Array(NUM_LANES * 2).fill(null), // 0-3 player1, 4-7 player2
+                turn: 'player1',
+                turnNumber: 1,
+                status: 'active',
+                winner: null,
+            };
+        }
+
+        function createDeck() {
+            const deck = [];
+            const cardKeys = Object.keys(CARD_DATABASE);
+            for (let i = 0; i < 20; i++) {
+                deck.push(cardKeys[i % cardKeys.length]);
+            }
+            // Shuffle
+            return deck.sort(() => Math.random() - 0.5);
+        }
+
+        function drawInitialHands() {
+            for (let i = 0; i < INITIAL_HAND_SIZE; i++) {
+                drawCard('player1');
+                drawCard('player2');
+            }
+        }
+        
+        function drawCard(role) {
+            const player = gameState.players[role];
+            if (player.deck.length > 0 && player.hand.length < 5) {
+                const cardId = player.deck.pop();
+                player.hand.push({ id: cardId, uid: `card_${Date.now()}_${Math.random()}` });
+            }
+        }
+
+        function startTurn() {
+            const currentPlayerRole = gameState.turn;
+            const player = gameState.players[currentPlayerRole];
+            
+            if(gameState.turnNumber > 1 || currentPlayerRole === 'player1') {
+               player.maxMana = Math.min(10, player.maxMana + 1);
+            }
+            player.mana = player.maxMana;
+            
+            drawCard(currentPlayerRole);
+        }
+        
+        function endTurn() {
+            if(gameState.turn !== myRole) return;
+            
+            // 1. Combat Phase
+            runCombat();
+
+            // 2. Check for winner
+            if (gameState.players.player1.hp <= 0) gameState.winner = 'player2';
+            if (gameState.players.player2.hp <= 0) gameState.winner = 'player1';
+            
+            if(gameState.winner) {
+                gameState.status = 'finished';
+            } else {
+                // 3. Switch turns
+                gameState.turn = (gameState.turn === 'player1') ? 'player2' : 'player1';
+                if(gameState.turn === 'player1') gameState.turnNumber++;
+                
+                // 4. Start new turn
+                startTurn();
+            }
+
+            // 5. Update database
+            updateDbGameState();
+        }
+
+        function runCombat() {
+            // Creatures attack
+            for (let i = 0; i < NUM_LANES; i++) {
+                const p1LaneIndex = i;
+                const p2LaneIndex = i + NUM_LANES;
+                const creature1 = gameState.lanes[p1LaneIndex];
+                const creature2 = gameState.lanes[p2LaneIndex];
+                
+                if (creature1) animateAttack(creature1.uid, creature2 ? creature2.uid : null, 'player2');
+                if (creature2) animateAttack(creature2.uid, creature1 ? creature1.uid : null, 'player1');
+            }
+            
+            // Give time for animation before damage calculation
+            setTimeout(() => {
+                const damageMap = {}; // creature_uid: total_damage
+
+                for (let i = 0; i < NUM_LANES; i++) {
+                    const p1LaneIndex = i;
+                    const p2LaneIndex = i + NUM_LANES;
+                    const creature1 = gameState.lanes[p1LaneIndex];
+                    const creature2 = gameState.lanes[p2LaneIndex];
+
+                    if (creature1 && creature2) { // Creatures fight
+                        damageMap[creature1.uid] = (damageMap[creature1.uid] || 0) + creature2.atk;
+                        damageMap[creature2.uid] = (damageMap[creature2.uid] || 0) + creature1.atk;
+                    } else if (creature1) { // Creature 1 attacks player 2
+                        gameState.players.player2.hp -= creature1.atk;
+                    } else if (creature2) { // Creature 2 attacks player 1
+                        gameState.players.player1.hp -= creature2.atk;
+                    }
+                }
+                
+                // Apply damage to creatures
+                gameState.lanes.forEach((card, index) => {
+                    if (card && damageMap[card.uid]) {
+                        card.hp -= damageMap[card.uid];
+                    }
+                });
+
+                // Remove dead creatures
+                gameState.lanes = gameState.lanes.map(card => (card && card.hp > 0) ? card : null);
+
+                // Re-sync state and DB after combat logic is fully resolved
+                updateDbGameState();
+
+            }, 1000); // Wait for attack animations to roughly finish
+        }
+
+        function playCard(cardInHand, laneIndex) {
+            const player = gameState.players[myRole];
+            const cardData = CARD_DATABASE[cardInHand.id];
+            
+            if (player.mana < cardData.cost) {
+                console.log("Not enough mana!");
+                return;
+            }
+
+            const myLaneBaseIndex = (myRole === 'player1') ? 0 : NUM_LANES;
+            const targetLane = myLaneBaseIndex + laneIndex;
+
+            if (gameState.lanes[targetLane]) {
+                console.log("Lane is occupied!");
+                return;
+            }
+
+            // Deduct mana
+            player.mana -= cardData.cost;
+            
+            // Remove from hand
+            player.hand = player.hand.filter(c => c.uid !== cardInHand.uid);
+
+            // Add to lane
+            gameState.lanes[targetLane] = {
+                id: cardInHand.id,
+                uid: cardInHand.uid,
+                atk: cardData.atk,
+                hp: cardData.hp,
+                owner: myRole,
+            };
+            
+            selectedCardInHand = null;
+            updateDbGameState();
+        }
+
+        // ############################################
+        // #         FIREBASE INTEGRATION             #
+        // ############################################
+
+        function signIn() {
+            const loginStatus = document.getElementById('login-status');
+            const findGameBtn = document.getElementById('find-game-btn');
+            
+            auth.signInAnonymously().catch(error => {
+                console.error("Anonymous Sign In Error:", error);
+                loginStatus.textContent = "Lỗi đăng nhập. Vui lòng thử lại.";
+            });
+
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    myPlayerId = user.uid;
+                    loginStatus.textContent = "Kết nối thành công! UID: " + myPlayerId.substring(0, 8);
+                    findGameBtn.style.display = 'inline-block';
+                }
+            });
+        }
+        
+        findGameBtn.onclick = () => {
+            findGameBtn.disabled = true;
+            document.getElementById('login-status').textContent = "Đang tìm trận...";
+            
+            const openGamesRef = db.ref('openGames');
+            openGamesRef.once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    // Join an existing game
+                    const games = snapshot.val();
+                    const gameKey = Object.keys(games)[0];
+                    const gameData = games[gameKey];
+                    
+                    if(gameData.player1Id === myPlayerId) {
+                        document.getElementById('login-status').textContent = "Đang chờ người chơi khác...";
+                        return; // Already created this game, just wait.
+                    }
+
+                    gameId = gameKey;
+                    myRole = 'player2';
+                    opponentPlayerId = gameData.player1Id;
+
+                    db.ref(`games/${gameId}/player2Id`).set(myPlayerId);
+                    db.ref(`games/${gameId}/status`).set('starting');
+                    openGamesRef.child(gameKey).remove();
+                    
+                    startGame();
+
+                } else {
+                    // Create a new game
+                    gameId = db.ref().child('games').push().key;
+                    myRole = 'player1';
+                    openGamesRef.child(gameId).set({ player1Id: myPlayerId, createdAt: firebase.database.ServerValue.TIMESTAMP });
+                    listenToGameCreation(gameId);
+                }
+            });
+        };
+
+        function listenToGameCreation(newGameId) {
+             const gameRef = db.ref(`games/${newGameId}`);
+             gameRef.on('value', snapshot => {
+                if(!snapshot.exists() || !snapshot.val().player2Id) return;
+
+                opponentPlayerId = snapshot.val().player2Id;
+                gameRef.off(); // Stop listening
+                startGame();
+             });
+        }
+        
+        function startGame() {
+            if (myRole === 'player1') {
+                gameState = createNewGame(myPlayerId, opponentPlayerId);
+                drawInitialHands();
+                startTurn();
+                updateDbGameState();
+            }
+            listenToGameState();
+        }
+
+        function listenToGameState() {
+            db.ref(`games/${gameId}/state`).on('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    gameState = snapshot.val();
+                    syncAll(); // The core function to update UI & 3D
+                }
+            });
+        }
+
+        function updateDbGameState() {
+            if (gameId) {
+                db.ref(`games/${gameId}/state`).set(gameState);
+            }
+        }
+        
+        // ############################################
+        // #             UI & 3D SYNC                 #
+        // ############################################
+
+        function syncAll() {
+            document.getElementById('login-modal').style.display = 'none';
+            syncPlayerUI();
+            syncHandUI();
+            syncBoard3D();
+            syncTurnIndicator();
+            checkGameOver();
+        }
+        
+        function syncPlayerUI() {
+            const myData = gameState.players[myRole];
+            const opponentRole = (myRole === 'player1') ? 'player2' : 'player1';
+            const opponentData = gameState.players[opponentRole];
+
+            document.getElementById('player-hp').textContent = myData.hp;
+            document.getElementById('player-mana').textContent = `${myData.mana}/${myData.maxMana}`;
+            document.getElementById('opponent-hp').textContent = opponentData.hp;
+            document.getElementById('opponent-mana').textContent = `${opponentData.mana}/${opponentData.maxMana}`;
+        }
+        
+        function syncHandUI() {
+            const playerHandDiv = document.getElementById('player-hand');
+            playerHandDiv.innerHTML = '';
+            
+            const myHand = gameState.players[myRole].hand;
+            
+            myHand.forEach((card, index) => {
+                const cardData = CARD_DATABASE[card.id];
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card-ui';
+                cardEl.dataset.cardUid = card.uid;
+                cardEl.dataset.cardIndex = index;
+                cardEl.style.backgroundImage = `url(${cardData.img})`;
+                
+                cardEl.innerHTML = `
+                    <div class="cost">${cardData.cost}</div>
+                    <div class="stats-bar">
+                        <div class="atk">${cardData.atk}</div>
+                        <div class="hp-stat">${cardData.hp}</div>
+                    </div>
+                `;
+                
+                cardEl.onclick = () => {
+                    const previouslySelected = document.querySelector('.card-ui.selected');
+                    if(previouslySelected) previouslySelected.classList.remove('selected');
+
+                    if (selectedCardInHand && selectedCardInHand.uid === card.uid) {
+                        selectedCardInHand = null;
+                    } else {
+                        cardEl.classList.add('selected');
+                        selectedCardInHand = { uid: card.uid, index: index, id: card.id };
+                    }
+                };
+
+                playerHandDiv.appendChild(cardEl);
+            });
+        }
+        
+        function syncBoard3D() {
+             // Track UIDs on the board to remove old cards
+            const currentBoardUIDs = new Set();
+            gameState.lanes.forEach(card => card && currentBoardUIDs.add(card.uid));
+
+            // Remove meshes for cards that are no longer on the board
+            for (const uid in cardMeshes) {
+                if (!currentBoardUIDs.has(uid)) {
+                    scene.remove(cardMeshes[uid]);
+                    delete cardMeshes[uid];
+                }
+            }
+
+            // Add or update card meshes
+            gameState.lanes.forEach((card, laneIndex) => {
+                if (card) {
+                    if (!cardMeshes[card.uid]) {
+                        // Card is new, create its mesh
+                        const cardData = CARD_DATABASE[card.id];
+                        const cardGeo = new THREE.PlaneGeometry(1.8, 2.5);
+                        const cardTexture = textureLoader.load(cardData.img);
+                        const cardMat = new THREE.MeshPhongMaterial({ map: cardTexture, side: THREE.DoubleSide });
+                        const mesh = new THREE.Mesh(cardGeo, cardMat);
+                        
+                        mesh.castShadow = true;
+                        mesh.userData = { ...card }; // Copy card data to mesh
+
+                        // Place card at starting position (off-screen) to animate in
+                        const isPlayerCard = (myRole === 'player1' && laneIndex < NUM_LANES) || 
+                                           (myRole === 'player2' && laneIndex >= NUM_LANES);
+                        mesh.position.y = 5;
+                        
+                        scene.add(mesh);
+                        cardMeshes[card.uid] = mesh;
+                    }
+                    
+                    // Always update position and rotation (for animation)
+                    const mesh = cardMeshes[card.uid];
+                    const lane = laneMeshes[laneIndex];
+
+                    const targetPosition = { x: lane.position.x, y: 1.5, z: lane.position.z };
+                    const targetRotation = { x: -Math.PI / 4, y: 0, z: 0 };
+                    
+                    // Animate to position using GSAP
+                    gsap.to(mesh.position, { duration: 0.5, ...targetPosition });
+                    gsap.to(mesh.rotation, { duration: 0.5, ...targetRotation });
+
+                    // TODO: Display HP/ATK on 3D card
+                }
+            });
+        }
+        
+        function syncTurnIndicator() {
+            const indicator = document.getElementById('turn-indicator');
+            const endTurnBtn = document.getElementById('end-turn-btn');
+            if (gameState.turn === myRole) {
+                indicator.textContent = "Lượt Của Bạn";
+                indicator.className = 'turn-indicator my-turn';
+                endTurnBtn.classList.remove('disabled');
+            } else {
+                indicator.textContent = "Lượt Đối Thủ";
+                indicator.className = 'turn-indicator opponent-turn';
+                endTurnBtn.classList.add('disabled');
+            }
+        }
+        
+        function checkGameOver() {
+            if (gameState.status !== 'finished') return;
+
+            const modal = document.getElementById('game-over-modal');
+            const title = document.getElementById('game-over-title');
+            const message = document.getElementById('game-over-message');
+            
+            if (gameState.winner === myRole) {
+                title.textContent = "BẠN THẮNG!";
+                message.textContent = "Một chiến thắng vẻ vang! Floop the Pig!";
+            } else {
+                title.textContent = "BẠN THUA!";
+                message.textContent = "Lần sau sẽ may mắn hơn, cố lên!";
+            }
+
+            modal.style.display = 'flex';
+        }
+        
+        function animateAttack(attackerUid, defenderUid, defendingPlayerRole) {
+            const attackerMesh = cardMeshes[attackerUid];
+            if (!attackerMesh) return;
+            
+            let targetPos;
+            if (defenderUid && cardMeshes[defenderUid]) {
+                 targetPos = cardMeshes[defenderUid].position.clone();
+            } else {
+                 // Attack player directly
+                 const isPlayer1Attacking = attackerMesh.userData.owner === 'player1';
+                 targetPos = new THREE.Vector3(attackerMesh.position.x, 1, isPlayer1Attacking ? -4 : 4);
+            }
+            
+            const originalPos = attackerMesh.position.clone();
+            
+            // GSAP Timeline for smooth attack animation
+            const tl = gsap.timeline();
+            tl.to(attackerMesh.position, { duration: 0.3, x: targetPos.x, y: targetPos.y, z: targetPos.z, ease: "power1.inOut" })
+              .to(attackerMesh.position, { duration: 0.5, x: originalPos.x, y: originalPos.y, z: originalPos.z, ease: "bounce.out" });
+        }
+        
+        // ############################################
+        // #            EVENT LISTENERS               #
+        // ############################################
+
+        function onCanvasClick(event) {
+            if (!selectedCardInHand || gameState.turn !== myRole) return;
+            
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            
+            const intersects = raycaster.intersectObjects(laneMeshes);
+            
+            if (intersects.length > 0) {
+                const clickedLane = intersects[0].object;
+                const { laneIndex, owner } = clickedLane.userData;
+
+                const myOwnerType = (myRole === 'player1') ? 'player' : 'opponent';
+
+                if (owner === myOwnerType) {
+                    playCard(selectedCardInHand, laneIndex);
+                }
+            }
+        }
+        
+        endTurnBtn.addEventListener('click', endTurn);
+
+        playAgainBtn.onclick = () => {
+           // A simple page reload is the easiest way to find a new game
+           // A more sophisticated system would handle this without a reload
+           location.reload();
+        }
+
+        // ############################################
+        // #                 INITIALIZE               #
+        // ############################################
+
+        initThree();
+        signIn();
+
+    </script>
+</body>
+</html>
