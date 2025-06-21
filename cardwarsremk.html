@@ -2,14 +2,14 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Card Wars Simulation - Chế độ đánh với Bot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Advanced Card Wars: Multiplayer & 3D Board Upgrade</title>
   <style>
-    /* Phong cách chủ đạo cho trang game */
+    /* Tổng thể */
     body {
       margin: 0;
       font-family: sans-serif;
-      background: #222;
+      background: #111;
       color: #fff;
     }
     #gameContainer {
@@ -17,37 +17,40 @@
       flex-direction: column;
       align-items: center;
     }
+    /* Canvas cho đồ họa 3D */
     #threejsCanvas {
       width: 100%;
       max-width: 800px;
-      height: 300px;
+      height: 400px;
       background: #000;
       display: block;
     }
+    /* Giao diện UI */
     #gameUI {
       width: 90%;
       max-width: 800px;
       margin: 10px;
       padding: 10px;
+      background: rgba(0, 0, 0, 0.8);
       border: 1px solid #444;
-      background: #333;
       border-radius: 8px;
+      text-align: center;
     }
     h1, h2 {
-      text-align: center;
       margin: 10px 0;
     }
     #gameStatus {
-      text-align: center;
-      margin: 10px 0;
       white-space: pre-wrap;
+      margin: 10px 0;
     }
-    button {
+    button, input[type="text"] {
       margin: 5px;
-      padding: 10px 20px;
+      padding: 8px 16px;
       font-size: 16px;
       border: none;
       border-radius: 4px;
+    }
+    button {
       background-color: #556;
       color: #fff;
       cursor: pointer;
@@ -56,140 +59,221 @@
       background-color: #444;
       cursor: not-allowed;
     }
-    #playerCards, #botCards {
+    input[type="text"] {
+      background: #222;
+      color: #fff;
+      border: 1px solid #666;
+      width: 150px;
+    }
+    /* Các khu vực bài và bảng điểm */
+    #playerCards, #playedCards {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-      margin-bottom: 10px;
+      margin: 10px auto;
     }
     .card {
       width: 80px;
       height: 120px;
-      border: 2px solid #fff;
-      border-radius: 8px;
+      border: 1px solid #fff;
+      border-radius: 4px;
       margin: 5px;
-      background: #444;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
+      background: #333;
+      padding: 5px;
       text-align: center;
       font-size: 14px;
-      padding: 5px;
+      cursor: pointer;
     }
     .card.selected {
       border-color: yellow;
     }
     #scoreBoard p {
-      text-align: center;
-      font-size: 18px;
       margin: 5px 0;
+      font-size: 18px;
+    }
+    /* Chat area */
+    #chatContainer {
+      margin-top: 10px;
+      padding: 5px;
+      background: #222;
+      border: 1px solid #444;
+      border-radius: 4px;
+      text-align: left;
+    }
+    #chatMessages {
+      height: 150px;
+      overflow-y: auto;
+      background: #111;
+      padding: 5px;
+      border: 1px solid #444;
+      margin-bottom: 5px;
+    }
+    /* Khu vực chế độ multiplayer */
+    #multiplayerUI {
+      margin: 10px 0;
     }
   </style>
 </head>
 <body>
   <div id="gameContainer">
-    <!-- Canvas 3D: sử dụng Three.js -->
+    <!-- Canvas 3D hiển thị bàn cờ -->
     <canvas id="threejsCanvas"></canvas>
     
-    <!-- Giao diện game: khu vực UI chứa thông tin trận đấu, bài của người chơi và bot -->
+    <!-- Giao diện điều khiển -->
     <div id="gameUI">
-      <h1>Card Wars Simulation</h1>
-      <div id="gameStatus">Nhấn "New Game" để bắt đầu trận đấu.</div>
-      <div style="text-align:center;">
-        <button id="newGameBtn">New Game</button>
-        <button id="playCardBtn" disabled>Play Card</button>
+      <h1>Advanced Card Wars</h1>
+      <!-- Chọn chế độ chơi -->
+      <div id="modeSelection">
+        <button id="vsBotBtn">Chơi với Bot</button>
+        <button id="vsFriendBtn">Chơi với Bạn</button>
       </div>
-      <div id="playerHand">
+      <!-- UI dành cho chế độ multiplayer -->
+      <div id="multiplayerUI" style="display:none;">
+        <input type="text" id="roomIdInput" placeholder="Nhập Room ID">
+        <button id="createRoomBtn">Tạo Phòng</button>
+        <button id="joinRoomBtn">Tham Gia Phòng</button>
+        <div id="roomStatus"></div>
+      </div>
+      <div id="gameStatus">Chọn chế độ chơi.</div>
+      
+      <div id="playerHandSection">
         <h2>Bài của bạn</h2>
         <div id="playerCards"></div>
       </div>
-      <div id="botHand">
-        <h2>Bài của Bot</h2>
-        <div id="botCards"></div>
+      
+      <div id="playedCardsSection">
+        <h2>Bài đã đánh</h2>
+        <div id="playedCards"></div>
       </div>
+      
       <div id="scoreBoard">
         <h2>Bảng điểm</h2>
         <p>Bạn: <span id="playerScore">0</span></p>
-        <p>Bot: <span id="botScore">0</span></p>
+        <p>Đối thủ: <span id="opponentScore">0</span></p>
+      </div>
+      
+      <button id="playCardBtn" disabled>Đánh bài đã chọn</button>
+      
+      <!-- Khu vực chat (chỉ hiển thị ở chế độ multiplayer) -->
+      <div id="chatContainer" style="display:none;">
+        <h2>Chat</h2>
+        <div id="chatMessages"></div>
+        <input type="text" id="chatInput" placeholder="Nhập tin nhắn...">
+        <button id="sendChatBtn">Gửi</button>
       </div>
     </div>
   </div>
   
-  <!-- Tích hợp các thư viện bên ngoài từ CDN -->
-  <!-- Three.js để tạo đồ họa 3D -->
+  <!-- Thư viện bên ngoài -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
-  <!-- Firebase (sử dụng phiên bản compat để đơn giản hóa) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
   
   <script>
-    /* ---------------------- Firebase Setup ---------------------- */
-    // Vui lòng thay thế các giá trị dưới đây bằng thông tin dự án Firebase của bạn
+    /* -------------------- Firebase Setup -------------------- */
+    // Thay các giá trị dưới đây bằng cấu hình dự án Firebase của bạn
     const firebaseConfig = {
-      apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
-      authDomain: "webai-7642b.firebaseapp.com",
-      databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "webai-7642b",
-      storageBucket: "webai-7642b.firebasestorage.app",
-      messagingSenderId: "967881370128",
-      appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
-      measurementId: "G-61XJ390Q30"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     
-    /* ---------------------- Three.js 3D Graphics ---------------------- */
+    /* -------------------- Three.js Setup -------------------- */
     const canvas = document.getElementById("threejsCanvas");
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    // Cài đặt kích thước renderer theo canvas
     renderer.setSize(canvas.clientWidth, canvas.clientHeight);
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000);
-    const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
-    camera.position.z = 5;
-    
-    // Tạo một đối tượng 3D đơn giản mô phỏng lá bài (dạng hộp mỏng)
-    const geometry = new THREE.BoxGeometry(1, 1.5, 0.1);
-    const material = new THREE.MeshPhongMaterial({ 
-      color: 0x156289, 
-      emissive: 0x072534, 
-      side: THREE.DoubleSide, 
-      flatShading: true 
-    });
-    const cardMesh = new THREE.Mesh(geometry, material);
-    scene.add(cardMesh);
-    
-    // Thêm ánh sáng cho cảnh
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambientLight);
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(5, 3, 5);
+    scene.background = new THREE.Color(0x228822); // nền bàn cờ xanh mộc
+    const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth/canvas.clientHeight, 0.1, 1000);
+    camera.position.set(0, 15, 15);
+    camera.lookAt(0, 0, 0);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(0, 20, 10);
     scene.add(directionalLight);
     
-    // Vòng lặp render cho đồ họa 3D
-    function animate() {
-      requestAnimationFrame(animate);
-      // Quay nhẹ lá bài cho hiệu ứng 3D sống động
-      cardMesh.rotation.y += 0.01;
-      cardMesh.rotation.x += 0.005;
-      renderer.render(scene, camera);
+    // Tạo bàn cờ với texture (dùng nguồn công khai)
+    const tableGeometry = new THREE.PlaneGeometry(20, 20);
+    const textureLoader = new THREE.TextureLoader();
+    const tableTexture = textureLoader.load("https://i.imgur.com/4y0QWty.jpg");
+    tableTexture.wrapS = tableTexture.wrapT = THREE.RepeatWrapping;
+    tableTexture.repeat.set(4, 4);
+    const tableMaterial = new THREE.MeshLambertMaterial({ map: tableTexture, side: THREE.DoubleSide });
+    const tableMesh = new THREE.Mesh(tableGeometry, tableMaterial);
+    tableMesh.rotation.x = - Math.PI / 2;
+    scene.add(tableMesh);
+    
+    /* -------------------- 3D Card & Animation Helpers -------------------- */
+    // Hàm tạo lá bài 3D, có mặt bài (faceUp) hoặc ngược (back)
+    function createCardMesh(card, faceUp=true) {
+      const cardText = card.name;
+      const url = faceUp 
+            ? "https://via.placeholder.com/200x300.png?text=" + encodeURIComponent(cardText)
+            : "https://via.placeholder.com/200x300.png?text=Back";
+      const texture = textureLoader.load(url);
+      const geometry = new THREE.BoxGeometry(2, 3, 0.2);
+      const materials = [
+        new THREE.MeshBasicMaterial({ color: 0xffffff }), // phải
+        new THREE.MeshBasicMaterial({ color: 0xffffff }), // trái
+        new THREE.MeshBasicMaterial({ map: texture }),      // trên
+        new THREE.MeshBasicMaterial({ color: 0xffffff }), // dưới
+        new THREE.MeshBasicMaterial({ map: texture }),      // trước
+        new THREE.MeshBasicMaterial({ color: 0x333333 })      // sau
+      ];
+      const mesh = new THREE.Mesh(geometry, materials);
+      mesh.castShadow = true;
+      return mesh;
     }
-    animate();
     
-    /* ---------------------- Logic Game Card Wars ---------------------- */
+    // Helper: animation di chuyển đối tượng đến vị trí target trong duration (ms)
+    function animateMovement(object, targetPos, duration, callback) {
+      const startPos = object.position.clone();
+      const startTime = performance.now();
+      function animate() {
+        const elapsed = performance.now() - startTime;
+        let t = Math.min(elapsed / duration, 1);
+        object.position.lerpVectors(startPos, targetPos, t);
+        if (t < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          if (callback) callback();
+        }
+      }
+      animate();
+    }
     
-    // Khởi tạo các biến của game
+    /* -------------------- Zones định sẵn trên bàn cờ -------------------- */
+    const handY = 0.3; // độ cao của lá bài so với bàn
+    const playerZoneZ = -8;   // khu vực bài của người chơi (phía dưới)
+    const opponentZoneZ = 8;  // khu vực bài của đối thủ (phía trên)
+    const centerZone = new THREE.Vector3(0, 0.3, 0); // trung tâm bàn cờ
+    
+    /* -------------------- Biến và Logic Game -------------------- */
+    let currentMode = null; // "bot" hoặc "friend"
+    let isMultiplayer = false;
+    let roomId = null;
+    let playerId = null;  // "player1" hoặc "player2" khi chơi multiplayer
+    let gameState = {};
     let playerDeck = [];
-    let botDeck = [];
+    let opponentDeck = [];
     let playerHand = [];
-    let botHand = [];
+    let opponentHand = [];
     let playerScore = 0;
-    let botScore = 0;
-    const maxHandSize = 5;
+    let opponentScore = 0;
+    let selectedCardIndex = null;
+    let playedCards = { player: null, opponent: null };
     
-    // Bộ bài mẫu (mỗi lá bài có tên và giá trị tấn công)
+    // Mảng chứa các mesh của bài ở tay (cho animation)
+    let playerHandMeshes = [];
+    let opponentHandMeshes = [];
+    
+    // Bộ bài mẫu (mỗi lá có tên và giá trị tấn công)
     const cardPool = [
       { name: "Sát Thủ", value: 5 },
       { name: "Pháp Sư", value: 4 },
@@ -198,7 +282,7 @@
       { name: "Tập Trung", value: 1 }
     ];
     
-    // Hàm xáo bài (shuffle)
+    // Hàm xáo bài
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -207,142 +291,314 @@
       return array;
     }
     
-    // Tạo deck (mỗi loại bài xuất hiện 4 lần rồi xáo trộn)
+    // Sinh deck, mỗi loại bài xuất hiện 4 lần, sau đó xáo trộn
     function generateDeck() {
       let deck = [];
       cardPool.forEach(card => {
         for (let i = 0; i < 4; i++) {
-          deck.push({ ...card });
+          deck.push(Object.assign({}, card));
         }
       });
       return shuffle(deck);
     }
     
-    // Chia bài cho người chơi và bot
+    // Chia bài cho mỗi bên, cập nhật UI HTML và tạo mesh 3D
     function dealHands() {
-      playerHand = playerDeck.splice(0, maxHandSize);
-      botHand = botDeck.splice(0, maxHandSize);
-      renderHands();
+      playerHand = playerDeck.splice(0, 5);
+      opponentHand = opponentDeck.splice(0, 5);
+      renderHandsUI();
+      createHandMeshes();
     }
     
-    // Hiển thị bài trên UI (người chơi thấy chi tiết, bot chỉ hiện ẩn)
-    function renderHands() {
-      const playerCardsDiv = document.getElementById("playerCards");
-      const botCardsDiv = document.getElementById("botCards");
-      playerCardsDiv.innerHTML = "";
-      botCardsDiv.innerHTML = "";
-      
+    // Hiển thị bài trong khu vực HTML để người chơi chọn
+    function renderHandsUI() {
+      const container = document.getElementById("playerCards");
+      container.innerHTML = "";
       playerHand.forEach((card, index) => {
-        const cardDiv = document.createElement("div");
-        cardDiv.className = "card";
-        cardDiv.innerHTML = `<b>${card.name}</b><br>Giá trị: ${card.value}`;
-        cardDiv.onclick = () => selectCard(index);
-        playerCardsDiv.appendChild(cardDiv);
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `<b>${card.name}</b><br>Giá trị: ${card.value}`;
+        div.onclick = () => selectCard(index);
+        container.appendChild(div);
       });
+      const playedContainer = document.getElementById("playedCards");
+      playedContainer.innerHTML = "";
+      if (playedCards.player)
+        playedContainer.innerHTML += `<div class="card"><b>${playedCards.player.name}</b><br>${playedCards.player.value}</div>`;
+      if (playedCards.opponent)
+        playedContainer.innerHTML += `<div class="card"><b>${playedCards.opponent.name}</b><br>${playedCards.opponent.value}</div>`;
+    }
+    
+    // Tạo các mesh cho bài trong tay và xòe chúng theo dạng fan (người chơi và đối thủ)
+    function createHandMeshes() {
+      // Xóa các mesh cũ nếu có
+      playerHandMeshes.forEach(mesh => scene.remove(mesh));
+      opponentHandMeshes.forEach(mesh => scene.remove(mesh));
+      playerHandMeshes = [];
+      opponentHandMeshes = [];
       
-      // Với bài của bot, chỉ hiện mặt sau (ẩn nội dung)
-      botHand.forEach(() => {
-        const botCardDiv = document.createElement("div");
-        botCardDiv.className = "card";
-        botCardDiv.innerHTML = `<b>Bí Ẩn</b>`;
-        botCardsDiv.appendChild(botCardDiv);
+      // Với người chơi (faceUp)
+      let n = playerHand.length, spacing = 3;
+      let startX = -((n - 1) * spacing) / 2;
+      for (let i = 0; i < n; i++) {
+        let mesh = createCardMesh(playerHand[i], true);
+        mesh.position.set(startX + i * spacing, handY, playerZoneZ);
+        scene.add(mesh);
+        playerHandMeshes.push(mesh);
+      }
+      // Với đối thủ (faceDown)
+      n = opponentHand.length;
+      startX = -((n - 1) * spacing) / 2;
+      for (let i = 0; i < n; i++) {
+        let mesh = createCardMesh(opponentHand[i], false);
+        mesh.position.set(startX + i * spacing, handY, opponentZoneZ);
+        scene.add(mesh);
+        opponentHandMeshes.push(mesh);
+      }
+    }
+    
+    // Cập nhật vị trí của các mesh của bài trong tay sau khi một lá bị loại bỏ
+    function updateHandMeshPositions() {
+      let n = playerHandMeshes.length, spacing = 3;
+      let startX = -((n - 1) * spacing) / 2;
+      playerHandMeshes.forEach((mesh, i) => {
+        const target = new THREE.Vector3(startX + i * spacing, handY, playerZoneZ);
+        animateMovement(mesh, target, 500);
       });
     }
     
-    let selectedCardIndex = null;
-    
-    // Người chơi chọn lá bài muốn chơi
+    // Khi người chơi chọn 1 lá bài trong UI HTML
     function selectCard(index) {
       selectedCardIndex = index;
-      const cardDivs = document.querySelectorAll("#playerCards .card");
-      cardDivs.forEach((div, idx) => {
+      document.querySelectorAll("#playerCards .card").forEach((div, idx) => {
         div.classList.toggle("selected", idx === index);
       });
       document.getElementById("playCardBtn").disabled = false;
     }
     
-    // Hàm tính từng lượt: người chơi và bot chọn bài, so sánh "giá trị" để xác định người thắng vòng
-    function playTurn() {
+    // Khi đánh bài, animate lá bài chuyển từ tay lên trung tâm bàn cờ
+    function animatePlayedCard(fromMesh, callback) {
+      const targetPos = centerZone.clone();
+      animateMovement(fromMesh, targetPos, 1000, () => {
+        setTimeout(() => {
+          scene.remove(fromMesh);
+          callback && callback();
+        }, 1500);
+      });
+    }
+    
+    // Chế độ chơi với Bot
+    function playTurnBot() {
       if (selectedCardIndex === null) return;
-      
-      // Lấy bài của người chơi
       const playerCard = playerHand.splice(selectedCardIndex, 1)[0];
+      const playerMesh = playerHandMeshes.splice(selectedCardIndex, 1)[0];
+      playedCards.player = playerCard;
+      animatePlayedCard(playerMesh, updateHandMeshPositions);
       
-      // Bot chọn bài ngẫu nhiên
-      const botChoiceIndex = Math.floor(Math.random() * botHand.length);
-      const botCard = botHand.splice(botChoiceIndex, 1)[0];
+      // Bot chọn ngẫu nhiên
+      const botIndex = Math.floor(Math.random() * opponentHand.length);
+      const botCard = opponentHand.splice(botIndex, 1)[0];
+      const botMesh = opponentHandMeshes.splice(botIndex, 1)[0];
+      playedCards.opponent = botCard;
+      animatePlayedCard(botMesh, () => {});
+      renderHandsUI();
       
-      let roundResult = "";
-      if (playerCard.value > botCard.value) {
-        playerScore++;
-        roundResult = "Bạn thắng vòng này!";
-      } else if (playerCard.value < botCard.value) {
-        botScore++;
-        roundResult = "Bot thắng vòng này!";
-      } else {
-        roundResult = "Hòa vòng!";
-      }
-      
-      document.getElementById("gameStatus").innerText = 
-        `Bạn chơi: ${playerCard.name} (${playerCard.value})\nBot chơi: ${botCard.name} (${botCard.value})\n` + roundResult;
-      
+      if (playerCard.value > botCard.value) { playerScore++; }
+      else if (playerCard.value < botCard.value) { opponentScore++; }
       updateScoreBoard();
-      renderHands();
       document.getElementById("playCardBtn").disabled = true;
       selectedCardIndex = null;
       
-      // Nếu hết bài trong tay và còn bài trong deck thì chia bài mới; ngược lại, kết thúc game
-      if (playerHand.length === 0 || botHand.length === 0) {
-        if (playerDeck.length > 0 && botDeck.length > 0) {
-          setTimeout(dealHands, 1500);
+      if (playerHand.length === 0 || opponentHand.length === 0) {
+        if (playerDeck.length > 0 && opponentDeck.length > 0) {
+          setTimeout(dealHands, 2000);
         } else {
           endGame();
         }
       }
     }
     
+    // Chế độ multiplayer: khi đánh bài, update bài đã đánh qua Firebase
+    function playTurnMultiplayer() {
+      if (selectedCardIndex === null) return;
+      const playedCard = playerHand.splice(selectedCardIndex, 1)[0];
+      const playerMesh = playerHandMeshes.splice(selectedCardIndex, 1)[0];
+      playedCards.player = playedCard;
+      animatePlayedCard(playerMesh, updateHandMeshPositions);
+      document.getElementById("playCardBtn").disabled = true;
+      database.ref('rooms/' + roomId + '/' + playerId + '/playedCard').set(playedCard)
+        .then(() => { console.log("Bài đánh đã được cập nhật"); })
+        .catch(err => console.error(err));
+      selectedCardIndex = null;
+    }
+    
     // Cập nhật bảng điểm
     function updateScoreBoard() {
       document.getElementById("playerScore").innerText = playerScore;
-      document.getElementById("botScore").innerText = botScore;
+      document.getElementById("opponentScore").innerText = opponentScore;
     }
     
-    // Bắt đầu trận mới
-    function newGame() {
-      playerDeck = generateDeck();
-      botDeck = generateDeck();
-      playerScore = 0;
-      botScore = 0;
-      updateScoreBoard();
-      dealHands();
-      document.getElementById("gameStatus").innerText = "Trận đấu bắt đầu!";
-    }
-    
-    // Kết thúc game, hiển thị kết quả và lưu điểm số lên Firebase
+    // Kết thúc game
     function endGame() {
       let finalMsg = "";
-      if (playerScore > botScore) finalMsg = "Chúc mừng! Bạn đã thắng trận đấu!";
-      else if (playerScore < botScore) finalMsg = "Bot thắng trận đấu!";
-      else finalMsg = "Trận đấu kết thúc hòa.";
+      if (playerScore > opponentScore) finalMsg = "Bạn thắng!";
+      else if (playerScore < opponentScore) finalMsg = "Đối thủ thắng!";
+      else finalMsg = "Game hòa.";
       document.getElementById("gameStatus").innerText = finalMsg;
-      
-      // Lưu kết quả điểm số vào Firebase Realtime Database
-      database.ref('scores').push({
-        playerScore: playerScore,
-        botScore: botScore,
+      if (isMultiplayer && roomId) {
+        database.ref('rooms/' + roomId + '/final').set({
+          player1Score: playerId === "player1" ? playerScore : gameState.player1?.score,
+          player2Score: playerId === "player2" ? playerScore : gameState.player2?.score,
+          timestamp: Date.now()
+        }).then(() => { console.log("Điểm kết thúc được lưu"); })
+          .catch(err => console.error(err));
+      }
+    }
+    
+    /* -------------------- Chat Functionality -------------------- */
+    function sendChat() {
+      const msg = document.getElementById("chatInput").value;
+      if (!msg.trim()) return;
+      const chatRef = database.ref('rooms/' + roomId + '/chat');
+      chatRef.push({
+        sender: playerId,
+        message: msg,
         timestamp: Date.now()
-      }).then(() => {
-        console.log("Score stored to Firebase.");
-      }).catch(err => {
-        console.error("Firebase error: ", err);
+      });
+      document.getElementById("chatInput").value = "";
+    }
+    
+    function listenForChat() {
+      const chatRef = database.ref('rooms/' + roomId + '/chat');
+      chatRef.on('child_added', snapshot => {
+        const data = snapshot.val();
+        const chatBox = document.getElementById("chatMessages");
+        const msgDiv = document.createElement("div");
+        msgDiv.style.marginBottom = "5px";
+        msgDiv.innerText = (data.sender === playerId ? "Bạn" : data.sender) + ": " + data.message;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
       });
     }
     
-    // Gán sự kiện cho các nút bấm
-    document.getElementById("newGameBtn").addEventListener("click", newGame);
-    document.getElementById("playCardBtn").addEventListener("click", playTurn);
+    /* -------------------- Multiplayer Room Functions -------------------- */
+    function createRoom() {
+      roomId = Math.random().toString(36).substr(2, 6).toUpperCase();
+      playerId = "player1";
+      isMultiplayer = true;
+      document.getElementById("chatContainer").style.display = "block";
+      const roomRef = database.ref('rooms/' + roomId);
+      playerDeck = generateDeck();
+      opponentDeck = generateDeck();
+      dealHands();
+      playerScore = 0;
+      opponentScore = 0;
+      roomRef.set({
+        player1: {
+          hand: playerHand,
+          score: playerScore,
+          playedCard: null
+        },
+        roomStatus: "waiting"
+      });
+      document.getElementById("roomStatus").innerText = "Phòng " + roomId + " được tạo. Chờ đối thủ...";
+      roomRef.on('value', snapshot => {
+        gameState = snapshot.val();
+        if (gameState.player2 && gameState.player1.playedCard && gameState.player2.playedCard) {
+          const p1Card = gameState.player1.playedCard;
+          const p2Card = gameState.player2.playedCard;
+          let roundResult = "";
+          if (p1Card.value > p2Card.value) {
+            if (playerId === "player1") { playerScore++; roundResult = "Bạn thắng vòng!"; }
+            else { opponentScore++; roundResult = "Bạn thua vòng!"; }
+          } else if (p1Card.value < p2Card.value) {
+            if (playerId === "player2") { playerScore++; roundResult = "Bạn thắng vòng!"; }
+            else { opponentScore++; roundResult = "Bạn thua vòng!"; }
+          } else { roundResult = "Vòng hòa!"; }
+          document.getElementById("gameStatus").innerText =
+            `Bài của bạn: ${p1Card.name} (${p1Card.value})\nBài đối thủ: ${p2Card.name} (${p2Card.value})\n` + roundResult;
+          database.ref('rooms/' + roomId + '/player1/playedCard').set(null);
+          database.ref('rooms/' + roomId + '/player2/playedCard').set(null);
+          updateScoreBoard();
+          renderHandsUI();
+        }
+      });
+      listenForChat();
+    }
     
-    // Điều chỉnh kích thước renderer khi window thay đổi
+    function joinRoom() {
+      roomId = document.getElementById("roomIdInput").value.toUpperCase();
+      if (!roomId) return;
+      const roomRef = database.ref('rooms/' + roomId);
+      roomRef.once('value').then(snapshot => {
+        if (snapshot.exists()) {
+          gameState = snapshot.val();
+          if (gameState.roomStatus === "waiting") {
+            playerId = "player2";
+            isMultiplayer = true;
+            document.getElementById("chatContainer").style.display = "block";
+            playerDeck = generateDeck();
+            opponentDeck = generateDeck();
+            dealHands();
+            playerScore = 0;
+            opponentScore = 0;
+            roomRef.update({
+              roomStatus: "playing",
+              player2: {
+                hand: playerHand,
+                score: playerScore,
+                playedCard: null
+              }
+            });
+            document.getElementById("roomStatus").innerText = "Tham gia phòng " + roomId + ". Trận đấu bắt đầu!";
+            listenForChat();
+          } else {
+            alert("Phòng đã đầy hoặc không hợp lệ.");
+          }
+        } else {
+          alert("Phòng không tồn tại.");
+        }
+      });
+    }
+    
+    /* -------------------- UI Event Listeners -------------------- */
+    document.getElementById("vsBotBtn").addEventListener("click", () => {
+      currentMode = "bot";
+      isMultiplayer = false;
+      document.getElementById("modeSelection").style.display = "none";
+      document.getElementById("multiplayerUI").style.display = "none";
+      document.getElementById("chatContainer").style.display = "none";
+      playerDeck = generateDeck();
+      opponentDeck = generateDeck();
+      dealHands();
+      playerScore = 0;
+      opponentScore = 0;
+      document.getElementById("gameStatus").innerText = "Trận đấu bắt đầu với Bot!";
+    });
+    
+    document.getElementById("vsFriendBtn").addEventListener("click", () => {
+      currentMode = "friend";
+      document.getElementById("modeSelection").style.display = "none";
+      document.getElementById("multiplayerUI").style.display = "block";
+      document.getElementById("gameStatus").innerText = "Chọn 'Tạo Phòng' hoặc 'Tham Gia Phòng' để chơi với bạn bè.";
+    });
+    
+    document.getElementById("createRoomBtn").addEventListener("click", createRoom);
+    document.getElementById("joinRoomBtn").addEventListener("click", joinRoom);
+    document.getElementById("playCardBtn").addEventListener("click", () => {
+      if (currentMode === "bot") playTurnBot();
+      else if (currentMode === "friend") playTurnMultiplayer();
+    });
+    document.getElementById("sendChatBtn").addEventListener("click", sendChat);
+    
+    /* -------------------- Render Loop -------------------- */
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+    animate();
+    
+    // Điều chỉnh kích thước canvas khi window thay đổi
     window.addEventListener("resize", () => {
       const width = canvas.clientWidth;
       const height = canvas.clientHeight;
