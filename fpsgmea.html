@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>COD Shooter</title>
+    <style>
+        body, html { margin: 0; padding: 0; overflow: hidden; width: 100%; height: 100%; background-color: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; }
+        .screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.7); z-index: 100; transition: opacity 0.5s; }
+        .hidden { opacity: 0; pointer-events: none; }
+        #lobby { z-index: 102; background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(https://i.imgur.com/G3C3k8k.jpeg); background-size: cover; background-position: center; }
+        .lobby-box { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px); padding: 30px 40px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .lobby-box h1 { margin-top: 0; font-size: 2.5em; letter-spacing: 2px; text-transform: uppercase; color: #facc15; }
+        .lobby-box .form-group { margin: 20px 0; }
+        .lobby-box label { display: block; margin-bottom: 8px; font-weight: bold; color: #cbd5e1;}
+        .lobby-box input, .lobby-box select { width: 100%; padding: 12px; background: #1e293b; border: 1px solid #475569; border-radius: 5px; color: white; font-size: 1em; }
+        #play-button { padding: 15px 40px; font-size: 1.2em; font-weight: bold; color: #1e293b; background: #facc15; border: none; border-radius: 5px; cursor: pointer; text-transform: uppercase; transition: transform 0.2s, background-color 0.2s; }
+        #play-button:hover { transform: scale(1.05); background: #fde047; }
+        #game-container { position: absolute; width: 100%; height: 100%; opacity: 1; transition: opacity 0.5s; }
+        #game-container.hidden { opacity: 0; }
+        #game-canvas { display: block; }
+        #ui-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .ui-element { position: absolute; background-color: rgba(0, 0, 0, 0.5); padding: 10px; border-radius: 5px; font-size: 1.5em; text-shadow: 1px 1px 2px black; }
+        #health-bar { top: 20px; left: 20px; color: #4CAF50; }
+        #team-scores { top: 20px; left: 50%; transform: translateX(-50%); font-size: 1.8em; }
+        #team-scores .blue { color: #2196F3; }
+        #team-scores .red { color: #F44336; }
+        #kills-display { top: 20px; right: 20px; color: #FFEB3B; }
+        #ammo-display { bottom: 80px; right: 20px; }
+        #respawn-timer { top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3em; text-align: center; }
+        /* Paste all previous CSS for mobile controls, ui-elements, rotate-prompt here */
+        #mobile-controls { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; display: none; pointer-events: none; }
+        #joystick-container { position: absolute; bottom: 30px; left: 30px; width: 120px; height: 120px; background: rgba(128, 128, 128, 0.4); border-radius: 50%; pointer-events: all; }
+        #joystick-thumb { position: absolute; width: 60px; height: 60px; background: rgba(255, 255, 255, 0.6); border-radius: 50%; top: 30px; left: 30px; }
+        #fire-button { position: absolute; bottom: 40px; right: 40px; width: 90px; height: 90px; background: rgba(255, 0, 0, 0.5); border: 2px solid rgba(255,255,255,0.7); border-radius: 50%; pointer-events: all; display: flex; align-items: center; justify-content: center; font-size: 1em; color: white; text-shadow: 1px 1px 2px black; }
+        #rotate-device-prompt { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; color: #fff; z-index: 10000; justify-content: center; align-items: center; text-align: center; font-size: 1.5em; }
+        @media (orientation: portrait) { #rotate-device-prompt { display: flex; } }
+    </style>
+</head>
+<body>
+
+    <div id="lobby" class="screen">
+        <div class="lobby-box">
+            <h1>Mini-Shooter</h1>
+            <div class="form-group"><label for="player-name">Tên</label><input type="text" id="player-name" value="Player" maxlength="15"></div>
+            <div class="form-group"><label for="map-select">Bản Đồ</label><select id="map-select"></select></div>
+            <div class="form-group"><label for="mode-select">Chế Độ</label><select id="mode-select"><option value="TDM">Team Deathmatch</option><option value="FFA">Free For All</option></select></div>
+            <button id="play-button">Vào Trận</button>
+        </div>
+    </div>
+
+    <div id="game-container" class="hidden">
+        <canvas id="game-canvas"></canvas>
+        <div id="ui-container">
+            <div id="health-bar" class="ui-element">HP: 100</div>
+            <div id="team-scores" class="ui-element"><span class="blue">0</span> - <span class="red">0</span></div>
+            <div id="kills-display" class="ui-element">Kills: 0</div>
+            <div id="ammo-display" class="ui-element">30 / 90</div>
+            <div id="respawn-timer" class="ui-element" style="display: none;"></div>
+        </div>
+        <div id="mobile-controls">
+            <div id="joystick-container"><div id="joystick-thumb"></div></div>
+            <div id="fire-button">BẮN</div>
+        </div>
+    </div>
+
+    <div id="rotate-device-prompt">Vui lòng xoay ngang màn hình để chơi game.</div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+    </script>
+    
+    <script type="module">
+        import * as THREE from 'three';
+        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+
+        // === FIREBASE CONFIG ===
+        const firebaseConfig = { /* PASTE YOUR CONFIG HERE */ };
+        let app, database;
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+        } catch(e) { console.error("Firebase config is invalid. Multiplayer will not work."); }
+        
+        // === GAME STATE & DOM ===
+        let scene, camera, renderer, controls, clock;
+        let player, playerVelocity = new THREE.Vector3();
+        const playerSpeed = 10.0, isMobile = 'ontouchstart' in window;
+        let moveForward=false, moveBackward=false, moveLeft=false, moveRight=false;
+        
+        let playerState = { health: 100, kills: 0, ammo: 30, reserveAmmo: 90, isReloading: false, isDead: false, team: null };
+        let myPlayerId = null, myName = 'Player';
+        let currentMode = 'TDM', currentMap = 'warehouse', teamScores = { blue: 0, red: 0 };
+        const otherPlayers = {};
+        
+        const lobbyScreen = document.getElementById('lobby');
+        const gameContainer = document.getElementById('game-container');
+        const playButton = document.getElementById('play-button');
+        
+        // ===================================
+        // === START: MODEL CREATION LOGIC ===
+        // ===================================
+        const materials = {
+            skin: new THREE.MeshLambertMaterial({ color: 0xffdbac }),
+            shirt_blue: new THREE.MeshLambertMaterial({ color: 0x3b82f6 }),
+            shirt_red: new THREE.MeshLambertMaterial({ color: 0xef4444 }),
+            pants: new THREE.MeshLambertMaterial({ color: 0x3f3f46 }),
+            gun: new THREE.MeshLambertMaterial({ color: 0x18181b }),
+        };
+
+        function createPlayerModel() {
+            const playerGroup = new THREE.Group();
+            
+            // Torso (Thân)
+            const torsoGeo = new THREE.BoxGeometry(0.8, 1, 0.4);
+            const torso = new THREE.Mesh(torsoGeo, materials.shirt_blue); // Default blue
+            torso.name = 'torso'; // Để dễ dàng đổi màu
+            torso.position.y = 0.8;
+            torso.castShadow = true;
+            playerGroup.add(torso);
+            
+            // Head (Đầu)
+            const headGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            const head = new THREE.Mesh(headGeo, materials.skin);
+            head.position.y = 1.6;
+            head.castShadow = true;
+            playerGroup.add(head);
+            
+            // Left Leg (Chân trái)
+            const legGeo = new THREE.BoxGeometry(0.3, 0.8, 0.3);
+            const leftLeg = new THREE.Mesh(legGeo, materials.pants);
+            leftLeg.position.set(-0.2, 0.4, 0);
+            leftLeg.castShadow = true;
+            playerGroup.add(leftLeg);
+
+            // Right Leg (Chân phải)
+            const rightLeg = new THREE.Mesh(legGeo, materials.pants);
+            rightLeg.position.set(0.2, 0.4, 0);
+            rightLeg.castShadow = true;
+            playerGroup.add(rightLeg);
+
+            // Left Arm (Tay trái)
+            const armGeo = new THREE.BoxGeometry(0.2, 0.8, 0.2);
+            const leftArm = new THREE.Mesh(armGeo, materials.skin);
+            leftArm.position.set(-0.6, 0.9, 0);
+            leftArm.castShadow = true;
+            playerGroup.add(leftArm);
+
+            // Right Arm (Tay phải) + Gun
+            const rightArm = new THREE.Mesh(armGeo, materials.skin);
+            rightArm.position.set(0.6, 0.9, 0);
+            rightArm.castShadow = true;
+            playerGroup.add(rightArm);
+            
+            const gunGeo = new THREE.BoxGeometry(0.15, 0.2, 0.7);
+            const gun = new THREE.Mesh(gunGeo, materials.gun);
+            gun.position.set(0, -0.2, 0.4);
+            rightArm.add(gun); // Gắn súng vào tay phải
+
+            // Player cao ~1.8 units, điều chỉnh vị trí để chân chạm đất
+            playerGroup.position.y = -0.05;
+
+            return playerGroup;
+        }
+
+        function setPlayerColor(playerModel, team) {
+            const torso = playerModel.getObjectByName('torso');
+            if (!torso) return;
+
+            if (team === 'blue') {
+                torso.material = materials.shirt_blue;
+            } else if (team === 'red') {
+                torso.material = materials.shirt_red;
+            } else { // FFA mode, color enemies gray
+                torso.material = new THREE.MeshLambertMaterial({ color: 0x888888 });
+            }
+        }
+        // =================================
+        // === END: MODEL CREATION LOGIC ===
+        // =================================
+
+
+        const MAPS = {
+            warehouse: {
+                name: 'Nhà Kho',
+                floorColor: 0x555555, fogColor: 0x333333, fogNear: 0, fogFar: 120,
+                obstacles: [
+                    { type: 'box', size: [8,8,8], pos: [0, 4, 0] },
+                    { type: 'box', size: [15,10,25], pos: [20, 5, -15], rot:[0,0.3,0] },
+                    { type: 'box', size: [15,10,25], pos: [-30, 5, -25], rot:[0,1.2,0] }
+                ]
+            },
+            desert: {
+                name: 'Sa Mạc',
+                floorColor: 0xd2b48c, fogColor: 0xf0e68c, fogNear: 50, fogFar: 150,
+                obstacles: [
+                    { type: 'box', size: [5,5,10], pos: [25, 2.5, 25], color: 0x966c4d },
+                    { type: 'box', size: [15,3,4], pos: [-20, 1.5, -20], color: 0x966c4d },
+                    { type: 'box', size: [3,10,4], pos: [0, 5, -30], color: 0x966c4d }
+                ]
+            }
+        };
+
+        function setupLobby() {
+            const mapSelect = document.getElementById('map-select');
+            Object.keys(MAPS).forEach(mapId => {
+                const option = document.createElement('option');
+                option.value = mapId;
+                option.textContent = MAPS[mapId].name;
+                mapSelect.appendChild(option);
+            });
+            playButton.addEventListener('click', () => {
+                myName = document.getElementById('player-name').value || 'Player';
+                currentMap = mapSelect.value;
+                currentMode = document.getElementById('mode-select').value;
+                
+                playButton.disabled = true;
+                playButton.textContent = "Đang vào trận...";
+                
+                lobbyScreen.classList.add('hidden');
+                gameContainer.classList.remove('hidden');
+                initGame();
+            });
+        }
+        
+        function loadMap(mapName) { /* same as previous version */ }
+
+        // --- All game logic functions (initGame, initMultiplayer, animate, etc.) are below ---
+        
+        function initGame() {
+            scene = new THREE.Scene();
+            clock = new THREE.Clock();
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('game-canvas'), antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            
+            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambient);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            dirLight.position.set(-50, 50, 50);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.set(2048, 2048);
+            scene.add(dirLight);
+
+            if (!isMobile) {
+                controls = new PointerLockControls(camera, document.body);
+                document.getElementById('game-canvas').addEventListener('click', () => controls.lock());
+                player = controls.getObject();
+            } else {
+                 player = new THREE.Object3D();
+                 player.add(camera);
+            }
+            player.position.y = 1.8;
+            scene.add(player);
+            
+            const floorGeo = new THREE.PlaneGeometry(200, 200);
+            const floorMat = new THREE.MeshLambertMaterial({ color: 0x999999 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.name = 'floor';
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+            
+            // Simplified from previous versions, now just calls loadMap and multiplayer.
+            const mapData = MAPS[currentMap];
+            scene.background = new THREE.Color(mapData.floorColor);
+            scene.fog = new THREE.Fog(mapData.fogColor, mapData.fogNear, mapData.fogFar);
+            floor.material.color.set(mapData.floorColor);
+
+            mapData.obstacles.forEach(obsData => {
+                const geo = new THREE.BoxGeometry(...(obsData.size || [10,10,15]));
+                const mat = new THREE.MeshLambertMaterial({ color: obsData.color || 0x6c757d });
+                const obstacle = new THREE.Mesh(geo, mat);
+                obstacle.position.fromArray(obsData.pos);
+                if(obsData.rot) obstacle.rotation.fromArray(obsData.rot);
+                obstacle.castShadow = true;
+                obstacle.receiveShadow = true;
+                scene.add(obstacle);
+            });
+            
+            initMultiplayer();
+            document.addEventListener('keydown', (e) => onKeyEvent(e, true));
+            document.addEventListener('keyup', (e) => onKeyEvent(e, false));
+            if (!isMobile) document.addEventListener('mousedown', onMouseDown);
+            window.addEventListener('resize', onWindowResize);
+            animate();
+        }
+
+        // Multiplayer logic remains very similar, just replacing model loading
+        function initMultiplayer() { /* Code from previous version to determine team... */
+            if (currentMode === 'TDM' && database) {
+                database.ref('players').once('value', (snapshot) => {
+                    const players = snapshot.val() || {};
+                    const blueCount = Object.values(players).filter(p => p.team === 'blue').length;
+                    const redCount = Object.values(players).filter(p => p.team === 'red').length;
+                    playerState.team = blueCount <= redCount ? 'blue' : 'red';
+                    joinGame();
+                });
+            } else {
+                playerState.team = null;
+                joinGame();
+            }
+        }
+        
+        function joinGame() { /* Same logic as before... */
+            if (!database) { alert("Không thể kết nối đến server."); return; }
+
+            const newPlayerRef = database.ref('players').push();
+            myPlayerId = newPlayerRef.key;
+            
+            respawn(); // Initial spawn
+            newPlayerRef.set({ name: myName, kills: 0, team: playerState.team, ...getNetworkData() });
+
+            newPlayerRef.onDisconnect().remove();
+            window.addEventListener('beforeunload', () => newPlayerRef.remove());
+
+            listenToPlayers();
+            listenToDamageEvents();
+            if(currentMode === 'TDM') listenToScores();
+            setInterval(updateMyPosition, 100);
+        }
+
+        function listenToPlayers() {
+            const playersRef = database.ref('players');
+            playersRef.on('child_added', snapshot => {
+                const data = snapshot.val();
+                const id = snapshot.key;
+                if (id === myPlayerId || !data) return;
+
+                // === REPLACED GLB LOADING WITH FUNCTION CALL ===
+                const playerModel = createPlayerModel();
+                
+                // Set color based on team
+                if (currentMode === 'TDM') {
+                    const enemyColor = playerState.team === 'blue' ? 'red' : 'blue';
+                    const playerColor = data.team === playerState.team ? 'blue' : enemyColor;
+                    setPlayerColor(playerModel, playerColor);
+                } else {
+                    setPlayerColor(playerModel, 'ffa_enemy'); // Special color for FFA enemies
+                }
+
+                playerModel.userData.playerId = id;
+                otherPlayers[id] = { mesh: playerModel, data: data };
+                scene.add(playerModel);
+            });
+            // `child_changed` and `child_removed` are mostly the same as before
+            playersRef.on('child_changed', snapshot => {
+                const data = snapshot.val();
+                const id = snapshot.key;
+                if (id === myPlayerId || !otherPlayers[id] || !data) return;
+                const op = otherPlayers[id];
+                op.data = data;
+                op.mesh.position.lerp(new THREE.Vector3(data.pos.x, data.pos.y, data.pos.z), 0.3);
+                op.mesh.rotation.y = data.rot.y;
+                if(data.kills !== undefined && playerState.kills !== data.kills && id === myPlayerId) {
+                    playerState.kills = data.kills;
+                    updateUI();
+                }
+            });
+            playersRef.on('child_removed', snapshot => {
+                const id = snapshot.key;
+                if (otherPlayers[id]) {
+                    scene.remove(otherPlayers[id].mesh);
+                    delete otherPlayers[id];
+                }
+            });
+        }
+        
+        // --- Paste ALL other logic functions here ---
+        // getNetworkData, shoot, takeDamage, reload, handleDeath, respawn, 
+        // updateUI, onKeyEvent, onMouseDown, onWindowResize...
+        // They are IDENTICAL to the previous multiplayer versions.
+
+        function getNetworkData(){return{pos: player.position, rot: { y: player.rotation.y }, camRot: { x: camera.rotation.x }}}
+        function updateMyPosition(){ if (!playerState.isDead && database) database.ref(`players/${myPlayerId}`).update(getNetworkData());}
+        function animate(){requestAnimationFrame(animate);const delta=clock.getDelta();if(!playerState.isDead){playerVelocity.x-=playerVelocity.x*10*delta;playerVelocity.z-=playerVelocity.z*10*delta;if(moveForward)playerVelocity.z-=playerSpeed*delta;if(moveBackward)playerVelocity.z+=playerSpeed*delta;if(moveLeft)playerVelocity.x-=playerSpeed*delta;if(moveRight)playerVelocity.x+=playerSpeed*delta;if(controls)controls.getObject().position.add(playerVelocity.clone().multiplyScalar(delta).applyEuler(player.rotation));}renderer.render(scene, isMobile ? camera : player);}
+        function shoot(){if(playerState.isReloading||playerState.ammo<=0||playerState.isDead)return;playerState.ammo--;updateUI();const raycaster=new THREE.Raycaster();const from=new THREE.Vector3();camera.getWorldPosition(from);const direction=new THREE.Vector3();camera.getWorldDirection(direction);raycaster.set(from,direction);const intersectMeshes=Object.values(otherPlayers).map(p=>p.mesh);const intersects=raycaster.intersectObjects(intersectMeshes,true);if(intersects.length>0){let hitObj=intersects[0].object;while(hitObj.parent&&!hitObj.userData.playerId){hitObj=hitObj.parent}const hitPlayerId=hitObj.userData.playerId;if(hitPlayerId&&otherPlayers[hitPlayerId]){const targetData=otherPlayers[hitPlayerId].data;if(currentMode==='TDM'&&targetData.team===playerState.team)return;if(database)database.ref('damageEvents').push({shooterId:myPlayerId,victimId:hitPlayerId,shooterTeam:playerState.team,damage:35,timestamp:firebase.database.ServerValue.TIMESTAMP})}}}
+        function takeDamage(damage, killerId, killerTeam){if(playerState.isDead)return;playerState.health-=damage;if(playerState.health<=0){playerState.health=0;playerState.isDead=true;if(killerId!==myPlayerId&&database){database.ref(`players/${killerId}/kills`).transaction(k=>(k||0)+1);if(currentMode==='TDM'&&killerTeam){database.ref(`scores/${killerTeam}`).transaction(s=>(s||0)+1)}}handleDeath()}updateUI();}
+        function respawn(){player.position.set((Math.random()-0.5)*80,1.8,(Math.random()-0.5)*80);playerState={...playerState,health:100,ammo:30,reserveAmmo:90,isDead:false};updateUI();}
+        function handleDeath(){const timerUI=document.getElementById('respawn-timer');timerUI.style.display='block';let countdown=5;timerUI.textContent=`Hồi sinh trong ${countdown}...`;const i=setInterval(()=>{countdown--;timerUI.textContent=`Hồi sinh trong ${countdown}...`;if(countdown<=0){clearInterval(i);timerUI.style.display='none';respawn()}},1000);}
+        function updateUI(){document.getElementById('health-bar').textContent=`HP: ${playerState.health}`;document.getElementById('kills-display').textContent=`Kills: ${playerState.kills}`;document.getElementById('ammo-display').textContent=`${playerState.isReloading?'Nạp đạn...':`${playerState.ammo}/${playerState.reserveAmmo}`}`;const teamScoresUI=document.getElementById('team-scores');const killsDisplayUI=document.getElementById('kills-display');if(currentMode==='TDM'){teamScoresUI.style.display='block';killsDisplayUI.style.display='none';teamScoresUI.innerHTML=`<span class="blue">${teamScores.blue||0}</span>-<span class="red">${teamScores.red||0}</span>`}else{teamScoresUI.style.display='none';killsDisplayUI.style.display='block';}}
+        function onKeyEvent(e, isDown){if(playerState.isDead)return;switch(e.code){case'KeyW':moveForward=isDown;break;case'KeyA':moveLeft=isDown;break;case'KeyS':moveBackward=isDown;break;case'KeyD':moveRight=isDown;break;case'KeyR':if(isDown)reload();break;}}
+        function onMouseDown(e){if(!playerState.isDead&&!controls.isLocked)controls.lock();else if(!playerState.isDead)shoot();}
+        function onWindowResize(){camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);}
+        function listenToScores() { if(database) database.ref('scores').on('value', snap => { teamScores = snap.val() || {blue: 0, red: 0}; updateUI(); }) }
+        function listenToDamageEvents() { if(database) { const ref = database.ref('damageEvents'); ref.orderByChild('timestamp').startAt(Date.now()).on('child_added', snap => { const e = snap.val(); if (e.victimId === myPlayerId) { takeDamage(e.damage, e.shooterId, e.shooterTeam); snap.ref.remove(); } }); }}
+        function reload() { if(playerState.isReloading||playerState.reserveAmmo<=0||playerState.ammo===30)return;playerState.isReloading=true;updateUI();setTimeout(()=>{const ammoNeeded=30-playerState.ammo;const ammoToReload=Math.min(ammoNeeded,playerState.reserveAmmo);playerState.ammo+=ammoToReload;playerState.reserveAmmo-=ammoToReload;playerState.isReloading=false;updateUI()},1500);}
+
+        // --- START POINT ---
+        setupLobby();
+
+    </script>
+</body>
+</html>
