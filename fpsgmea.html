@@ -1,408 +1,795 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>COD Shooter</title>
-    <style>
-        body, html { margin: 0; padding: 0; overflow: hidden; width: 100%; height: 100%; background-color: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; }
-        .screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.7); z-index: 100; transition: opacity 0.5s; }
-        .hidden { opacity: 0; pointer-events: none; }
-        #lobby { z-index: 102; background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(https://i.imgur.com/G3C3k8k.jpeg); background-size: cover; background-position: center; }
-        .lobby-box { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px); padding: 30px 40px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .lobby-box h1 { margin-top: 0; font-size: 2.5em; letter-spacing: 2px; text-transform: uppercase; color: #facc15; }
-        .lobby-box .form-group { margin: 20px 0; }
-        .lobby-box label { display: block; margin-bottom: 8px; font-weight: bold; color: #cbd5e1;}
-        .lobby-box input, .lobby-box select { width: 100%; padding: 12px; background: #1e293b; border: 1px solid #475569; border-radius: 5px; color: white; font-size: 1em; }
-        #play-button { padding: 15px 40px; font-size: 1.2em; font-weight: bold; color: #1e293b; background: #facc15; border: none; border-radius: 5px; cursor: pointer; text-transform: uppercase; transition: transform 0.2s, background-color 0.2s; }
-        #play-button:hover { transform: scale(1.05); background: #fde047; }
-        #game-container { position: absolute; width: 100%; height: 100%; opacity: 1; transition: opacity 0.5s; }
-        #game-container.hidden { opacity: 0; }
-        #game-canvas { display: block; }
-        #ui-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        .ui-element { position: absolute; background-color: rgba(0, 0, 0, 0.5); padding: 10px; border-radius: 5px; font-size: 1.5em; text-shadow: 1px 1px 2px black; }
-        #health-bar { top: 20px; left: 20px; color: #4CAF50; }
-        #team-scores { top: 20px; left: 50%; transform: translateX(-50%); font-size: 1.8em; }
-        #team-scores .blue { color: #2196F3; }
-        #team-scores .red { color: #F44336; }
-        #kills-display { top: 20px; right: 20px; color: #FFEB3B; }
-        #ammo-display { bottom: 80px; right: 20px; }
-        #respawn-timer { top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3em; text-align: center; }
-        /* Paste all previous CSS for mobile controls, ui-elements, rotate-prompt here */
-        #mobile-controls { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; display: none; pointer-events: none; }
-        #joystick-container { position: absolute; bottom: 30px; left: 30px; width: 120px; height: 120px; background: rgba(128, 128, 128, 0.4); border-radius: 50%; pointer-events: all; }
-        #joystick-thumb { position: absolute; width: 60px; height: 60px; background: rgba(255, 255, 255, 0.6); border-radius: 50%; top: 30px; left: 30px; }
-        #fire-button { position: absolute; bottom: 40px; right: 40px; width: 90px; height: 90px; background: rgba(255, 0, 0, 0.5); border: 2px solid rgba(255,255,255,0.7); border-radius: 50%; pointer-events: all; display: flex; align-items: center; justify-content: center; font-size: 1em; color: white; text-shadow: 1px 1px 2px black; }
-        #rotate-device-prompt { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; color: #fff; z-index: 10000; justify-content: center; align-items: center; text-align: center; font-size: 1.5em; }
-        @media (orientation: portrait) { #rotate-device-prompt { display: flex; } }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Call of Duty Lite</title>
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r142/three.min.js"></script>
+  <!-- Firebase (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+  <!-- NippleJS for mobile joystick -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.9.0/nipplejs.min.js"></script>
+  <style>
+    /* Cài đặt cơ bản & reset */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: sans-serif; }
+    canvas { display: block; }
+    
+    /* UI Overlay: Score, Health, Ammo */
+    #ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 100;
+      color: #fff;
+      line-height: 1.5;
+    }
+    #score { font-size: 20px; }
+    #health, #ammo { font-size: 18px; }
+    
+    /* Reload progress bar */
+    #reloadBar {
+      position: absolute;
+      bottom: 50px;
+      left: 10px;
+      width: 200px;
+      height: 10px;
+      background: rgba(255,255,255,0.3);
+      z-index: 120;
+      display: none;
+    }
+    #reloadProgress { height: 100%; width: 0; background: lime; }
+    
+    /* Minimmap */
+    #minimap {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 110;
+      background: rgba(0,0,0,0.5);
+      border: 2px solid #fff;
+    }
+    
+    /* Crosshair */
+    #crosshair {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 105;
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+    }
+    #crosshair:before, #crosshair:after {
+      content: "";
+      position: absolute;
+      background: #fff;
+    }
+    #crosshair:before { top: 9px; left: 0; right: 0; height: 2px; }
+    #crosshair:after { left: 9px; top: 0; bottom: 0; width: 2px; }
+    
+    /* Pause Overlay */
+    #pauseOverlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 40px;
+    }
+    
+    /* Hit Marker (red flash) */
+    #hitMarker {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 0, 0, 0.3);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s;
+      z-index: 250;
+    }
+    
+    /* Leaderboard Button & Overlay */
+    #leaderboardBtn {
+      position: fixed;
+      top: 10px;
+      right: 80px;
+      z-index: 150;
+      padding: 5px 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #leaderboardOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 400;
+      color: #fff;
+      text-align: center;
+      padding-top: 50px;
+    }
+    #leaderboardOverlay h1 { font-size: 32px; margin-bottom: 20px; }
+    #leaderboardList { font-size: 20px; margin-bottom: 20px; }
+    #leaderboardOverlay button {
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    
+    /* Lobby UI Overlay */
+    #lobby {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 500;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    #lobby > div { margin: 10px; }
+    #lobby label { margin-right: 5px; }
+    #lobby button {
+      padding: 10px 20px;
+      font-size: 20px;
+      margin: 10px;
+      cursor: pointer;
+    }
+    
+    /* Mobile controls */
+    #shootButton {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 150;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.7);
+      border: none;
+      font-size: 16px;
+    }
+    #joystickZone {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 150;
+      width: 150px;
+      height: 150px;
+    }
+  </style>
 </head>
 <body>
 
-    <div id="lobby" class="screen">
-        <div class="lobby-box">
-            <h1>Mini-Shooter</h1>
-            <div class="form-group"><label for="player-name">Tên</label><input type="text" id="player-name" value="Player" maxlength="15"></div>
-            <div class="form-group"><label for="map-select">Bản Đồ</label><select id="map-select"></select></div>
-            <div class="form-group"><label for="mode-select">Chế Độ</label><select id="mode-select"><option value="TDM">Team Deathmatch</option><option value="FFA">Free For All</option></select></div>
-            <button id="play-button">Vào Trận</button>
-        </div>
+  <!-- UI Overlay: Score, Health, Ammo -->
+  <div id="ui">
+    <div id="score">Score: 0</div>
+    <div id="health">Health: 100</div>
+    <div id="ammo">Ammo: 30/30</div>
+  </div>
+  <!-- Reload progress bar -->
+  <div id="reloadBar"><div id="reloadProgress"></div></div>
+  <!-- Minimmap -->
+  <canvas id="minimap" width="150" height="150"></canvas>
+  <!-- Crosshair -->
+  <div id="crosshair"></div>
+  <!-- Leaderboard Button -->
+  <button id="leaderboardBtn">Leaderboard</button>
+  <!-- Pause Overlay -->
+  <div id="pauseOverlay">
+    <div>
+      <h1>Paused</h1>
+      <button id="resumeBtn">Resume</button>
     </div>
-
-    <div id="game-container" class="hidden">
-        <canvas id="game-canvas"></canvas>
-        <div id="ui-container">
-            <div id="health-bar" class="ui-element">HP: 100</div>
-            <div id="team-scores" class="ui-element"><span class="blue">0</span> - <span class="red">0</span></div>
-            <div id="kills-display" class="ui-element">Kills: 0</div>
-            <div id="ammo-display" class="ui-element">30 / 90</div>
-            <div id="respawn-timer" class="ui-element" style="display: none;"></div>
-        </div>
-        <div id="mobile-controls">
-            <div id="joystick-container"><div id="joystick-thumb"></div></div>
-            <div id="fire-button">BẮN</div>
-        </div>
+  </div>
+  <!-- Leaderboard Overlay -->
+  <div id="leaderboardOverlay">
+    <h1>Leaderboard</h1>
+    <div id="leaderboardList"></div>
+    <button id="closeLeaderboardBtn">Close</button>
+  </div>
+  <!-- Hit Marker -->
+  <div id="hitMarker"></div>
+  
+  <!-- Lobby UI -->
+  <div id="lobby">
+    <h1>Call of Duty Lite</h1>
+    <div>
+      <label for="mapSelect">Chọn Map:</label>
+      <select id="mapSelect">
+        <option value="desert">Sa mạc hoang vu</option>
+        <option value="urban">Thành phố hiện đại</option>
+      </select>
     </div>
-
-    <div id="rotate-device-prompt">Vui lòng xoay ngang màn hình để chơi game.</div>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script type="importmap">
-        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
-    </script>
+    <div>
+      <label for="modeSelect">Chọn chế độ:</label>
+      <select id="modeSelect">
+        <option value="freeForAll">Free For All</option>
+        <option value="teamDeathmatch">Team Deathmatch</option>
+      </select>
+    </div>
+    <div>
+      <label for="weaponSelect">Chọn súng:</label>
+      <select id="weaponSelect">
+        <option value="rifle">Súng Trường</option>
+        <option value="sniper">Súng Bắn Tỉa</option>
+      </select>
+    </div>
+    <button id="startBtn">Start Game</button>
+  </div>
+  
+  <!-- Mobile: Shoot Button -->
+  <button id="shootButton">Bắn</button>
+  <!-- Mobile: Joystick Zone -->
+  <div id="joystickZone"></div>
+  
+  <!-- Main Game Canvas -->
+  <canvas id="gameCanvas"></canvas>
+  
+  <script>
+    /***************** FIREBASE CONFIG *****************/
+    // Thay thế các giá trị bên dưới bằng cấu hình Firebase thật của bạn
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
     
-    <script type="module">
-        import * as THREE from 'three';
-        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-
-        // === FIREBASE CONFIG ===
-        const firebaseConfig = {       
-      apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
-      authDomain: "webai-7642b.firebaseapp.com",
-      databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "webai-7642b",
-      storageBucket: "webai-7642b.firebasestorage.app",
-      messagingSenderId: "967881370128",
-      appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
-      measurementId: "G-61XJ390Q30" 
-        };
-        let app, database;
-        try {
-            app = firebase.initializeApp(firebaseConfig);
-            database = firebase.database();
-        } catch(e) { console.error("Firebase config is invalid. Multiplayer will not work."); }
-        
-        // === GAME STATE & DOM ===
-        let scene, camera, renderer, controls, clock;
-        let player, playerVelocity = new THREE.Vector3();
-        const playerSpeed = 10.0, isMobile = 'ontouchstart' in window;
-        let moveForward=false, moveBackward=false, moveLeft=false, moveRight=false;
-        
-        let playerState = { health: 100, kills: 0, ammo: 30, reserveAmmo: 90, isReloading: false, isDead: false, team: null };
-        let myPlayerId = null, myName = 'Player';
-        let currentMode = 'TDM', currentMap = 'warehouse', teamScores = { blue: 0, red: 0 };
-        const otherPlayers = {};
-        
-        const lobbyScreen = document.getElementById('lobby');
-        const gameContainer = document.getElementById('game-container');
-        const playButton = document.getElementById('play-button');
-        
-        // ===================================
-        // === START: MODEL CREATION LOGIC ===
-        // ===================================
-        const materials = {
-            skin: new THREE.MeshLambertMaterial({ color: 0xffdbac }),
-            shirt_blue: new THREE.MeshLambertMaterial({ color: 0x3b82f6 }),
-            shirt_red: new THREE.MeshLambertMaterial({ color: 0xef4444 }),
-            pants: new THREE.MeshLambertMaterial({ color: 0x3f3f46 }),
-            gun: new THREE.MeshLambertMaterial({ color: 0x18181b }),
-        };
-
-        function createPlayerModel() {
-            const playerGroup = new THREE.Group();
-            
-            // Torso (Thân)
-            const torsoGeo = new THREE.BoxGeometry(0.8, 1, 0.4);
-            const torso = new THREE.Mesh(torsoGeo, materials.shirt_blue); // Default blue
-            torso.name = 'torso'; // Để dễ dàng đổi màu
-            torso.position.y = 0.8;
-            torso.castShadow = true;
-            playerGroup.add(torso);
-            
-            // Head (Đầu)
-            const headGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-            const head = new THREE.Mesh(headGeo, materials.skin);
-            head.position.y = 1.6;
-            head.castShadow = true;
-            playerGroup.add(head);
-            
-            // Left Leg (Chân trái)
-            const legGeo = new THREE.BoxGeometry(0.3, 0.8, 0.3);
-            const leftLeg = new THREE.Mesh(legGeo, materials.pants);
-            leftLeg.position.set(-0.2, 0.4, 0);
-            leftLeg.castShadow = true;
-            playerGroup.add(leftLeg);
-
-            // Right Leg (Chân phải)
-            const rightLeg = new THREE.Mesh(legGeo, materials.pants);
-            rightLeg.position.set(0.2, 0.4, 0);
-            rightLeg.castShadow = true;
-            playerGroup.add(rightLeg);
-
-            // Left Arm (Tay trái)
-            const armGeo = new THREE.BoxGeometry(0.2, 0.8, 0.2);
-            const leftArm = new THREE.Mesh(armGeo, materials.skin);
-            leftArm.position.set(-0.6, 0.9, 0);
-            leftArm.castShadow = true;
-            playerGroup.add(leftArm);
-
-            // Right Arm (Tay phải) + Gun
-            const rightArm = new THREE.Mesh(armGeo, materials.skin);
-            rightArm.position.set(0.6, 0.9, 0);
-            rightArm.castShadow = true;
-            playerGroup.add(rightArm);
-            
-            const gunGeo = new THREE.BoxGeometry(0.15, 0.2, 0.7);
-            const gun = new THREE.Mesh(gunGeo, materials.gun);
-            gun.position.set(0, -0.2, 0.4);
-            rightArm.add(gun); // Gắn súng vào tay phải
-
-            // Player cao ~1.8 units, điều chỉnh vị trí để chân chạm đất
-            playerGroup.position.y = -0.05;
-
-            return playerGroup;
+    /***************** THREE.JS SETUP *****************/
+    const gameCanvas = document.getElementById("gameCanvas");
+    const renderer = new THREE.WebGLRenderer({ canvas: gameCanvas, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x333333);
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    
+    /***************** GLOBAL GAME STATE & UI ELEMENTS *****************/
+    let isGameActive = false;
+    let isPaused = false;
+    let score = 0;
+    let reloadStartTime = 0;
+    
+    const uiScore = document.getElementById("score");
+    const uiHealth = document.getElementById("health");
+    const uiAmmo = document.getElementById("ammo");
+    const reloadBar = document.getElementById("reloadBar");
+    const reloadProgress = document.getElementById("reloadProgress");
+    const minimap = document.getElementById("minimap");
+    const minimapCtx = minimap.getContext("2d");
+    const pauseOverlay = document.getElementById("pauseOverlay");
+    const resumeBtn = document.getElementById("resumeBtn");
+    const hitMarker = document.getElementById("hitMarker");
+    const leaderboardBtn = document.getElementById("leaderboardBtn");
+    const leaderboardOverlay = document.getElementById("leaderboardOverlay");
+    const leaderboardList = document.getElementById("leaderboardList");
+    const closeLeaderboardBtn = document.getElementById("closeLeaderboardBtn");
+    // Lobby UI
+    const lobby = document.getElementById("lobby");
+    const mapSelect = document.getElementById("mapSelect");
+    const modeSelect = document.getElementById("modeSelect");
+    const weaponSelect = document.getElementById("weaponSelect");
+    const startBtn = document.getElementById("startBtn");
+    const shootButton = document.getElementById("shootButton");
+    
+    /***************** MULTIPLAYER (MỞ RỘNG) *****************/
+    db.ref("players").on("value", snapshot => {
+      console.log("Multiplayer update:", snapshot.val());
+      // Bạn có thể bổ sung logic hiển thị người chơi khác lên scene tại đây
+    });
+    
+    /***************** MAP MANAGER *****************/
+    const MapManager = {
+      maps: [
+        {
+          id: "desert",
+          name: "Sa mạc hoang vu",
+          settings: { ambientLight: 0xcccc99, groundColor: 0xEDC9AF },
+          spawnPoints: [ {x: 0, y: 1, z: 0}, {x: 10, y: 1, z: -10} ]
+        },
+        {
+          id: "urban",
+          name: "Thành phố hiện đại",
+          settings: { ambientLight: 0xffffff, groundColor: 0x999999 },
+          spawnPoints: [ {x: -5, y: 1, z: -5}, {x: 5, y: 1, z: 5} ]
         }
-
-        function setPlayerColor(playerModel, team) {
-            const torso = playerModel.getObjectByName('torso');
-            if (!torso) return;
-
-            if (team === 'blue') {
-                torso.material = materials.shirt_blue;
-            } else if (team === 'red') {
-                torso.material = materials.shirt_red;
-            } else { // FFA mode, color enemies gray
-                torso.material = new THREE.MeshLambertMaterial({ color: 0x888888 });
+      ],
+      currentMap: null,
+      loadMap: function(mapId) {
+        const map = this.maps.find(m => m.id === mapId);
+        if(map) {
+          this.currentMap = map;
+          ambientLight.color.setHex(map.settings.ambientLight);
+          ground.material.color.setHex(map.settings.groundColor);
+          // Ở đây bạn có thể load thêm các đối tượng, mô hình hoặc hiệu ứng đặc trưng của map
+        }
+      }
+    };
+    
+    /***************** WEAPON MANAGER *****************/
+    const weaponList = [
+      {
+        id: "rifle",
+        name: "Súng Trường",
+        damage: 10,
+        fireRate: 300,
+        ammoCapacity: 30,
+        reloadTime: 2000
+      },
+      {
+        id: "sniper",
+        name: "Súng Bắn Tỉa",
+        damage: 40,
+        fireRate: 1500,
+        ammoCapacity: 5,
+        reloadTime: 3000
+      }
+    ];
+    const WeaponManager = {
+      weapons: weaponList,
+      currentWeapon: null,
+      switchWeapon: function(weaponId) {
+        const weapon = this.weapons.find(w => w.id === weaponId);
+        if(weapon) {
+          this.currentWeapon = weapon;
+          player.weapon.ammo = weapon.ammoCapacity;
+          player.weapon.maxAmmo = weapon.ammoCapacity;
+          player.weapon.reloadTime = weapon.reloadTime;
+          player.weapon.fireRate = weapon.fireRate;
+          player.weapon.damage = weapon.damage;
+        }
+      }
+    };
+    
+    /***************** GAME MODE MANAGER *****************/
+    const ModeManager = {
+      modes: {
+        freeForAll: { name: "Free For All" },
+        teamDeathmatch: { name: "Team Deathmatch" }
+      },
+      currentMode: "freeForAll"
+    };
+    
+    /***************** PLAYER & INPUT *****************/
+    let player = {
+      mesh: null,
+      yaw: 0,
+      pitch: 0,
+      speed: 0.15,
+      health: 100,
+      weapon: {
+        ammo: 30,
+        maxAmmo: 30,
+        reloadTime: 2000,
+        reloading: false,
+        fireRate: 300,
+        damage: 10
+      }
+    };
+    const keys = { forward: false, backward: false, left: false, right: false };
+    let joystickVector = new THREE.Vector3(0, 0, 0);
+    
+    /***************** GAME OBJECTS *****************/
+    const bullets = [];
+    const bots = [];
+    const explosions = [];
+    let bulletCooldown = false;
+    const damageInterval = 1000;
+    
+    /***************** AUDIO *****************/
+    const shootSound = new Audio("https://example.com/shoot.mp3");
+    const explosionSound = new Audio("https://example.com/explosion.mp3");
+    
+    /***************** SCENE & SHADOWS *****************/
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(5, 10, 7.5);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 1024;
+    dirLight.shadow.mapSize.height = 1024;
+    dirLight.shadow.camera.near = 0.5;
+    dirLight.shadow.camera.far = 50;
+    scene.add(dirLight);
+    const groundGeo = new THREE.PlaneGeometry(100, 100);
+    const groundMat = new THREE.MeshPhongMaterial({ color: 0x555555 });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI/2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+    
+    /***************** INITIALIZE PLAYER *****************/
+    function initPlayer() {
+      const playerGeo = new THREE.BoxGeometry(1,2,1);
+      const playerMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, visible: false });
+      player.mesh = new THREE.Mesh(playerGeo, playerMat);
+      player.mesh.position.set(0,1,0);
+      player.yaw = 0;
+      player.pitch = 0;
+      player.health = 100;
+      player.weapon.ammo = player.weapon.maxAmmo;
+      scene.add(player.mesh);
+    }
+    
+    /***************** SPAWN BOTS *****************/
+    function spawnBot() {
+      if (!isGameActive) return;
+      const botGeo = new THREE.BoxGeometry(1,2,1);
+      const botMat = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+      const botMesh = new THREE.Mesh(botGeo, botMat);
+      botMesh.castShadow = true;
+      const angle = Math.random() * 2 * Math.PI;
+      const dist = 15 + Math.random() * 10;
+      botMesh.position.set(
+        player.mesh.position.x + Math.cos(angle) * dist,
+        1,
+        player.mesh.position.z + Math.sin(angle) * dist
+      );
+      const botObj = { mesh: botMesh, health: 3, lastDamage: 0 };
+      bots.push(botObj);
+      scene.add(botMesh);
+    }
+    
+    function spawnInitialBots(count) {
+      for (let i = 0; i < count; i++) spawnBot();
+    }
+    
+    /***************** EXPLOSION EFFECT *****************/
+    function createExplosion(position) {
+      const particleCount = 12;
+      for (let i = 0; i < particleCount; i++){
+        const particleGeo = new THREE.SphereGeometry(0.05, 6, 6);
+        const particleMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 1 });
+        const particle = new THREE.Mesh(particleGeo, particleMat);
+        particle.position.copy(position);
+        const direction = new THREE.Vector3((Math.random()-0.5), (Math.random()-0.5), (Math.random()-0.5)).normalize();
+        explosions.push({ mesh: particle, life: 30, direction: direction });
+        scene.add(particle);
+      }
+      if (explosionSound) explosionSound.play().catch(() => {});
+    }
+    
+    /***************** BULLET FIRE *****************/
+    function shootBullet(){
+      if (bulletCooldown || !isGameActive || player.weapon.reloading) return;
+      if (player.weapon.ammo <= 0) { reloadWeapon(); return; }
+      if (shootSound) shootSound.play().catch(() => {});
+      
+      const bulletGeo = new THREE.SphereGeometry(0.1, 8, 8);
+      const bulletMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+      const bulletMesh = new THREE.Mesh(bulletGeo, bulletMat);
+      const origin = player.mesh.position.clone();
+      origin.y += 1.6;
+      bulletMesh.position.copy(origin);
+      const direction = new THREE.Vector3(Math.sin(player.yaw)*Math.cos(player.pitch), Math.sin(player.pitch), Math.cos(player.yaw)*Math.cos(player.pitch)).normalize();
+      scene.add(bulletMesh);
+      bullets.push({ mesh: bulletMesh, direction: direction, life: 100 });
+      player.weapon.ammo--;
+      updateUI();
+      bulletCooldown = true;
+      setTimeout(()=> { bulletCooldown = false; }, player.weapon.fireRate);
+    }
+    
+    /***************** RELOAD WEAPON *****************/
+    function reloadWeapon(){
+      if (player.weapon.reloading) return;
+      player.weapon.reloading = true;
+      reloadBar.style.display = "block";
+      reloadStartTime = Date.now();
+      uiAmmo.textContent = "Ammo: Reloading...";
+      setTimeout(()=>{
+        player.weapon.ammo = player.weapon.maxAmmo;
+        player.weapon.reloading = false;
+        reloadBar.style.display = "none";
+        updateUI();
+      }, player.weapon.reloadTime);
+    }
+    
+    function updateReloadProgress(){
+      if (player.weapon.reloading) {
+        let elapsed = Date.now() - reloadStartTime;
+        let percent = Math.min((elapsed / player.weapon.reloadTime) * 100, 100);
+        reloadProgress.style.width = percent + "%";
+      }
+    }
+    
+    /***************** UPDATE UI *****************/
+    function updateUI(){
+      uiScore.textContent = "Score: " + score;
+      uiHealth.textContent = "Health: " + player.health;
+      uiAmmo.textContent = player.weapon.reloading ? "Ammo: Reloading..." : "Ammo: " + player.weapon.ammo + "/" + player.weapon.maxAmmo;
+    }
+    
+    /***************** HIT MARKER EFFECT *****************/
+    function showHitMarker(){
+      hitMarker.style.opacity = 1;
+      setTimeout(() => { hitMarker.style.opacity = 0; }, 100);
+    }
+    
+    /***************** UPDATE MINIMAP *****************/
+    function updateMinimap(){
+      minimapCtx.clearRect(0, 0, minimap.width, minimap.height);
+      minimapCtx.strokeStyle = "#fff";
+      minimapCtx.strokeRect(0, 0, minimap.width, minimap.height);
+      function mapCoord(value) { return ((value + 50) / 100) * minimap.width; }
+      const playerX = mapCoord(player.mesh.position.x);
+      const playerZ = mapCoord(player.mesh.position.z);
+      minimapCtx.fillStyle = "blue";
+      minimapCtx.beginPath();
+      minimapCtx.arc(playerX, playerZ, 5, 0, 2 * Math.PI);
+      minimapCtx.fill();
+      minimapCtx.fillStyle = "red";
+      bots.forEach(bot => {
+        if(bot.mesh) {
+          const bx = mapCoord(bot.mesh.position.x);
+          const bz = mapCoord(bot.mesh.position.z);
+          minimapCtx.beginPath();
+          minimapCtx.arc(bx, bz, 4, 0, 2 * Math.PI);
+          minimapCtx.fill();
+        }
+      });
+    }
+    
+    /***************** PAUSE & RESUME *****************/
+    function pauseGame(){
+      isPaused = true;
+      pauseOverlay.style.display = "flex";
+    }
+    function resumeGame(){
+      isPaused = false;
+      pauseOverlay.style.display = "none";
+      gameCanvas.requestPointerLock();
+    }
+    document.addEventListener("keydown", (e)=>{
+      if(e.key === "Escape" && isGameActive){
+        if(!isPaused) pauseGame();
+        else resumeGame();
+      }
+    });
+    resumeBtn.addEventListener("click", ()=> { resumeGame(); });
+    
+    /***************** LEADERBOARD *****************/
+    function pushScoreToLeaderboard(){
+      const playerScore = { score: score, timestamp: Date.now() };
+      db.ref("leaderboard").push(playerScore);
+    }
+    function updateLeaderboard(){
+      db.ref("leaderboard").orderByChild("score").limitToLast(5).once("value").then(snapshot => {
+        let scores = [];
+        snapshot.forEach(child => { scores.push(child.val()); });
+        scores.sort((a, b) => b.score - a.score);
+        let html = "<ol>";
+        scores.forEach(item => { html += "<li>" + item.score + "</li>"; });
+        html += "</ol>";
+        leaderboardList.innerHTML = html;
+      });
+    }
+    leaderboardBtn.addEventListener("click", ()=> { updateLeaderboard(); leaderboardOverlay.style.display = "block"; });
+    closeLeaderboardBtn.addEventListener("click", ()=> { leaderboardOverlay.style.display = "none"; });
+    
+    /***************** MOBILE CONTROLS *****************/
+    let pointerLocked = false;
+    gameCanvas.addEventListener("click", ()=> { gameCanvas.requestPointerLock(); });
+    document.addEventListener("pointerlockchange", ()=> { pointerLocked = (document.pointerLockElement === gameCanvas); });
+    if ("ontouchstart" in window) {
+      shootButton.style.display = "block";
+      shootButton.addEventListener("touchstart", (e)=> { e.preventDefault(); shootBullet(); });
+      document.getElementById("joystickZone").style.display = "block";
+      const joystickZone = document.getElementById("joystickZone");
+      var joystick = nipplejs.create({
+        zone: joystickZone,
+        mode: "static",
+        position: { left: "75px", top: "75px" },
+        color: "white"
+      });
+      joystick.on("move", function(evt, data){
+        if(data.vector) { joystickVector.set(data.vector.x, 0, data.vector.y); }
+      });
+      joystick.on("end", ()=> { joystickVector.set(0,0,0); });
+    }
+    
+    document.addEventListener("mousemove", (e)=>{
+      if(!pointerLocked || !isGameActive || isPaused) return;
+      player.yaw   -= e.movementX * 0.002;
+      player.pitch -= e.movementY * 0.002;
+      player.pitch = Math.max(-Math.PI/2, Math.min(Math.PI/2, player.pitch));
+    });
+    
+    /***************** LOBBY: START GAME *****************/
+    startBtn.addEventListener("click", ()=>{
+      // Chọn map, chế độ và vũ khí từ lobby UI
+      MapManager.loadMap(mapSelect.value);
+      ModeManager.currentMode = modeSelect.value;
+      WeaponManager.switchWeapon(weaponSelect.value);
+      // Ẩn lobby và bắt đầu game
+      lobby.style.display = "none";
+      startGame();
+      gameCanvas.requestPointerLock();
+    });
+    
+    /***************** START & END GAME *****************/
+    function startGame(){
+      isGameActive = true;
+      isPaused = false;
+      score = 0;
+      player.health = 100;
+      player.weapon.ammo = player.weapon.maxAmmo;
+      updateUI();
+      reloadBar.style.display = "none";
+      // Xóa các đối tượng hiện có
+      bots.forEach(bot => { if(bot.mesh) scene.remove(bot.mesh); });
+      bots.length = 0;
+      bullets.forEach(b => { scene.remove(b.mesh); });
+      bullets.length = 0;
+      explosions.forEach(exp => { scene.remove(exp.mesh); });
+      explosions.length = 0;
+      if(player.mesh) scene.remove(player.mesh);
+      initPlayer();
+      spawnInitialBots(3);
+    }
+    
+    function endGame(){
+      isGameActive = false;
+      pushScoreToLeaderboard();
+      lobby.innerHTML = "<h1>GAME OVER</h1><button id='restartBtn'>Restart</button>";
+      lobby.style.display = "flex";
+      document.getElementById("restartBtn").addEventListener("click", ()=>{
+        lobby.style.display = "none";
+        startGame();
+        gameCanvas.requestPointerLock();
+      });
+    }
+    
+    /***************** RESIZE & ORIENTATION *****************/
+    function onWindowResize(){
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener("resize", onWindowResize);
+    window.addEventListener("orientationchange", onWindowResize);
+    
+    /***************** GAME LOOP *****************/
+    function animate(){
+      requestAnimationFrame(animate);
+      if(!isGameActive || isPaused){ renderer.render(scene, camera); return; }
+      
+      updateReloadProgress();
+      
+      let keyboardMove = new THREE.Vector3();
+      if(keys.forward){ keyboardMove.x += Math.sin(player.yaw); keyboardMove.z += Math.cos(player.yaw); }
+      if(keys.backward){ keyboardMove.x -= Math.sin(player.yaw); keyboardMove.z -= Math.cos(player.yaw); }
+      if(keys.left){ keyboardMove.x += Math.sin(player.yaw - Math.PI/2); keyboardMove.z += Math.cos(player.yaw - Math.PI/2); }
+      if(keys.right){ keyboardMove.x += Math.sin(player.yaw + Math.PI/2); keyboardMove.z += Math.cos(player.yaw + Math.PI/2); }
+      keyboardMove.normalize().multiplyScalar(player.speed);
+      
+      let joystickMove = joystickVector.clone();
+      joystickMove.applyAxisAngle(new THREE.Vector3(0,1,0), player.yaw);
+      joystickMove.normalize().multiplyScalar(player.speed * joystickVector.length());
+      
+      let move = new THREE.Vector3();
+      move.add(keyboardMove);
+      move.add(joystickMove);
+      player.mesh.position.add(move);
+      
+      const eyePos = player.mesh.position.clone();
+      eyePos.y += 1.6;
+      camera.position.copy(eyePos);
+      camera.rotation.set(player.pitch, player.yaw, 0, "YXZ");
+      
+      for(let i = bullets.length - 1; i >= 0; i--){
+        let b = bullets[i];
+        b.mesh.position.add(b.direction.clone().multiplyScalar(0.5));
+        b.life--;
+        for(let j = bots.length - 1; j >= 0; j--){
+          let bot = bots[j];
+          if(bot.mesh){
+            let d = b.mesh.position.distanceTo(bot.mesh.position);
+            if(d < 0.8){
+              createExplosion(b.mesh.position);
+              scene.remove(b.mesh);
+              bullets.splice(i, 1);
+              bot.health--;
+              if(bot.health <= 0){
+                scene.remove(bot.mesh);
+                bots.splice(j, 1);
+                score += 10;
+                updateUI();
+                setTimeout(spawnBot, 3000);
+              }
+              break;
             }
+          }
         }
-        // =================================
-        // === END: MODEL CREATION LOGIC ===
-        // =================================
-
-
-        const MAPS = {
-            warehouse: {
-                name: 'Nhà Kho',
-                floorColor: 0x555555, fogColor: 0x333333, fogNear: 0, fogFar: 120,
-                obstacles: [
-                    { type: 'box', size: [8,8,8], pos: [0, 4, 0] },
-                    { type: 'box', size: [15,10,25], pos: [20, 5, -15], rot:[0,0.3,0] },
-                    { type: 'box', size: [15,10,25], pos: [-30, 5, -25], rot:[0,1.2,0] }
-                ]
-            },
-            desert: {
-                name: 'Sa Mạc',
-                floorColor: 0xd2b48c, fogColor: 0xf0e68c, fogNear: 50, fogFar: 150,
-                obstacles: [
-                    { type: 'box', size: [5,5,10], pos: [25, 2.5, 25], color: 0x966c4d },
-                    { type: 'box', size: [15,3,4], pos: [-20, 1.5, -20], color: 0x966c4d },
-                    { type: 'box', size: [3,10,4], pos: [0, 5, -30], color: 0x966c4d }
-                ]
-            }
-        };
-
-        function setupLobby() {
-            const mapSelect = document.getElementById('map-select');
-            Object.keys(MAPS).forEach(mapId => {
-                const option = document.createElement('option');
-                option.value = mapId;
-                option.textContent = MAPS[mapId].name;
-                mapSelect.appendChild(option);
-            });
-            playButton.addEventListener('click', () => {
-                myName = document.getElementById('player-name').value || 'Player';
-                currentMap = mapSelect.value;
-                currentMode = document.getElementById('mode-select').value;
-                
-                playButton.disabled = true;
-                playButton.textContent = "Đang vào trận...";
-                
-                lobbyScreen.classList.add('hidden');
-                gameContainer.classList.remove('hidden');
-                initGame();
-            });
+        if(b && (b.life <= 0 || b.mesh.position.length() > 100)){
+          scene.remove(b.mesh);
+          bullets.splice(i, 1);
         }
-        
-        function loadMap(mapName) { /* same as previous version */ }
-
-        // --- All game logic functions (initGame, initMultiplayer, animate, etc.) are below ---
-        
-        function initGame() {
-            scene = new THREE.Scene();
-            clock = new THREE.Clock();
-
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('game-canvas'), antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.shadowMap.enabled = true;
-            
-            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-            scene.add(ambient);
-            const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
-            dirLight.position.set(-50, 50, 50);
-            dirLight.castShadow = true;
-            dirLight.shadow.mapSize.set(2048, 2048);
-            scene.add(dirLight);
-
-            if (!isMobile) {
-                controls = new PointerLockControls(camera, document.body);
-                document.getElementById('game-canvas').addEventListener('click', () => controls.lock());
-                player = controls.getObject();
-            } else {
-                 player = new THREE.Object3D();
-                 player.add(camera);
-            }
-            player.position.y = 1.8;
-            scene.add(player);
-            
-            const floorGeo = new THREE.PlaneGeometry(200, 200);
-            const floorMat = new THREE.MeshLambertMaterial({ color: 0x999999 });
-            const floor = new THREE.Mesh(floorGeo, floorMat);
-            floor.name = 'floor';
-            floor.rotation.x = -Math.PI / 2;
-            floor.receiveShadow = true;
-            scene.add(floor);
-            
-            // Simplified from previous versions, now just calls loadMap and multiplayer.
-            const mapData = MAPS[currentMap];
-            scene.background = new THREE.Color(mapData.floorColor);
-            scene.fog = new THREE.Fog(mapData.fogColor, mapData.fogNear, mapData.fogFar);
-            floor.material.color.set(mapData.floorColor);
-
-            mapData.obstacles.forEach(obsData => {
-                const geo = new THREE.BoxGeometry(...(obsData.size || [10,10,15]));
-                const mat = new THREE.MeshLambertMaterial({ color: obsData.color || 0x6c757d });
-                const obstacle = new THREE.Mesh(geo, mat);
-                obstacle.position.fromArray(obsData.pos);
-                if(obsData.rot) obstacle.rotation.fromArray(obsData.rot);
-                obstacle.castShadow = true;
-                obstacle.receiveShadow = true;
-                scene.add(obstacle);
-            });
-            
-            initMultiplayer();
-            document.addEventListener('keydown', (e) => onKeyEvent(e, true));
-            document.addEventListener('keyup', (e) => onKeyEvent(e, false));
-            if (!isMobile) document.addEventListener('mousedown', onMouseDown);
-            window.addEventListener('resize', onWindowResize);
-            animate();
+      }
+      
+      let now = Date.now();
+      bots.forEach(bot=>{
+        if(bot.mesh){
+          let dirToPlayer = new THREE.Vector3().subVectors(player.mesh.position, bot.mesh.position);
+          dirToPlayer.y = 0;
+          dirToPlayer.normalize();
+          bot.mesh.position.add(dirToPlayer.multiplyScalar(0.03));
+          let d = bot.mesh.position.distanceTo(player.mesh.position);
+          if(d < 1.5 && now - bot.lastDamage > damageInterval){
+            player.health -= 10;
+            updateUI();
+            bot.lastDamage = now;
+            showHitMarker();
+          }
         }
-
-        // Multiplayer logic remains very similar, just replacing model loading
-        function initMultiplayer() { /* Code from previous version to determine team... */
-            if (currentMode === 'TDM' && database) {
-                database.ref('players').once('value', (snapshot) => {
-                    const players = snapshot.val() || {};
-                    const blueCount = Object.values(players).filter(p => p.team === 'blue').length;
-                    const redCount = Object.values(players).filter(p => p.team === 'red').length;
-                    playerState.team = blueCount <= redCount ? 'blue' : 'red';
-                    joinGame();
-                });
-            } else {
-                playerState.team = null;
-                joinGame();
-            }
+      });
+      
+      for(let i = explosions.length - 1; i >= 0; i--){
+        let exp = explosions[i];
+        exp.mesh.position.add(exp.direction.clone().multiplyScalar(0.1));
+        exp.mesh.material.opacity -= 0.03;
+        exp.life--;
+        if(exp.life <= 0 || exp.mesh.material.opacity <= 0){
+          scene.remove(exp.mesh);
+          explosions.splice(i, 1);
         }
-        
-        function joinGame() { /* Same logic as before... */
-            if (!database) { alert("Không thể kết nối đến server."); return; }
-
-            const newPlayerRef = database.ref('players').push();
-            myPlayerId = newPlayerRef.key;
-            
-            respawn(); // Initial spawn
-            newPlayerRef.set({ name: myName, kills: 0, team: playerState.team, ...getNetworkData() });
-
-            newPlayerRef.onDisconnect().remove();
-            window.addEventListener('beforeunload', () => newPlayerRef.remove());
-
-            listenToPlayers();
-            listenToDamageEvents();
-            if(currentMode === 'TDM') listenToScores();
-            setInterval(updateMyPosition, 100);
-        }
-
-        function listenToPlayers() {
-            const playersRef = database.ref('players');
-            playersRef.on('child_added', snapshot => {
-                const data = snapshot.val();
-                const id = snapshot.key;
-                if (id === myPlayerId || !data) return;
-
-                // === REPLACED GLB LOADING WITH FUNCTION CALL ===
-                const playerModel = createPlayerModel();
-                
-                // Set color based on team
-                if (currentMode === 'TDM') {
-                    const enemyColor = playerState.team === 'blue' ? 'red' : 'blue';
-                    const playerColor = data.team === playerState.team ? 'blue' : enemyColor;
-                    setPlayerColor(playerModel, playerColor);
-                } else {
-                    setPlayerColor(playerModel, 'ffa_enemy'); // Special color for FFA enemies
-                }
-
-                playerModel.userData.playerId = id;
-                otherPlayers[id] = { mesh: playerModel, data: data };
-                scene.add(playerModel);
-            });
-            // `child_changed` and `child_removed` are mostly the same as before
-            playersRef.on('child_changed', snapshot => {
-                const data = snapshot.val();
-                const id = snapshot.key;
-                if (id === myPlayerId || !otherPlayers[id] || !data) return;
-                const op = otherPlayers[id];
-                op.data = data;
-                op.mesh.position.lerp(new THREE.Vector3(data.pos.x, data.pos.y, data.pos.z), 0.3);
-                op.mesh.rotation.y = data.rot.y;
-                if(data.kills !== undefined && playerState.kills !== data.kills && id === myPlayerId) {
-                    playerState.kills = data.kills;
-                    updateUI();
-                }
-            });
-            playersRef.on('child_removed', snapshot => {
-                const id = snapshot.key;
-                if (otherPlayers[id]) {
-                    scene.remove(otherPlayers[id].mesh);
-                    delete otherPlayers[id];
-                }
-            });
-        }
-        
-        // --- Paste ALL other logic functions here ---
-        // getNetworkData, shoot, takeDamage, reload, handleDeath, respawn, 
-        // updateUI, onKeyEvent, onMouseDown, onWindowResize...
-        // They are IDENTICAL to the previous multiplayer versions.
-
-        function getNetworkData(){return{pos: player.position, rot: { y: player.rotation.y }, camRot: { x: camera.rotation.x }}}
-        function updateMyPosition(){ if (!playerState.isDead && database) database.ref(`players/${myPlayerId}`).update(getNetworkData());}
-        function animate(){requestAnimationFrame(animate);const delta=clock.getDelta();if(!playerState.isDead){playerVelocity.x-=playerVelocity.x*10*delta;playerVelocity.z-=playerVelocity.z*10*delta;if(moveForward)playerVelocity.z-=playerSpeed*delta;if(moveBackward)playerVelocity.z+=playerSpeed*delta;if(moveLeft)playerVelocity.x-=playerSpeed*delta;if(moveRight)playerVelocity.x+=playerSpeed*delta;if(controls)controls.getObject().position.add(playerVelocity.clone().multiplyScalar(delta).applyEuler(player.rotation));}renderer.render(scene, isMobile ? camera : player);}
-        function shoot(){if(playerState.isReloading||playerState.ammo<=0||playerState.isDead)return;playerState.ammo--;updateUI();const raycaster=new THREE.Raycaster();const from=new THREE.Vector3();camera.getWorldPosition(from);const direction=new THREE.Vector3();camera.getWorldDirection(direction);raycaster.set(from,direction);const intersectMeshes=Object.values(otherPlayers).map(p=>p.mesh);const intersects=raycaster.intersectObjects(intersectMeshes,true);if(intersects.length>0){let hitObj=intersects[0].object;while(hitObj.parent&&!hitObj.userData.playerId){hitObj=hitObj.parent}const hitPlayerId=hitObj.userData.playerId;if(hitPlayerId&&otherPlayers[hitPlayerId]){const targetData=otherPlayers[hitPlayerId].data;if(currentMode==='TDM'&&targetData.team===playerState.team)return;if(database)database.ref('damageEvents').push({shooterId:myPlayerId,victimId:hitPlayerId,shooterTeam:playerState.team,damage:35,timestamp:firebase.database.ServerValue.TIMESTAMP})}}}
-        function takeDamage(damage, killerId, killerTeam){if(playerState.isDead)return;playerState.health-=damage;if(playerState.health<=0){playerState.health=0;playerState.isDead=true;if(killerId!==myPlayerId&&database){database.ref(`players/${killerId}/kills`).transaction(k=>(k||0)+1);if(currentMode==='TDM'&&killerTeam){database.ref(`scores/${killerTeam}`).transaction(s=>(s||0)+1)}}handleDeath()}updateUI();}
-        function respawn(){player.position.set((Math.random()-0.5)*80,1.8,(Math.random()-0.5)*80);playerState={...playerState,health:100,ammo:30,reserveAmmo:90,isDead:false};updateUI();}
-        function handleDeath(){const timerUI=document.getElementById('respawn-timer');timerUI.style.display='block';let countdown=5;timerUI.textContent=`Hồi sinh trong ${countdown}...`;const i=setInterval(()=>{countdown--;timerUI.textContent=`Hồi sinh trong ${countdown}...`;if(countdown<=0){clearInterval(i);timerUI.style.display='none';respawn()}},1000);}
-        function updateUI(){document.getElementById('health-bar').textContent=`HP: ${playerState.health}`;document.getElementById('kills-display').textContent=`Kills: ${playerState.kills}`;document.getElementById('ammo-display').textContent=`${playerState.isReloading?'Nạp đạn...':`${playerState.ammo}/${playerState.reserveAmmo}`}`;const teamScoresUI=document.getElementById('team-scores');const killsDisplayUI=document.getElementById('kills-display');if(currentMode==='TDM'){teamScoresUI.style.display='block';killsDisplayUI.style.display='none';teamScoresUI.innerHTML=`<span class="blue">${teamScores.blue||0}</span>-<span class="red">${teamScores.red||0}</span>`}else{teamScoresUI.style.display='none';killsDisplayUI.style.display='block';}}
-        function onKeyEvent(e, isDown){if(playerState.isDead)return;switch(e.code){case'KeyW':moveForward=isDown;break;case'KeyA':moveLeft=isDown;break;case'KeyS':moveBackward=isDown;break;case'KeyD':moveRight=isDown;break;case'KeyR':if(isDown)reload();break;}}
-        function onMouseDown(e){if(!playerState.isDead&&!controls.isLocked)controls.lock();else if(!playerState.isDead)shoot();}
-        function onWindowResize(){camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);}
-        function listenToScores() { if(database) database.ref('scores').on('value', snap => { teamScores = snap.val() || {blue: 0, red: 0}; updateUI(); }) }
-        function listenToDamageEvents() { if(database) { const ref = database.ref('damageEvents'); ref.orderByChild('timestamp').startAt(Date.now()).on('child_added', snap => { const e = snap.val(); if (e.victimId === myPlayerId) { takeDamage(e.damage, e.shooterId, e.shooterTeam); snap.ref.remove(); } }); }}
-        function reload() { if(playerState.isReloading||playerState.reserveAmmo<=0||playerState.ammo===30)return;playerState.isReloading=true;updateUI();setTimeout(()=>{const ammoNeeded=30-playerState.ammo;const ammoToReload=Math.min(ammoNeeded,playerState.reserveAmmo);playerState.ammo+=ammoToReload;playerState.reserveAmmo-=ammoToReload;playerState.isReloading=false;updateUI()},1500);}
-
-        // --- START POINT ---
-        setupLobby();
-
-    </script>
+      }
+      
+      if(player.health <= 0 && isGameActive) { endGame(); }
+      
+      if(pointerLocked){
+        db.ref("players/player1").set({
+          x: player.mesh.position.x,
+          y: player.mesh.position.y,
+          z: player.mesh.position.z,
+          yaw: player.yaw,
+          pitch: player.pitch,
+          health: player.health,
+          score: score,
+          ammo: player.weapon.ammo
+        });
+      }
+      
+      updateMinimap();
+      renderer.render(scene, camera);
+    }
+    
+    document.addEventListener("keydown", (e)=>{
+      if(e.key === "w" || e.key === "ArrowUp") keys.forward = true;
+      if(e.key === "s" || e.key === "ArrowDown") keys.backward = true;
+      if(e.key === "a" || e.key === "ArrowLeft") keys.left = true;
+      if(e.key === "d" || e.key === "ArrowRight") keys.right = true;
+      if(e.key === " ") shootBullet();
+      if(e.key.toLowerCase() === "r") reloadWeapon();
+    });
+    document.addEventListener("keyup", (e)=>{
+      if(e.key === "w" || e.key === "ArrowUp") keys.forward = false;
+      if(e.key === "s" || e.key === "ArrowDown") keys.backward = false;
+      if(e.key === "a" || e.key === "ArrowLeft") keys.left = false;
+      if(e.key === "d" || e.key === "ArrowRight") keys.right = false;
+    });
+    
+    animate();
+  </script>
 </body>
 </html>
