@@ -33,6 +33,18 @@
   <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
   <!-- Axios để upload video lên Cloudinary -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"></script>
+  <!-- Thêm head -->
+  <!-- Liên kết đến file manifest -->
+  <link rel="manifest" href="./manifest.json">
+  
+  <!-- Meta tag cho màu sắc trên thanh địa chỉ -->
+  <!-- Dành cho index.html -->
+  <meta name="theme-color" content="#00ff41"/> 
+  <!-- Bạn có thể đổi thành #667eea cho old.html -->
+  
+  <!-- Thêm hỗ trợ cho iOS -->
+  <link rel="apple-touch-icon" href="https://www.gstatic.com/images/branding/product/1x/firebase_192dp.png">
+
 
   <style>
     /* === CÁC CHỦ ĐỀ GIAO DIỆN === */
@@ -602,8 +614,17 @@
           appendMessage(message);
         }
       },
+      
       presence: function(event) {
         updatePresence();
+    // Thông báo khi có người ra/vào và tab đang ẩn
+    if (document.hidden) {
+        if (event.action === "join") {
+            showLocalNotification("Thành viên mới", `${uuid} vừa tham gia kênh chat.`);
+        } else if (event.action === "leave" || event.action === "timeout") {
+            showLocalNotification("Thành viên rời đi", `${uuid} vừa rời khỏi kênh chat.`);
+        }
+    }
         if(event.action === "join") {
           appendSystemMessage(sanitize(event.uuid) + " đã online");
         } else if(event.action === "leave" || event.action === "timeout") {
@@ -704,6 +725,13 @@
       if (message.timestamp) {
         content += "<br><small>" + formatTime(message.timestamp) + "</small>";
       }
+  // -- BẮT ĐẦU PHẦN CHỈNH SỬA --
+  // Kiểm tra nếu tin nhắn không phải của mình VÀ tab đang ẩn
+  if (messageClass === 'other' && document.hidden) {
+    const notifTitle = `Tin nhắn mới từ ${senderName}`;
+    const notifBody = message.text || (message.image ? 'Đã gửi một hình ảnh.' : '');
+    showLocalNotification(notifTitle, notifBody);
+  }
       msgDiv.innerHTML = content;
       chatWindow.appendChild(msgDiv);
       chatWindow.scrollTop = chatWindow.scrollHeight;
@@ -1885,6 +1913,39 @@
 
     // Dummy updatePresence function
     function updatePresence(){}
+    
+/* -------------------- THÔNG BÁO & PWA -------------------- */
+
+// 1. HÀM HIỂN THỊ THÔNG BÁO LOCAL
+function showLocalNotification(title, body) {
+  // Kiểm tra quyền
+  if (Notification.permission === 'granted') {
+    navigator.serviceWorker.ready.then(registration => {
+      registration.showNotification(title, {
+        body: body,
+        icon: 'https://www.gstatic.com/images/branding/product/1x/firebase_192dp.png', // Icon mẫu
+        badge: 'https://www.gstatic.com/images/branding/product/1x/firebase_192dp.png' // Icon nhỏ
+      });
+    });
+  }
+}
+
+// 2. HÀM YÊU CẦU QUYỀN VÀ ĐĂNG KÝ SERVICE WORKER
+window.addEventListener('load', () => {
+  // Đăng ký Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(registration => console.log('Service Worker registered.'))
+      .catch(error => console.log('Service Worker registration failed:', error));
+  }
+  
+  // Yêu cầu quyền nhận thông báo
+  if ('Notification' in window && Notification.permission !== 'granted') {
+     Notification.requestPermission();
+  }
+});
+
+    
 
   </script>
 </body>
