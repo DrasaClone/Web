@@ -1,41 +1,54 @@
-// Tên của bộ nhớ cache
-const CACHE_NAME = 'my-pwa-cache-v1';
+// Khi nâng cấp sw thì nâng v1.2 lên các số khác để cập nhật
+// service-worker.js
 
-// Danh sách các file cần được cache lại để hoạt động offline
+const CACHE_NAME = 'ma-tran-giao-tiep-v1.2';
+// Các tệp cần thiết để ứng dụng chạy offline
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  './',
+  './index.html',
+  './old.html'
+  // Khi bạn có các file css, js riêng, hãy thêm chúng vào đây
+  // './style.css',
+  // './main.js'
 ];
 
-// Lắng nghe sự kiện 'install'
-// Sự kiện này được kích hoạt khi service worker được cài đặt lần đầu
+// 1. Cài đặt Service Worker và lưu cache
 self.addEventListener('install', event => {
-  // Chờ cho đến khi quá trình caching hoàn tất
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache); // Thêm tất cả các file trong danh sách vào cache
+        console.log('Opened cache and added core files');
+        return cache.addAll(urlsToCache);
       })
   );
+  self.skipWaiting(); // Kích hoạt service worker mới ngay lập tức
 });
 
-// Lắng nghe sự kiện 'fetch'
-// Sự kiện này được kích hoạt mỗi khi có một yêu cầu mạng (ví dụ: tải ảnh, css,...)
+// 2. Lấy dữ liệu từ cache khi offline
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Nếu tìm thấy tài nguyên trong cache, trả về nó
-        if (response) {
-          return response;
-        }
-        // Nếu không, thực hiện yêu cầu mạng bình thường
-        return fetch(event.request);
-      }
-    )
+        // Nếu có trong cache thì trả về, không thì fetch từ network
+        return response || fetch(event.request);
+      })
   );
+});
+
+// 3. Xóa các cache cũ khi có phiên bản mới
+self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            console.log('Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+  return self.clients.claim();
 });
