@@ -1,81 +1,80 @@
-// Khi nâng cấp sw thì nâng v1.2 lên các số khác để cập nhật
 // service-worker.js
 
-// service-worker.js
-
-const CACHE_NAME = 'matran-cache-v1.5'; // Rất quan trọng: Đổi số phiên bản
+// Tăng phiên bản cache để buộc cập nhật
+const CACHE_NAME = 'matran-cache-v1.7'; 
 const START_URL = './index.html';
 
-// Danh sách các file cốt lõi cần để ứng dụng khởi động
-const PRECACHE_ASSETS = [
-  './', // Cache cả thư mục gốc
+// Danh sách các file cốt lõi
+const CORE_ASSETS = [
+  './', 
   START_URL,
-  './old.html'
-  // './css/style.css',  // Bỏ comment nếu có file riêng
-  // './js/main.js'    // Bỏ comment nếu có file riêng
+  './old.html',
+  // Thêm các file tĩnh khác nếu có, ví dụ icon nếu bạn host riêng
+  'https://www.gstatic.com/images/branding/product/1x/firebase_192dp.png', // Cache luôn icon
+  'https://www.gstatic.com/images/branding/product/1x/firebase_512dp.png'
 ];
 
-// --- GIAI ĐOẠN 1: CÀI ĐẶT (INSTALL) ---
-// Tải trước các file cốt lõi vào cache
+
+// --- 1. GIAI ĐOẠN CÀI ĐẶT ---
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('[Service Worker] Pre-caching core assets.');
-        return cache.addAll(PRECACHE_ASSETS);
+        console.log('[SW] Caching core assets on install');
+        return cache.addAll(CORE_ASSETS);
       })
-      .then(() => self.skipWaiting()) // Kích hoạt ngay lập tức
+      .then(() => self.skipWaiting())
   );
 });
 
 
-// --- GIAI ĐOẠN 2: KÍCH HOẠT (ACTIVATE) ---
-// Dọn dẹp các cache cũ không cần thiết
+// --- 2. GIAI ĐOẠN KÍCH HOẠT ---
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
-            console.log('[Service Worker] Clearing old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
-    }).then(() => self.clients.claim()) // Giành quyền kiểm soát ngay lập tức
+    }).then(() => self.clients.claim())
   );
 });
 
 
-// --- GIAI ĐOẠN 3: XỬ LÝ YÊU CẦU MẠNG (FETCH) ---
-// Đây là phần quan trọng nhất để trình duyệt công nhận là có thể cài đặt
+// --- 3. GIAI ĐOẠN FETCH (QUAN TRỌNG NHẤT) ---
+// Sử dụng chiến lược "Stale-While-Revalidate"
 self.addEventListener('fetch', event => {
-  // Bỏ qua các yêu cầu không phải GET (vd: POST lên Firebase)
-  if (event.request.method !== 'GET') {
-    return;
-  }
+  // Chỉ xử lý các yêu cầu GET
+  if (event.request.method !== 'GET') return;
   
-  // Chiến lược: Ưu tiên lấy từ mạng trước (Network First)
-  // Phù hợp cho ứng dụng chat để luôn có dữ liệu mới
+  // Bỏ qua các yêu cầu đến Firebase và các dịch vụ bên thứ 3 để tránh lỗi
+  const requestUrl = new URL(event.request.url);
+  if (requestUrl.hostname.includes('firebase') || requestUrl.hostname.includes('pubnub') || requestUrl.hostname.includes('googleapis') || requestUrl.hostname.includes('facebook')) {
+    return; 
+  }
+
   event.respondWith(
-    fetch(event.request)
-      .then(networkResponse => {
-        // Nếu lấy từ mạng thành công, lưu bản mới nhất vào cache
-        return caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, networkResponse.clone());
-          console.log('[Service Worker] Fetched and cached new data:', event.request.url);
-          return networkResponse;
-        });
-      })
-      .catch(() => {
-        // Nếu lấy từ mạng thất bại (offline), thì tìm trong cache
-        console.log('[Service Worker] Network failed, trying to get from cache:', event.request.url);
-        return caches.match(event.request);
-      })
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.match(event.request)
+        .then(cachedResponse => {
+          // Lấy yêu cầu mới từ mạng song song
+          const fetchPromise = fetch(event.request).then(networkResponse => {
+            // Nếu thành công, cập nhật cache
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          });
+
+          // Trả về bản cache ngay lập tức (nếu có), hoặc chờ fetch thành công
+          return cachedResponse || fetchPromise;
+        })
+    })
   );
 });
 
-// Sự kiện để hiển thị thông báo cục bộ (đã có từ trước)
+// Sự kiện click vào thông báo
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   event.waitUntil(clients.openWindow(START_URL));
