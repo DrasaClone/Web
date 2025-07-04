@@ -2,16 +2,13 @@ name: Build DrasaClone Web Android App
 
 on:
   workflow_dispatch:
-    inputs:
-      push_sender_id:
-        description: 'FCM Sender ID'
-        required: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Setup Node.js
@@ -22,7 +19,7 @@ jobs:
       - name: Install Cordova CLI
         run: npm install -g cordova
 
-      - name: Create Cordova project
+      - name: Create and prepare Cordova project
         run: |
           rm -rf android-webapp
           mkdir -p android-webapp
@@ -30,13 +27,19 @@ jobs:
           cordova create . com.drasaclone.web DrasaCloneApp
           cordova platform add android
 
-      - name: Build signed debug APK
+      - name: Copy your pre-configured files
+        run: |
+          # Giả sử bạn đã commit sẵn config.xml và www/ vào thư mục android-webapp
+          cp ../config.xml android-webapp/config.xml
+          cp -R ../www android-webapp/www
+
+      - name: Build universal debug APK
         run: |
           cd android-webapp
           cordova build android --debug -- --gradleArg=-PcdvBuildMultipleApks=false
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: drasaclone-web-app-debug
+          name: drasaclone-web-debug-apk
           path: android-webapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
