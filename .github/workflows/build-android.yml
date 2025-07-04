@@ -1,4 +1,4 @@
-name: Build DrasaClone Web Android App
+name: Build All-in-One DrasaClone Android App
 
 on:
   workflow_dispatch:
@@ -6,40 +6,113 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install Cordova CLI
-        run: npm install -g cordova
-
-      - name: Create and prepare Cordova project
+      - name: Setup Node.js and Cordova
         run: |
-          rm -rf android-webapp
-          mkdir -p android-webapp
-          cd android-webapp
+          npm install -g cordova
+          cordova -v
+
+      - name: Create Cordova project
+        run: |
+          rm -rf android-webapp || true
+          mkdir android-webapp && cd android-webapp
           cordova create . com.drasaclone.web DrasaCloneApp
           cordova platform add android
 
-      - name: Copy your pre-configured files
+      - name: Generate config.xml
         run: |
-          # Giả sử bạn đã commit sẵn config.xml và www/ vào thư mục android-webapp
-          cp ../config.xml android-webapp/config.xml
-          cp -R ../www android-webapp/www
+          cat <<'EOF' > android-webapp/config.xml
+          <?xml version='1.0' encoding='utf-8'?>
+          <widget id="com.drasaclone.web" version="1.0.0"
+            xmlns="http://www.w3.org/ns/widgets"
+            xmlns:cdv="http://cordova.apache.org/ns/1.0">
+            <name>DrasaClone Web</name>
+            <content src="https://drasaclone.github.io/Web/" />
+            <allow-navigation href="https://drasaclone.github.io/Web/*" />
+            <access origin="*" />
+            <plugin name="cordova-plugin-inappbrowser" spec="^5.0.0" />
+            <plugin name="cordova-plugin-background-mode" spec="^0.7.3" />
+            <plugin name="phonegap-plugin-push" spec="^2.3.0">
+              <variable name="SENDER_ID" value="967881370128" />
+            </plugin>
+            <platform name="android">
+              <edit-config file="AndroidManifest.xml" mode="merge"
+                target="/manifest/uses-permission">
+                <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+              </edit-config>
+              <uses-permission android:name="android.permission.INTERNET" />
+            </platform>
+          </widget>
+          EOF
+
+      - name: Generate www/index.html
+        run: |
+          mkdir -p android-webapp/www/js
+          cat <<'EOF' > android-webapp/www/index.html
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>DrasaClone Web</title>
+            <script src="cordova.js"></script>
+            <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+            <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
+            <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-messaging-compat.js"></script>
+            <script src="js/index.js"></script>
+          </head>
+          <body></body>
+          </html>
+          EOF
+
+      - name: Generate www/js/index.js
+        run: |
+          cat <<EOF > android-webapp/www/js/index.js
+const firebaseConfig = {
+  apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
+  authDomain: "webai-7642b.firebaseapp.com",
+  databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "webai-7642b",
+  storageBucket: "webai-7642b.firebasestorage.app",
+  messagingSenderId: "967881370128",
+  appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
+  measurementId: "G-61XJ390Q30"
+};
+if (window.cordova) {
+  document.addEventListener('deviceready', () => {
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    auth.useDeviceLanguage();
+    window.handleGoogleSignIn = () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider);
+    };
+    window.open = cordova.InAppBrowser.open;
+    cordova.plugins.backgroundMode.enable();
+    cordova.plugins.backgroundMode.on('activate', () => {
+      cordova.plugins.backgroundMode.disableWebViewOptimizations();
+    });
+    const messaging = firebase.messaging();
+    messaging.requestPermission()
+      .then(() => messaging.getToken())
+      .then(token => console.log('FCM Token:', token));
+    messaging.onMessage(payload => new Notification(payload.notification.title, {
+      body: payload.notification.body
+    }));
+  });
+}
+EOF
 
       - name: Build universal debug APK
         run: |
           cd android-webapp
           cordova build android --debug -- --gradleArg=-PcdvBuildMultipleApks=false
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: drasaclone-web-debug-apk
+          name: drasaclone-all-in-one-apk
           path: android-webapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
