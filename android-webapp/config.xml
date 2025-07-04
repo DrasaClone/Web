@@ -17,7 +17,7 @@
   <plugin name="cordova-plugin-inappbrowser" spec="^5.0.0" />
   <plugin name="cordova-plugin-background-mode" spec="^0.7.3" />
   <plugin name="phonegap-plugin-push" spec="^2.3.0">
-    <variable name="SENDER_ID" value="${PUSH_SENDER_ID}" />
+    <variable name="SENDER_ID" value="${967881370128}" />
   </plugin>
 
   <!-- Android permissions -->
