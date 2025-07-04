@@ -1,8 +1,12 @@
 # .github/workflows/build-android.yml
-name: Build and Sign Debug WebView APK
+name: Build WebView APK with In-App Links & Push
 
 on:
   workflow_dispatch:
+    inputs:
+      push_sender_id:
+        description: 'FCM Sender ID for push notifications'
+        required: true
 
 jobs:
   build:
@@ -22,26 +26,66 @@ jobs:
       - name: Create Cordova project
         run: |
           rm -rf android-webapp
-          mkdir android-webapp
-          cd android-webapp
+          mkdir android-webapp && cd android-webapp
           cordova create . com.drasaclone.web WebApp
+          cd .
+
+      - name: Add Android platform
+        run: |
+          cd android-webapp
           cordova platform add android
+
+      - name: Install Cordova plugins
+        run: |
+          cd android-webapp
+          cordova plugin add cordova-plugin-inappbrowser
+          cordova plugin add cordova-plugin-background-mode
+          cordova plugin add phonegap-plugin-push --variable SENDER_ID="${{ github.event.inputs.push_sender_id }}"
+
+      - name: Patch config.xml for navigation & permissions
+        run: |
+          cd android-webapp
+          # Allow all URLs under your domain
+          sed -i "/<widget /a\  <allow-navigation href=\"https://drasaclone.github.io/Web/*\" \/>" config.xml
+          # Add POST_NOTIFICATIONS permission
+          sed -i "/<platform name=\"android\">/a\    <edit-config file=\"AndroidManifest.xml\" mode=\"merge\" target=\"/manifest/uses-permission\">\n      <uses-permission android:name=\"android.permission.POST_NOTIFICATIONS\" \/>\n    <\/edit-config>" config.xml
+
+      - name: Inject link & push handling script
+        run: |
+          cd android-webapp/www/js || exit 0
+          mkdir -p .
+          cat << 'EOF' >> index.js
+if (window.cordova) {
+  document.addEventListener('deviceready', () => {
+    // Open links in app WebView
+    window.open = cordova.InAppBrowser.open;
+
+    // Enable background mode
+    cordova.plugins.backgroundMode.enable();
+    cordova.plugins.backgroundMode.on('activate', () => {
+      cordova.plugins.backgroundMode.disableWebViewOptimizations();
+    });
+
+    // Initialize Push
+    var push = PushNotification.init({ android: { senderID: "${{ github.event.inputs.push_sender_id }}" } });
+    push.on('registration', data => console.log('Push token:', data.registrationId));
+    push.on('notification', data => new Notification(data.title || 'Notification', { body: data.message }));
+  });
+}
+EOF
 
       - name: Configure WebView URL
         run: |
           cd android-webapp
-          sed -i 's|<content src=.*|<content src="https://drasaclone.github.io/Web/" />|' config.xml
+          sed -i 's|<content src=.*|<content src="https://drasaclone.github.io/Web/" \/>|' config.xml
 
       - name: Build signed debug APK
         run: |
           cd android-webapp
           cordova build android --debug -- --gradleArg=-PcdvBuildMultipleApks=false
 
-      - name: Upload signed debug APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: drasaclone-signed-debug-apk
+          name: drasaclone-web-app-debug
           path: android-webapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
-
-# Lưu ý: Cordova tự động ký bản debug APK bằng debug keystore mặc định.
-# Bạn chỉ cần tải về và cài app-debug.apk là đã có chữ ký, miễn bật nguồn ngoài và gỡ bản cũ.
