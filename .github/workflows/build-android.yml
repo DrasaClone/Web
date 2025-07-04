@@ -1,1 +1,77 @@
+# .github/workflows/build-android.yml
+name: Build WebView Android App
 
+on:
+  workflow_dispatch:
+    inputs:
+      keystore_base64:
+        description: 'Base64 encoded keystore for signing (optional).'
+        required: false
+      keystore_password:
+        description: 'Keystore password.'
+        required: false
+      key_alias:
+        description: 'Key alias.'
+        required: false
+      key_password:
+        description: 'Key alias password.'
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Cordova CLI
+        run: npm install -g cordova
+
+      - name: Create Cordova project
+        run: |
+          rm -rf android-webapp
+          mkdir android-webapp
+          cd android-webapp
+          cordova create . com.example.webviewapp WebApp
+          cd .
+
+      - name: Configure WebView
+        run: |
+          cd android-webapp
+          cordova platform add android
+          # Update config.xml to point to your GitHub Pages URL
+          sed -i "s|<content src=.*|<content src=\"https://drasaclone.github.io/Web/\" />|" config.xml
+
+      - name: Configure signing (optional)
+        if: ${{ github.event.inputs.keystore_base64 }}
+        run: |
+          cd android-webapp
+          echo "${{ github.event.inputs.keystore_base64 }}" | base64 --decode > release.keystore
+          cordova build android --release \
+            -- --keystore=release.keystore \
+            --storePassword=${{ github.event.inputs.keystore_password }} \
+            --alias=${{ github.event.inputs.key_alias }} \
+            --password=${{ github.event.inputs.key_password }}
+
+      - name: Build debug APK
+        if: ${{ !github.event.inputs.keystore_base64 }}
+        run: |
+          cd android-webapp
+          cordova build android --debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-webview-apk
+          path: |
+            android-webapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+            android-webapp/platforms/android/app/build/outputs/apk/release/*.apk
+
+# config.xml (in android-webapp/config.xml)
+# Replace the <content> tag inside <widget>:
+#   <content src="https://USERNAME.github.io/REPO_NAME/" />
