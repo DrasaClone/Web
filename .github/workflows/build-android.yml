@@ -26,13 +26,9 @@ jobs:
       - name: Create Cordova project
         run: |
           rm -rf android-webapp
-          mkdir android-webapp && cd android-webapp
-          cordova create . com.drasaclone.web WebApp
-          cd .
-
-      - name: Add Android platform
-        run: |
+          mkdir -p android-webapp
           cd android-webapp
+          cordova create . com.drasaclone.web WebApp
           cordova platform add android
 
       - name: Install Cordova plugins
@@ -42,42 +38,47 @@ jobs:
           cordova plugin add cordova-plugin-background-mode
           cordova plugin add phonegap-plugin-push --variable SENDER_ID="${{ github.event.inputs.push_sender_id }}"
 
-      - name: Patch config.xml for navigation & permissions
+      - name: Patch config.xml
         run: |
           cd android-webapp
-          # Allow all URLs under your domain
-          sed -i "/<widget /a\  <allow-navigation href=\"https://drasaclone.github.io/Web/*\" \/>" config.xml
+          # Allow navigation within app
+          sed -i '/<widget /a \
+    <allow-navigation href="https://drasaclone.github.io/Web/*" />' config.xml
           # Add POST_NOTIFICATIONS permission
-          sed -i "/<platform name=\"android\">/a\    <edit-config file=\"AndroidManifest.xml\" mode=\"merge\" target=\"/manifest/uses-permission\">\n      <uses-permission android:name=\"android.permission.POST_NOTIFICATIONS\" \/>\n    <\/edit-config>" config.xml
+          sed -i '/<platform name="android"/a \
+    <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/uses-permission">\
+      <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\
+    </edit-config>' config.xml
 
-      - name: Inject link & push handling script
+      - name: Inject app behavior script
         run: |
-          cd android-webapp/www/js || exit 0
-          mkdir -p .
-          cat << 'EOF' >> index.js
+          cat <<EOF > android-webapp/www/js/index.js
 if (window.cordova) {
-  document.addEventListener('deviceready', () => {
+  document.addEventListener('deviceready', function() {
     // Open links in app WebView
     window.open = cordova.InAppBrowser.open;
 
     // Enable background mode
     cordova.plugins.backgroundMode.enable();
-    cordova.plugins.backgroundMode.on('activate', () => {
+    cordova.plugins.backgroundMode.on('activate', function() {
       cordova.plugins.backgroundMode.disableWebViewOptimizations();
     });
 
     // Initialize Push
     var push = PushNotification.init({ android: { senderID: "${{ github.event.inputs.push_sender_id }}" } });
-    push.on('registration', data => console.log('Push token:', data.registrationId));
-    push.on('notification', data => new Notification(data.title || 'Notification', { body: data.message }));
+    push.on('registration', function(data) {
+      console.log('Push token:', data.registrationId);
+    });
+    push.on('notification', function(data) {
+      new Notification(data.title || 'Notification', { body: data.message });
+    });
   });
 }
 EOF
 
       - name: Configure WebView URL
         run: |
-          cd android-webapp
-          sed -i 's|<content src=.*|<content src="https://drasaclone.github.io/Web/" \/>|' config.xml
+          sed -i 's|<content src=.*|<content src="https://drasaclone.github.io/Web/" />|' android-webapp/config.xml
 
       - name: Build signed debug APK
         run: |
@@ -89,3 +90,6 @@ EOF
         with:
           name: drasaclone-web-app-debug
           path: android-webapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+
+# Note: Cordova debug APK is auto-signed with debug keystore.
+# After download, uninstall any old version, enable unknown sources, then install 'app-debug.apk'.
