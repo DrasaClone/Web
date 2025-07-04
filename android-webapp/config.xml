@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.drasaclone.web" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+  <name>DrasaClone Web</name>
+  <description>WebView for DrasaClone site</description>
+  <author email="you@example.com" href="https://drasaclone.github.io/Web/">DrasaClone</author>
+
+  <!-- Cho phép tải trang chính -->
+  <content src="https://drasaclone.github.io/Web/" />
+
+  <!-- Mở mọi link trong cùng WebView -->
+  <allow-navigation href="https://drasaclone.github.io/Web/*" />
+
+  <!-- Cho phép localStorage, IndexedDB, cookies if needed -->
+  <access origin="*" />
+
+  <!-- Plugins -->
+  <plugin name="cordova-plugin-inappbrowser" spec="^5.0.0" />
+  <plugin name="cordova-plugin-background-mode" spec="^0.7.3" />
+  <plugin name="phonegap-plugin-push" spec="^2.3.0">
+    <variable name="SENDER_ID" value="${PUSH_SENDER_ID}" />
+  </plugin>
+
+  <!-- Android permissions -->
+  <platform name="android">
+    <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/uses-permission">
+      <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    </edit-config>
+
+    <!-- Required for geolocation or other features, if any -->
+    <uses-permission android:name="android.permission.INTERNET" />
+  </platform>
+</widget>
