@@ -1,4 +1,5 @@
-name: Build Signed WebView Android APK
+# .github/workflows/build-android.yml
+name: Build and Sign Debug WebView APK
 
 on:
   workflow_dispatch:
@@ -7,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source code
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Setup Node.js
@@ -26,18 +27,21 @@ jobs:
           cordova create . com.drasaclone.web WebApp
           cordova platform add android
 
-      - name: Set WebView URL
+      - name: Configure WebView URL
         run: |
           cd android-webapp
           sed -i 's|<content src=.*|<content src="https://drasaclone.github.io/Web/" />|' config.xml
 
-      - name: Build signed release APK
+      - name: Build signed debug APK
         run: |
           cd android-webapp
-          cordova build android --release -- --gradleArg=-PcdvBuildMultipleApks=false
+          cordova build android --debug -- --gradleArg=-PcdvBuildMultipleApks=false
 
-      - name: Upload release APK
+      - name: Upload signed debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: drasaclone-release-apk
-          path: android-webapp/platforms/android/app/build/outputs/apk/release/app-release.apk
+          name: drasaclone-signed-debug-apk
+          path: android-webapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+
+# Lưu ý: Cordova tự động ký bản debug APK bằng debug keystore mặc định.
+# Bạn chỉ cần tải về và cài app-debug.apk là đã có chữ ký, miễn bật nguồn ngoài và gỡ bản cũ.
