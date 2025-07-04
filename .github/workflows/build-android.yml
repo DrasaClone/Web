@@ -1,5 +1,4 @@
-# .github/workflows/build-android.yml
-name: Build WebView Android App
+name: Build Signed WebView Android APK
 
 on:
   workflow_dispatch:
@@ -32,14 +31,13 @@ jobs:
           cd android-webapp
           sed -i 's|<content src=.*|<content src="https://drasaclone.github.io/Web/" />|' config.xml
 
-      - name: Build universal debug APK
+      - name: Build signed release APK
         run: |
           cd android-webapp
-          # Disable multiple APK splits to produce a universal APK
-          cordova build android --debug -- --gradleArg=-PcdvBuildMultipleApks=false
+          cordova build android --release -- --gradleArg=-PcdvBuildMultipleApks=false
 
-      - name: Upload APK Artifact
+      - name: Upload release APK
         uses: actions/upload-artifact@v4
         with:
-          name: drasaclone-web-universal-apk
-          path: android-webapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          name: drasaclone-release-apk
+          path: android-webapp/platforms/android/app/build/outputs/apk/release/app-release.apk
