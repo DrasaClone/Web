@@ -42,13 +42,9 @@ jobs:
         run: |
           cd android-webapp
           # Allow navigation within app
-          sed -i '/<widget /a \
-    <allow-navigation href="https://drasaclone.github.io/Web/*" />' config.xml
+          sed -i '/<widget /a <allow-navigation href="https://drasaclone.github.io/Web/*" />' config.xml
           # Add POST_NOTIFICATIONS permission
-          sed -i '/<platform name="android"/a \
-    <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/uses-permission">\
-      <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\
-    </edit-config>' config.xml
+          sed -i '/<platform name="android"/a <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/uses-permission"><uses-permission android:name="android.permission.POST_NOTIFICATIONS" /></edit-config>' config.xml
 
       - name: Inject app behavior script
         run: |
