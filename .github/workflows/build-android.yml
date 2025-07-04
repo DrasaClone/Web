@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install Cordova
+      - name: Install Cordova CLI
         run: npm install -g cordova
 
       - name: Create Cordova project
@@ -32,13 +32,14 @@ jobs:
           cd android-webapp
           sed -i 's|<content src=.*|<content src="https://drasaclone.github.io/Web/" />|' config.xml
 
-      - name: Build APK (debug)
+      - name: Build universal debug APK
         run: |
           cd android-webapp
-          cordova build android --debug
+          # Disable multiple APK splits to produce a universal APK
+          cordova build android --debug -- --gradleArg=-PcdvBuildMultipleApks=false
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: drasaclone-web-apk
+          name: drasaclone-web-universal-apk
           path: android-webapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
