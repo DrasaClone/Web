@@ -1,5 +1,5 @@
 # .github/workflows/build-android.yml
-name: Build WebView APK with In-App Links & State Persistence
+name: "Build WebView APK with In-App Links & State Persistence"
 
 on:
   workflow_dispatch:
@@ -49,7 +49,7 @@ jobs:
       - name: Inject app behavior script
         run: |
           cd android-webapp/www/js
-          cat <<EOF > index.js
+          cat <<'EOF' > index.js
 if (window.cordova) {
   document.addEventListener('deviceready', function () {
     // Override target="_blank" links to open in the same WebView
@@ -86,7 +86,7 @@ if (window.cordova) {
     });
 
     // Initialize Push Notifications
-    var push = PushNotification.init({ android: { senderID: "${{ github.event.inputs.push_sender_id }}" } });
+    var push = PushNotification.init({ android: { senderID: "$${{ github.event.inputs.push_sender_id }}" } });
     push.on('registration', function (data) {
       console.log('Push token:', data.registrationId);
     });
