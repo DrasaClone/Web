@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: '20.x'
 
-      # 3. Cài Capacitor CLI & Android platform (nếu chưa có android/)
+      # 3. Cài Capacitor CLI & Init Android nếu cần
       - name: Install Capacitor & Init Android
         run: |
           npm install @capacitor/cli@latest @capacitor/android@latest
@@ -37,13 +37,22 @@ jobs:
             build-tools;33.0.2
             platforms;android-33
 
-      # 5. Copy Web assets vào Android assets
+      # 5. Prepare Web assets (dynamically chọn Web/ hoặc root)
       - name: Prepare Web assets
         run: |
           DEST=android/app/src/main/assets/public
           rm -rf "$DEST"
           mkdir -p "$DEST"
-          rsync -a --delete Web/ "$DEST/"
+          if [ -d Web ]; then
+            SOURCE="Web/"
+          else
+            SOURCE="./"
+          fi
+          rsync -a --delete \
+            --exclude='android' \
+            --exclude='.github' \
+            --exclude='.git' \
+            "$SOURCE" "$DEST/"
 
       # 6. Build Android release với Gradle wrapper
       - name: Build Android Release
