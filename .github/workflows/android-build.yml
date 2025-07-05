@@ -1,5 +1,5 @@
 # Tên của workflow
-name: Build Android APK from Web Repo (v3 - Final)
+name: Build Android APK (v4 - The ZIP Method)
 
 # Chạy thủ công
 on:
@@ -10,21 +10,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Bước 1: Checkout một repository mẫu MỚI và đang hoạt động.
-      # Đây là thay đổi quan trọng nhất.
-      - name: 1. Checkout a NEW, working Android App Template
-        uses: actions/checkout@v4
-        with:
-          repository: DheerajDevaraj/Android-WebView-App-Template
-          path: ./android-project
-          ref: main  # Repository này sử dụng nhánh 'main'
+      # Bước 1: Dùng lệnh 'curl' để tải trực tiếp file .ZIP của mã nguồn mẫu.
+      # Đây là phương pháp trực tiếp, bỏ qua mọi vấn đề về quyền của git.
+      - name: 1. Download Source Code as ZIP
+        run: curl -Lo template.zip https://github.com/DheerajDevaraj/Android-WebView-App-Template/archive/refs/heads/main.zip
 
-      # Bước 2: Tùy chỉnh MainActivity.
-      # -> Gói "package" đã được cập nhật để khớp với template mới. <-
-      - name: 2. Customize MainActivity with All Features
+      # Bước 2: Dùng lệnh 'unzip' để giải nén file vừa tải.
+      # Thư mục sau khi giải nén sẽ có tên là "Android-WebView-App-Template-main"
+      - name: 2. Unzip the Source Code
+        run: unzip template.zip
+        
+      # Bước 3: Tùy chỉnh MainActivity.
+      # --> Đường dẫn đã được cập nhật để trỏ vào thư mục vừa giải nén. <--
+      - name: 3. Customize MainActivity with All Features
         run: |
-          cat <<'EOF' > android-project/app/src/main/java/com/dheeraj/webviewapp/MainActivity.java
-          package com.dheeraj.webviewapp; // <<-- Đã thay đổi để khớp với template mới!
+          cat <<'EOF' > Android-WebView-App-Template-main/app/src/main/java/com/dheeraj/webviewapp/MainActivity.java
+          package com.dheeraj.webviewapp;
 
           import android.content.Context;
           import android.content.SharedPreferences;
@@ -81,23 +82,25 @@ jobs:
           }
           EOF
 
-      # Bước 3: Cài đặt Java (Không thay đổi)
-      - name: 3. Setup Java Environment
+      # Bước 4: Cài đặt Java.
+      - name: 4. Setup Java Environment
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # Bước 4: Build APK (Không thay đổi)
-      - name: 4. Build the APK
+      # Bước 5: Build APK.
+      # --> Di chuyển vào đúng thư mục đã giải nén trước khi build. <--
+      - name: 5. Build the APK
+        working-directory: ./Android-WebView-App-Template-main
         run: |
-          cd android-project
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      # Bước 5: Tải APK lên (Không thay đổi)
-      - name: 5. Upload APK as Artifact
+      # Bước 6: Tải APK lên.
+      # --> Cập nhật đường dẫn cuối cùng đến file APK. <--
+      - name: 6. Upload APK as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DrasaClone-WebApp-Final
-          path: android-project/app/build/outputs/apk/debug/app-debug.apk
+          name: DrasaClone-WebApp-Final-Build
+          path: ./Android-WebView-App-Template-main/app/build/outputs/apk/debug/app-debug.apk
