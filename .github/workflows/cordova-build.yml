@@ -1,8 +1,17 @@
+name: Build Cordova APK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Setup Node.js & Cordova CLI
         uses: actions/setup-node@v3
@@ -16,7 +25,17 @@ jobs:
       - name: Generate config.xml
         run: |
           cat <<EOF > build/config.xml
-          <!-- nội dung như trước -->
+          <?xml version='1.0' encoding='utf-8'?>
+          <widget id="com.yourcompany.drasaclone" version="1.0.0" xmlns="http://www.w3.org/ns/widgets"
+                  xmlns:cdv="http://cordova.apache.org/ns/1.0">
+            <name>DrasaClone</name>
+            <content src="https://drasaclone.github.io/Web/" />
+            <access origin="*" />
+            <allow-intent href="http://*/*" />
+            <allow-intent href="https://*/*" />
+            <preference name="LoadUrlTimeoutValue" value="700000" />
+            <preference name="AutoHideSplashScreen" value="false" />
+          </widget>
           EOF
 
       - name: Inspect repo structure
@@ -26,8 +45,7 @@ jobs:
         run: |
           rm -rf build/www
           mkdir -p build/www
-          rsync -av --exclude='build' --exclude='.github' --exclude='.git' . build/www
-          # nếu web ở Web/: rsync -av Web/ build/www/
+          cp -r Web/* build/www/
 
       - name: Add platform & plugins
         run: |
@@ -41,7 +59,8 @@ jobs:
           cd build
           npx cordova build android --debug
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
         with:
           name: drasaclone-debug-apk
           path: build/platforms/android/app/build/outputs/apk/debug/app-debug.apk
