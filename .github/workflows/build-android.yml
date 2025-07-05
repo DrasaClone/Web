@@ -1,0 +1,85 @@
+name: Build DrasaClone WebView App
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js & Cordova
+        run: |
+          npm install -g cordova
+          cordova -v
+
+      - name: Scaffold Cordova project
+        run: |
+          rm -rf android-webapp
+          mkdir android-webapp
+          cd android-webapp
+          cordova create . com.drasaclone.web DrasaCloneApp
+          cordova platform add android
+          # Cài plugin InAppBrowser & BackgroundMode
+          cordova plugin add cordova-plugin-inappbrowser
+          cordova plugin add cordova-plugin-background-mode
+
+      - name: Write config.xml
+        run: |
+          cat > android-webapp/config.xml <<'EOF'
+          <?xml version='1.0' encoding='utf-8'?>
+          <widget id="com.drasaclone.web" version="1.0.0"
+            xmlns="http://www.w3.org/ns/widgets"
+            xmlns:cdv="http://cordova.apache.org/ns/1.0">
+            <name>DrasaClone Web</name>
+            <content src="https://drasaclone.github.io/Web/" />
+            <allow-navigation href="https://drasaclone.github.io/Web/*" />
+            <access origin="*" />
+            <plugin name="cordova-plugin-inappbrowser" spec="^5.0.0" />
+            <plugin name="cordova-plugin-background-mode" spec="^0.7.3" />
+            <platform name="android">
+              <uses-permission android:name="android.permission.INTERNET" />
+            </platform>
+          </widget>
+          EOF
+
+      - name: Write www files
+        run: |
+          mkdir -p android-webapp/www/js
+          cat > android-webapp/www/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>DrasaClone Web</title>
+            <script src="cordova.js"></script>
+            <script src="js/index.js"></script>
+          </head>
+          <body></body>
+          </html>
+          EOF
+          cat > android-webapp/www/js/index.js <<'EOF'
+          document.addEventListener('deviceready', () => {
+            // Mọi link mở trong WebView
+            window.open = cordova.InAppBrowser.open;
+            // Chạy ngầm
+            cordova.plugins.backgroundMode.enable();
+            cordova.plugins.backgroundMode.on('activate', () => {
+              cordova.plugins.backgroundMode.disableWebViewOptimizations();
+            });
+          });
+          EOF
+
+      - name: Build universal debug APK
+        run: |
+          cd android-webapp
+          cordova build android --debug -- --gradleArg=-PcdvBuildMultipleApks=false
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: drasaclone-webview-debug-apk
+          path: android-webapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
