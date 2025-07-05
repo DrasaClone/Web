@@ -1,5 +1,7 @@
-name: Build Android APK from Web Repo
+# Tên của workflow
+name: Build Android APK from Web Repo (v3 - Final)
 
+# Chạy thủ công
 on:
   workflow_dispatch:
 
@@ -8,21 +10,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Bước 1: Dùng "Action" để clone repo mẫu một cách an toàn.
-      # ---> DÒNG SỬA LỖI ĐƯỢC THÊM VÀO ĐÂY <---
-      # Chúng ta chỉ định rõ phải lấy code từ nhánh "master".
-      - name: 1. Checkout Android App Template
+      # Bước 1: Checkout một repository mẫu MỚI và đang hoạt động.
+      # Đây là thay đổi quan trọng nhất.
+      - name: 1. Checkout a NEW, working Android App Template
         uses: actions/checkout@v4
         with:
-          repository: TomerGaber/Android-WebView-App-Template
+          repository: DheerajDevaraj/Android-WebView-App-Template
           path: ./android-project
-          ref: master # Chỉ định rõ nhánh cần checkout là 'master'
+          ref: main  # Repository này sử dụng nhánh 'main'
 
-      # Bước 2: Tùy chỉnh MainActivity. (KHÔNG THAY ĐỔI)
+      # Bước 2: Tùy chỉnh MainActivity.
+      # -> Gói "package" đã được cập nhật để khớp với template mới. <-
       - name: 2. Customize MainActivity with All Features
         run: |
-          cat <<'EOF' > android-project/app/src/main/java/com/tomerg/webviewapp/MainActivity.java
-          package com.tomerg.webviewapp;
+          cat <<'EOF' > android-project/app/src/main/java/com/dheeraj/webviewapp/MainActivity.java
+          package com.dheeraj.webviewapp; // <<-- Đã thay đổi để khớp với template mới!
 
           import android.content.Context;
           import android.content.SharedPreferences;
@@ -79,23 +81,23 @@ jobs:
           }
           EOF
 
-      # Bước 3: Cài đặt Java. (KHÔNG THAY ĐỔI)
+      # Bước 3: Cài đặt Java (Không thay đổi)
       - name: 3. Setup Java Environment
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # Bước 4: Build APK. (KHÔNG THAY ĐỔI)
+      # Bước 4: Build APK (Không thay đổi)
       - name: 4. Build the APK
         run: |
           cd android-project
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      # Bước 5: Tải APK lên. (KHÔNG THAY ĐỔI)
+      # Bước 5: Tải APK lên (Không thay đổi)
       - name: 5. Upload APK as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DrasaClone-WebApp
+          name: DrasaClone-WebApp-Final
           path: android-project/app/build/outputs/apk/debug/app-debug.apk
