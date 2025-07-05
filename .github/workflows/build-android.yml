@@ -22,19 +22,20 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install Bubblewrap
+      - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
 
-      - name: Initialize Bubblewrap project
+      - name: Init Bubblewrap project
         run: |
-          rm -rf bubblewrap-project || true
-          mkdir bubblewrap-project && cd bubblewrap-project
+          mkdir bubblewrap-project
+          cd bubblewrap-project
           bubblewrap init \
             --manifest="https://drasaclone.github.io/Web/manifest.webmanifest" \
             --packageId="com.drasaclone.web" \
             --appVersionName="1.0.0" \
             --appVersionCode="1" \
-            --name="DrasaClone Web"
+            --name="DrasaClone Web" \
+            --no-prompt
 
       - name: Build APK
         run: |
@@ -44,5 +45,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: drasaclone-pwa-apk
+          name: drasaclone-web-apk
           path: bubblewrap-project/build/*.apk
