@@ -18,7 +18,7 @@ jobs:
           node-version: '16'
 
       - name: Install Cordova
-        run: npm ci
+        run: npm install
         working-directory: cordova
 
       - name: Add Android platform
