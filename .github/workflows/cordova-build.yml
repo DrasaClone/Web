@@ -1,19 +1,8 @@
-name: Build Cordova APK
-
-# 1. Khai báo khi nào chạy workflow
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Setup Node.js & Cordova CLI
         uses: actions/setup-node@v3
@@ -27,30 +16,20 @@ jobs:
       - name: Generate config.xml
         run: |
           cat <<EOF > build/config.xml
-          <?xml version='1.0' encoding='utf-8'?>
-          <widget id="com.yourcompany.drasaclone"
-                  version="1.0.0"
-                  xmlns="http://www.w3.org/ns/widgets"
-                  xmlns:cdv="http://cordova.apache.org/ns/1.0">
-            <name>DrasaClone</name>
-            <description>Wrapper for drasaclone.github.io/Web</description>
-            <author email="you@example.com" href="https://drasaclone.github.io">You</author>
-            <content src="https://drasaclone.github.io/Web/" />
-            <access origin="*" />
-            <allow-intent href="http://*/*" />
-            <allow-intent href="https://*/*" />
-            <preference name="LoadUrlTimeoutValue" value="700000" />
-            <preference name="AutoHideSplashScreen" value="false" />
-          </widget>
+          <!-- nội dung như trước -->
           EOF
+
+      - name: Inspect repo structure
+        run: ls -R .
 
       - name: Copy website into www/
         run: |
           rm -rf build/www
           mkdir -p build/www
-          cp -r Web/* build/www/
+          rsync -av --exclude='build' --exclude='.github' --exclude='.git' . build/www
+          # nếu web ở Web/: rsync -av Web/ build/www/
 
-      - name: Add Android platform & plugins
+      - name: Add platform & plugins
         run: |
           cd build
           npx cordova platform add android
@@ -62,8 +41,7 @@ jobs:
           cd build
           npx cordova build android --debug
 
-      - name: Upload Debug APK
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: drasaclone-debug-apk
           path: build/platforms/android/app/build/outputs/apk/debug/app-debug.apk
