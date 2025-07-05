@@ -1,17 +1,15 @@
 # Tên của Workflow
-name: Build Android APK
+name: Build Android APK with dedicated Action
 
 # Điều kiện kích hoạt Workflow
 on:
-  # Chạy khi có push lên nhánh `main` (hoặc `master`)
   push:
     branches: [ "main" ]
-  # Cho phép chạy thủ công từ tab Actions
   workflow_dispatch:
 
 # Các công việc cần thực hiện
 jobs:
-  build:
+  android-build:
     # Chạy trên máy ảo Ubuntu mới nhất
     runs-on: ubuntu-latest
 
@@ -28,29 +26,38 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Bước 3: Thiết lập Gradle, tự động cache dependencies
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+      # Bước 3: Cache các thư viện Gradle để build nhanh hơn ở các lần sau
+      # Bước này tách biệt và đáng tin cậy hơn cache mặc định
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-      # Bước 4: Cấp quyền thực thi cho file gradlew (nếu nó tồn tại)
-      # Đây là một bước an toàn để phòng trường hợp file gradlew bị mất quyền thực thi khi commit
-      # Nếu file chưa có, nó sẽ được tạo ở bước sau
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew || echo "gradlew not found, will be generated"
-
-      # Bước 5: Build ứng dụng để tạo ra file APK Debug
-      # Lệnh này sẽ tự động tải các dependencies, build dự án và tạo APK
-      # Nếu gradlew chưa có, lệnh này sẽ tự tạo ra nó.
-      - name: Build with Gradle and create APK
+      # Bước 4: Chạy lệnh build Gradle
+      # Đây là bước quan trọng nhất. Chúng ta chỉ cần chỉ định task cần chạy.
+      # Action này sẽ tự động tìm và chạy gradlew
+      - name: Build with Gradle
         run: ./gradlew :app:assembleDebug
-        # Đặt thời gian timeout để tránh treo
-        timeout-minutes: 20 
+      
+      # Bước 5: Tìm file APK đã được tạo
+      # Chúng ta dùng một action khác để tìm đường dẫn chính xác của file APK.
+      # Rất hữu ích vì đường dẫn có thể thay đổi.
+      - name: Find debug APK
+        id: find_apk # Đặt ID để tham chiếu ở bước sau
+        uses: zuisong/find-file@v1
+        with:
+          path: 'app/build/outputs/apk/debug' # Thư mục chứa APK
+          suffix: '.apk' # Tìm file có đuôi .apk
 
       # Bước 6: Tải file APK đã build xong lên làm "Artifact"
       - name: Upload APK as Artifact
         uses: actions/upload-artifact@v4
         with:
-          # Tên của artifact để bạn dễ nhận biết
           name: app-debug-apk
-          # Đường dẫn tới file APK cần tải lên
-          path: app/build/outputs/apk/debug/app-debug.apk
+          # Lấy đường dẫn từ kết quả của bước 'find_apk' ở trên
+          path: ${{ steps.find_apk.outputs.path }}
