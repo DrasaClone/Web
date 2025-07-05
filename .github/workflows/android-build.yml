@@ -18,9 +18,9 @@ jobs:
         with:
           node-version: '18'
 
-      # 3. Cài dependencies (Capacitor)
+      # 3. Cài dependencies (Capacitor) bằng npm install
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       # 4. Cài Android SDK & Build Tools
       - name: Setup Android SDK
