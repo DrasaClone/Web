@@ -1,0 +1,52 @@
+name: 📦 Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build_apk:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Lấy source
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # 2. Cài Node.js (dùng Capacitor CLI)
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # 3. Cài dependencies (Capacitor)
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Cài Android SDK & Build Tools
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+        with:
+          api-level: 33
+          components: build-tools;33.0.2,platforms;android-33
+
+      # 5. Copy web assets vào thư mục Android
+      - name: Prepare Web assets
+        run: |
+          rm -rf android/app/src/main/assets/public
+          mkdir -p android/app/src/main/assets/public
+          cp -R Web/* android/app/src/main/assets/public/
+
+      # 6. Build Android release
+      - name: Build Android Release
+        run: |
+          cd android
+          ./gradlew assembleRelease
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+      # 7. Đưa APK lên artifact để download
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: drasa-android-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
