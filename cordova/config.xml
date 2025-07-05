@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.yourcompany.drasaclone" version="1.0.0"
+    xmlns="http://www.w3.org/ns/widgets"
+    xmlns:cdv="http://cordova.apache.org/ns/1.0">
+  <name>DrasaClone</name>
+  <description>Wrapper for drasaclone.github.io/Web</description>
+  <author email="you@example.com" href="https://drasaclone.github.io">You</author>
+  <content src="https://drasaclone.github.io/Web/" />
+  <preference name="LoadUrlTimeoutValue" value="700000" />
+  <platform name="android">
+    <allow-intent href="*" />
+  </platform>
+  <access origin="*" />
+</widget>
