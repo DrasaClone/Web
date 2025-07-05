@@ -1,51 +1,33 @@
-name: Build Android APK
+name: Auto Build APK with WebView Only
 
 on:
+  workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Lấy mã nguồn từ GitHub
+      - name: Checkout dummy repo
         uses: actions/checkout@v3
 
-      - name: 🧱 Cài Node.js 20 (yêu cầu cho Capacitor 7+)
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-
-      - name: 📦 Cài Capacitor CLI & Android
-        run: npm install @capacitor/cli@latest @capacitor/android@latest
-
-      - name: 🏗️ Khởi tạo & thêm Android nếu chưa có
+      - name: Clone minimal WebView project
         run: |
-          if [ ! -d android ]; then
-            npx cap init drasaclone com.drasaclone.app --web-dir=Web
-            npx cap add android
-          fi
+          git clone https://github.com/anhducw/WebViewAppSample.git app
+          sed -i 's|https://example.com|https://drasaclone.github.io/Web|g' app/app/src/main/java/com/example/webviewapp/MainActivity.java
 
-      - name: 🔄 Đồng bộ plugin và assets
-        run: npx cap sync android
+      - name: Set permission for gradlew
+        run: chmod +x ./app/gradlew
 
-      - name: 🗂️ Copy web files vào thư mục Android
+      - name: Build release APK
         run: |
-          DEST=android/app/src/main/assets/public
-          rm -rf "$DEST"
-          mkdir -p "$DEST"
-          rsync -a --delete Web/ "$DEST/"
-
-      - name: 🏗️ Build APK Release
-        run: |
-          cd android
-          chmod +x gradlew
+          cd app
           ./gradlew assembleRelease
 
-      - name: 📤 Tải APK lên GitHub Actions
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-release.apk
-          path: android/app/build/outputs/apk/release/app-release.apk
+          name: WebViewApp-APK
+          path: app/app/build/outputs/apk/release/app-release.apk
