@@ -1,4 +1,4 @@
-name: Auto Build APK with WebView Only
+name: Auto Build WebView APK
 
 on:
   workflow_dispatch:
@@ -13,10 +13,9 @@ jobs:
       - name: Checkout dummy repo
         uses: actions/checkout@v3
 
-      - name: Clone minimal WebView project
+      - name: Clone public WebView project
         run: |
-          git clone https://github.com/anhducw/WebViewAppSample.git app
-          sed -i 's|https://example.com|https://drasaclone.github.io/Web|g' app/app/src/main/java/com/example/webviewapp/MainActivity.java
+          git clone https://github.com/chatgpt-code/WebViewAppPublic.git app
 
       - name: Set permission for gradlew
         run: chmod +x ./app/gradlew
