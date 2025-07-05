@@ -9,13 +9,14 @@ jobs:
 
     steps:
       # Bước 1: Dùng "Action" để clone repo mẫu một cách an toàn.
-      # Đây là bước thay đổi quan trọng để sửa lỗi.
-      # Nó sẽ clone repo mẫu vào thư mục hiện tại.
+      # ---> DÒNG SỬA LỖI ĐƯỢC THÊM VÀO ĐÂY <---
+      # Chúng ta chỉ định rõ phải lấy code từ nhánh "master".
       - name: 1. Checkout Android App Template
         uses: actions/checkout@v4
         with:
           repository: TomerGaber/Android-WebView-App-Template
-          path: ./android-project  # Tải vào thư mục con tên là "android-project"
+          path: ./android-project
+          ref: master # Chỉ định rõ nhánh cần checkout là 'master'
 
       # Bước 2: Tùy chỉnh MainActivity. (KHÔNG THAY ĐỔI)
       - name: 2. Customize MainActivity with All Features
