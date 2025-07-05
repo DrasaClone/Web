@@ -25,11 +25,16 @@ jobs:
           DEST=android/app/src/main/assets/public
           rm -rf "$DEST"
           mkdir -p "$DEST"
-          # Nếu bạn có thư mục Web/, copy nó; nếu không, copy tất cả file ở root
           if [ -d Web ]; then
-            cp -R Web/* "$DEST"
+            # Copy nội dung thư mục Web/ vào assets
+            rsync -a --delete Web/ "$DEST/"
           else
-            cp -R * "$DEST"
+            # Nếu không có Web/, lấy toàn bộ file trừ android/.github/.git
+            rsync -a --delete \
+              --exclude='android' \
+              --exclude='.github' \
+              --exclude='.git' \
+              ./ "$DEST/"
           fi
 
       - name: Build Android Release
