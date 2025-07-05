@@ -1,5 +1,5 @@
 # .github/workflows/build-android.yml
-name: "Build WebView APK with In-App Links & State Persistence"
+name: "Build WebView APK with State Persistence"
 
 on:
   workflow_dispatch:
@@ -46,56 +46,10 @@ jobs:
           # Add notifications permission
           sed -i '/<platform name="android"/a <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/uses-permission"><uses-permission android:name="android.permission.POST_NOTIFICATIONS" /></edit-config>' config.xml
 
-      - name: Inject app behavior script
+      - name: Copy custom index.js
         run: |
-          cd android-webapp/www/js
-          cat <<'EOF' > index.js
-if (window.cordova) {
-  document.addEventListener('deviceready', function () {
-    // Override target="_blank" links to open in the same WebView
-    document.addEventListener('click', function (e) {
-      var anchor = e.target.closest('a[href]');
-      if (anchor && anchor.getAttribute('target') === '_blank') {
-        e.preventDefault();
-        cordova.InAppBrowser.open(anchor.href, '_self', 'location=no');
-      }
-    });
-
-    // Override window.open globally
-    window.open = function (url) {
-      return cordova.InAppBrowser.open(url, '_self', 'location=no');
-    };
-
-    // Persist current URL on pause
-    document.addEventListener('pause', function () {
-      localStorage.setItem('lastUrl', window.location.href);
-    });
-
-    // Restore URL on resume
-    document.addEventListener('resume', function () {
-      var lastUrl = localStorage.getItem('lastUrl');
-      if (lastUrl) {
-        window.location.href = lastUrl;
-      }
-    });
-
-    // Enable background mode
-    cordova.plugins.backgroundMode.enable();
-    cordova.plugins.backgroundMode.on('activate', function () {
-      cordova.plugins.backgroundMode.disableWebViewOptimizations();
-    });
-
-    // Initialize Push Notifications
-    var push = PushNotification.init({ android: { senderID: "$${{ github.event.inputs.push_sender_id }}" } });
-    push.on('registration', function (data) {
-      console.log('Push token:', data.registrationId);
-    });
-    push.on('notification', function (data) {
-      new Notification(data.title || 'Notification', { body: data.message });
-    });
-  });
-}
-EOF
+          # Assumes you have a custom www/js/index.js committed in repo
+          cp www/js/index.js android-webapp/www/js/index.js
 
       - name: Configure WebView URL
         run: |
@@ -112,5 +66,7 @@ EOF
           name: drasaclone-web-app-debug
           path: android-webapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
 
-# Note: Cordova debug APK is auto-signed with debug keystore.
-# On device: uninstall old version, enable unknown sources, install 'app-debug.apk'.
+# Note:
+# 1. Create a file www/js/index.js in your repo with the in-app link, state persistence, and background-mode logic.
+# 2. Cordova debug APK is auto-signed with debug keystore.
+# 3. On device: uninstall old version, enable unknown sources, install 'app-debug.apk'.
