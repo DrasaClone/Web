@@ -37,13 +37,17 @@ jobs:
             build-tools;33.0.2
             platforms;android-33
 
-      # 5. Prepare Web assets: copy nội dung Web/ vào Android assets/public
+      # 5. Prepare Web assets: copy everything except Android/.github/.git into assets/public
       - name: Prepare Web assets
         run: |
           DEST=android/app/src/main/assets/public
           rm -rf "$DEST"
           mkdir -p "$DEST"
-          rsync -a --delete Web/ "$DEST/"
+          rsync -a --delete \
+            --exclude='android' \
+            --exclude='.github' \
+            --exclude='.git' \
+            ./ "$DEST/"
 
       # 6. Build Android release with Gradle wrapper
       - name: Build Android Release
