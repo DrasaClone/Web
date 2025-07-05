@@ -1,25 +1,23 @@
-# Tên của workflow, sẽ hiển thị trong tab Actions
 name: Build Android APK from Web Repo
 
-# Dòng này quan trọng: cho phép bạn chạy workflow này một cách THỦ CÔNG
-# bằng cách vào tab Actions và nhấn nút "Run workflow"
-# Nó sẽ không tự chạy mỗi khi bạn cập nhật web để tránh phiền phức
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    # Chạy trên máy ảo Ubuntu mới nhất của GitHub
     runs-on: ubuntu-latest
 
     steps:
-      # Bước 1: Tải về bộ mã nguồn Android WebView mẫu vào một thư mục tên là "android-project"
-      - name: 1. Clone Android App Template
-        run: git clone https://github.com/TomerGaber/Android-WebView-App-Template.git android-project
+      # Bước 1: Dùng "Action" để clone repo mẫu một cách an toàn.
+      # Đây là bước thay đổi quan trọng để sửa lỗi.
+      # Nó sẽ clone repo mẫu vào thư mục hiện tại.
+      - name: 1. Checkout Android App Template
+        uses: actions/checkout@v4
+        with:
+          repository: TomerGaber/Android-WebView-App-Template
+          path: ./android-project  # Tải vào thư mục con tên là "android-project"
 
-      # Bước 2: "Phẫu thuật" file MainActivity.java
-      # Bước này sẽ XÓA nội dung file gốc và THAY THẾ bằng code mới của chúng ta
-      # đã có đủ các tính năng bạn yêu cầu.
+      # Bước 2: Tùy chỉnh MainActivity. (KHÔNG THAY ĐỔI)
       - name: 2. Customize MainActivity with All Features
         run: |
           cat <<'EOF' > android-project/app/src/main/java/com/tomerg/webviewapp/MainActivity.java
@@ -35,7 +33,6 @@ jobs:
 
           public class MainActivity extends AppCompatActivity {
 
-              // <<-- URL TRANG WEB CỦA BẠN ĐƯỢC ĐẶT CỨNG Ở ĐÂY -->>
               private static final String HOME_PAGE_URL = "https://drasaclone.github.io/Web";
               
               private static final String PREFS_NAME = "WebViewAppPrefs";
@@ -81,21 +78,21 @@ jobs:
           }
           EOF
 
-      # Bước 3: Cài đặt môi trường Java (bắt buộc cho build Android)
+      # Bước 3: Cài đặt Java. (KHÔNG THAY ĐỔI)
       - name: 3. Setup Java Environment
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # Bước 4: Thực hiện build file APK
+      # Bước 4: Build APK. (KHÔNG THAY ĐỔI)
       - name: 4. Build the APK
         run: |
           cd android-project
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      # Bước 5: Tải file APK đã build xong lên mục Artifacts để bạn có thể download
+      # Bước 5: Tải APK lên. (KHÔNG THAY ĐỔI)
       - name: 5. Upload APK as Artifact
         uses: actions/upload-artifact@v4
         with:
