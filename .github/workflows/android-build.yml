@@ -7,36 +7,29 @@ on:
 jobs:
   build_apk:
     runs-on: ubuntu-latest
+
     steps:
-      # 1. Lấy source
+      # 1. Checkout source
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # 2. Cài Node.js (dùng Capacitor CLI)
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      # 3. Cài dependencies (Capacitor) bằng npm install
-      - name: Install dependencies
-        run: npm install
-
-      # 4. Cài Android SDK & Build Tools
+      # 2. Cài Android SDK & Build Tools
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
         with:
           api-level: 33
-          components: build-tools;33.0.2,platforms;android-33
+          components: |
+            build-tools;33.0.2
+            platforms;android-33
 
-      # 5. Copy web assets vào thư mục Android
+      # 3. Copy Web assets vào Android assets
       - name: Prepare Web assets
         run: |
           rm -rf android/app/src/main/assets/public
           mkdir -p android/app/src/main/assets/public
           cp -R Web/* android/app/src/main/assets/public/
 
-      # 6. Build Android release
+      # 4. Build Android release với Gradle
       - name: Build Android Release
         run: |
           cd android
@@ -44,7 +37,7 @@ jobs:
         env:
           GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
-      # 7. Đưa APK lên artifact để download
+      # 5. Upload APK artifact để tải về
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
