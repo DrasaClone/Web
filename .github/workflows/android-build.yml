@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: '20.x'
 
-      # 3. Install Capacitor CLI & Init Android wrapper (webDir=Web)
+      # 3. Install Capacitor CLI & Init/Sync Android wrapper
       - name: Install Capacitor & Init Android
         run: |
           npm install @capacitor/cli@latest @capacitor/android@latest
@@ -27,6 +27,8 @@ jobs:
             npx cap init drasaclone com.drasaclone.app --web-dir=Web
             npx cap add android
           fi
+          # Đảm bảo đồng bộ hóa toàn bộ Android project
+          npx cap sync android
 
       # 4. Setup Android SDK & Build Tools
       - name: Setup Android SDK
@@ -37,19 +39,15 @@ jobs:
             build-tools;33.0.2
             platforms;android-33
 
-      # 5. Prepare Web assets: copy everything except Android/.github/.git into assets/public
+      # 5. Prepare Web assets: copy mọi file từ Web/ vào Android assets/public
       - name: Prepare Web assets
         run: |
           DEST=android/app/src/main/assets/public
           rm -rf "$DEST"
           mkdir -p "$DEST"
-          rsync -a --delete \
-            --exclude='android' \
-            --exclude='.github' \
-            --exclude='.git' \
-            ./ "$DEST/"
+          rsync -a --delete Web/ "$DEST/"
 
-      # 6. Build Android release with Gradle wrapper
+      # 6. Build Android release với Gradle wrapper
       - name: Build Android Release
         run: |
           cd android
