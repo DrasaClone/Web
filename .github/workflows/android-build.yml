@@ -1,64 +1,51 @@
-name: 📦 Build Android APK
+name: Build Android APK
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  build_apk:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout source
-      - name: Checkout repo
+      - name: 📥 Lấy mã nguồn từ GitHub
         uses: actions/checkout@v3
 
-      # 2. Setup Node.js >=20 (yêu cầu của Capacitor)
-      - name: Setup Node.js
+      - name: 🧱 Cài Node.js 20 (yêu cầu cho Capacitor 7+)
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: '20'
 
-      # 3. Install Capacitor CLI & Init/Sync Android wrapper
-      - name: Install Capacitor & Init Android
+      - name: 📦 Cài Capacitor CLI & Android
+        run: npm install @capacitor/cli@latest @capacitor/android@latest
+
+      - name: 🏗️ Khởi tạo & thêm Android nếu chưa có
         run: |
-          npm install @capacitor/cli@latest @capacitor/android@latest
           if [ ! -d android ]; then
             npx cap init drasaclone com.drasaclone.app --web-dir=Web
             npx cap add android
           fi
-          # Đảm bảo đồng bộ hóa toàn bộ Android project
-          npx cap sync android
 
-      # 4. Setup Android SDK & Build Tools
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
-        with:
-          api-level: 33
-          components: |
-            build-tools;33.0.2
-            platforms;android-33
+      - name: 🔄 Đồng bộ plugin và assets
+        run: npx cap sync android
 
-      # 5. Prepare Web assets: copy mọi file từ Web/ vào Android assets/public
-      - name: Prepare Web assets
+      - name: 🗂️ Copy web files vào thư mục Android
         run: |
           DEST=android/app/src/main/assets/public
           rm -rf "$DEST"
           mkdir -p "$DEST"
           rsync -a --delete Web/ "$DEST/"
 
-      # 6. Build Android release với Gradle wrapper
-      - name: Build Android Release
+      - name: 🏗️ Build APK Release
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleRelease
-        env:
-          GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
-      # 7. Upload the APK as an artifact
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+      - name: 📤 Tải APK lên GitHub Actions
+        uses: actions/upload-artifact@v3
         with:
-          name: drasa-android-apk
+          name: app-release.apk
           path: android/app/build/outputs/apk/release/app-release.apk
