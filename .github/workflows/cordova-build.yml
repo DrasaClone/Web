@@ -17,9 +17,14 @@ jobs:
         with:
           node-version: '16'
 
-      - name: Install Cordova
-        run: npm install
-        working-directory: cordova
+      - name: Debug cordova folder
+        run: ls -R cordova
+
+      - name: Install Cordova & deps
+        run: |
+          cd cordova
+          npm install
+        shell: bash
 
       - name: Add Android platform
         run: npx cordova platform add android
@@ -28,11 +33,6 @@ jobs:
       - name: Build APK (Debug)
         run: npx cordova build android --debug
         working-directory: cordova
-
-      - name: Verify APK output
-        run: |
-          echo "Contents of outputs folder:"
-          ls -R cordova/platforms/android/app/build/outputs
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
