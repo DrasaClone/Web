@@ -1,45 +1,52 @@
 name: Build Android APK
 
-# Chạy workflow này mỗi khi có push lên nhánh main
 on:
   push:
-    branches: [ "main" ] # Hoặc "master" tùy theo tên nhánh chính của bạn
-  # Cho phép chạy workflow này thủ công từ tab Actions
+    branches: [ "main" ] # Hoặc "master" tùy nhánh của bạn
   workflow_dispatch:
 
 jobs:
   build:
-    # Chạy trên máy ảo Ubuntu mới nhất của GitHub
     runs-on: ubuntu-latest
 
     steps:
-      # Bước 1: Checkout mã nguồn của bạn từ repo về máy ảo
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Bước 2: Cài đặt Java Development Kit (JDK) phiên bản 17
-      # Android build hiện đại cần Java 17
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # Bước 3: Setup Gradle
-      # Bước này sẽ tự động cache các dependencies để lần build sau nhanh hơn
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-        
-      # Bước 4: Chạy lệnh build của Gradle để tạo file APK
-      # Nó sẽ tự động tải Gradle wrapper nếu cần.
-      # ./gradlew assembleDebug sẽ tạo ra một APK để debug.
+        # LƯU Ý QUAN TRỌNG: KHÔNG DÙNG caching mặc định
+        # để tránh lỗi 503 tạm thời.
+
+      # ***** BƯỚC SỬA LỖI - Thêm bước này vào *****
+      - name: Make Gradle Wrapper executable
+        # Tự thêm quyền thực thi cho gradlew mà không cần commit
+        # Đây là giải pháp đơn giản nếu bạn có thể tự thêm file gradlew vào repo
+        # run: chmod +x ./gradlew 
+
+      # ----- CÁCH SỬA LỖI TỐT HƠN - TỰ ĐỘNG SINH RA GRADLE WRAPPER ---
+      # Bước 3 (Mới): Tự sinh các tệp Gradle Wrapper cần thiết
+      # Nó sẽ tạo ra các tệp gradlew, gradlew.bat, và thư mục gradle/
+      - name: Generate Gradle Wrapper
+        # Bạn nên xác định một phiên bản gradle cụ thể để đảm bảo tính ổn định
+        run: gradle wrapper --gradle-version 8.4 
+
+      # Bước 4 (Cũ): Chạy lệnh build
+      # Bây giờ tệp ./gradlew đã tồn tại và có thể chạy được
       - name: Build with Gradle
         run: ./gradlew :app:assembleDebug
+        # Thêm timeout phòng trường hợp build quá lâu
+        timeout-minutes: 15
 
-      # Bước 5: Tải file APK đã build xong lên làm artifact của workflow
-      # Bạn có thể tải file này về sau khi build xong.
+      # Bước 5 (Cũ): Tải lên artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk # Tên của artifact
-          path: app/build/outputs/apk/debug/app-debug.apk # Đường dẫn đến file APK
+          name: app-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
