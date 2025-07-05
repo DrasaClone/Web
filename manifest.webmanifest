@@ -1,8 +1,0 @@
-{
-  "name": "DrasaClone Web",
-  "short_name": "DrasaClone",
-  "start_url": "/Web/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000"
-}
