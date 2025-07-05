@@ -12,21 +12,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js & Install Cordova
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-      - run: npm install
+
+      - name: Install Cordova
+        run: npm ci
         working-directory: cordova
 
-      - name: Add Android platform & Build
+      - name: Add Android platform
+        run: npx cordova platform add android
+        working-directory: cordova
+
+      - name: Build APK (Debug)
+        run: npx cordova build android --debug
+        working-directory: cordova
+
+      - name: Verify APK output
         run: |
-          npx cordova platform add android
-          npx cordova build android --debug
-        working-directory: cordova
+          echo "Contents of outputs folder:"
+          ls -R cordova/platforms/android/app/build/outputs
 
-      - name: Upload APK artifact
+      - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: DrasaClone-debug
+          name: drasaclone-debug-apk
           path: cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk
