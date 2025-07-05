@@ -1,6 +1,16 @@
+name: Build Cordova APK
+
+# 1. Khai báo khi nào chạy workflow
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -24,8 +34,7 @@ jobs:
                   xmlns:cdv="http://cordova.apache.org/ns/1.0">
             <name>DrasaClone</name>
             <description>Wrapper for drasaclone.github.io/Web</description>
-            <author email="you@example.com"
-                    href="https://drasaclone.github.io">You</author>
+            <author email="you@example.com" href="https://drasaclone.github.io">You</author>
             <content src="https://drasaclone.github.io/Web/" />
             <access origin="*" />
             <allow-intent href="http://*/*" />
