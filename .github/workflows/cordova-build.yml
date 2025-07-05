@@ -1,13 +1,6 @@
-name: CI Build Cordova APK
-
-on:
-  push:
-    branches: [ main ]
-
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -21,7 +14,7 @@ jobs:
       - name: Create Cordova project
         run: cordova create build com.yourcompany.drasaclone DrasaClone
 
-      - name: Generate custom config.xml
+      - name: Generate config.xml
         run: |
           cat <<EOF > build/config.xml
           <?xml version='1.0' encoding='utf-8'?>
@@ -45,18 +38,20 @@ jobs:
       - name: Copy website into www/
         run: |
           rm -rf build/www
-          cp -r Web build/www
+          mkdir -p build/www
+          cp -r Web/* build/www/
 
-      - name: Add Android platform
-        run: cd build && npx cordova platform add android
-
-      - name: Add plugins & Build Debug APK
+      - name: Add Android platform & plugins
         run: |
           cd build
+          npx cordova platform add android
           npx cordova plugin add cordova-plugin-inappbrowser
           npx cordova plugin add cordova-plugin-background-mode
+
+      - name: Build Debug APK
+        run: |
+          cd build
           npx cordova build android --debug
-        shell: bash
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
