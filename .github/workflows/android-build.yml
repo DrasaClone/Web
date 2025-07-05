@@ -9,9 +9,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout source
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      # 2. Setup Node.js (để chạy Capacitor CLI)
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # 3. Cài Capacitor CLI & Android platform (nếu chưa có android/)
+      - name: Install Capacitor & Init Android
+        run: |
+          npm install @capacitor/cli@latest @capacitor/android@latest
+          # Nếu chưa init trước, khởi tạo project Capacitor
+          if [ ! -d android ]; then
+            npx cap init drasaclone com.drasaclone.app --web-dir=Web
+            npx cap add android
+          fi
+
+      # 4. Setup Android SDK & Build Tools
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
         with:
@@ -20,30 +38,24 @@ jobs:
             build-tools;33.0.2
             platforms;android-33
 
+      # 5. Copy Web assets vào Android assets
       - name: Prepare Web assets
         run: |
           DEST=android/app/src/main/assets/public
           rm -rf "$DEST"
           mkdir -p "$DEST"
-          if [ -d Web ]; then
-            # Copy nội dung thư mục Web/ vào assets
-            rsync -a --delete Web/ "$DEST/"
-          else
-            # Nếu không có Web/, lấy toàn bộ file trừ android/.github/.git
-            rsync -a --delete \
-              --exclude='android' \
-              --exclude='.github' \
-              --exclude='.git' \
-              ./ "$DEST/"
-          fi
+          rsync -a --delete Web/ "$DEST/"
 
+      # 6. Build Android release với Gradle wrapper
       - name: Build Android Release
         run: |
           cd android
+          chmod +x gradlew
           ./gradlew assembleRelease
         env:
           GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
+      # 7. Upload APK artifact để tải về
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
