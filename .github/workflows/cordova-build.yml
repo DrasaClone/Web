@@ -1,41 +1,65 @@
-name: Build Cordova APK
+name: CI Build Cordova APK
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build:
+  build-apk:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
+      - name: Setup Node.js & Cordova CLI
         uses: actions/setup-node@v3
         with:
           node-version: '16'
+      - run: npm install -g cordova@10
 
-      - name: Debug cordova folder
-        run: ls -R cordova
+      - name: Create Cordova project
+        run: cordova create build com.yourcompany.drasaclone DrasaClone
 
-      - name: Install Cordova & deps
+      - name: Generate custom config.xml
         run: |
-          cd cordova
-          npm install
-        shell: bash
+          cat <<EOF > build/config.xml
+          <?xml version='1.0' encoding='utf-8'?>
+          <widget id="com.yourcompany.drasaclone"
+                  version="1.0.0"
+                  xmlns="http://www.w3.org/ns/widgets"
+                  xmlns:cdv="http://cordova.apache.org/ns/1.0">
+            <name>DrasaClone</name>
+            <description>Wrapper for drasaclone.github.io/Web</description>
+            <author email="you@example.com"
+                    href="https://drasaclone.github.io">You</author>
+            <content src="https://drasaclone.github.io/Web/" />
+            <access origin="*" />
+            <allow-intent href="http://*/*" />
+            <allow-intent href="https://*/*" />
+            <preference name="LoadUrlTimeoutValue" value="700000" />
+            <preference name="AutoHideSplashScreen" value="false" />
+          </widget>
+          EOF
+
+      - name: Copy website into www/
+        run: |
+          rm -rf build/www
+          cp -r Web build/www
 
       - name: Add Android platform
-        run: npx cordova platform add android
-        working-directory: cordova
+        run: cd build && npx cordova platform add android
 
-      - name: Build APK (Debug)
-        run: npx cordova build android --debug
-        working-directory: cordova
+      - name: Add plugins & Build Debug APK
+        run: |
+          cd build
+          npx cordova plugin add cordova-plugin-inappbrowser
+          npx cordova plugin add cordova-plugin-background-mode
+          npx cordova build android --debug
+        shell: bash
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: drasaclone-debug-apk
-          path: cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          path: build/platforms/android/app/build/outputs/apk/debug/app-debug.apk
