@@ -1,12 +1,8 @@
 # .github/workflows/build-android.yml
-name: "Build WebView APK with State Persistence"
+name: "Build WebView APK with In-App Links & State Persistence"
 
 on:
   workflow_dispatch:
-    inputs:
-      push_sender_id:
-        description: 'FCM Sender ID for push notifications'
-        required: true
 
 jobs:
   build:
@@ -31,12 +27,11 @@ jobs:
           cordova create . com.drasaclone.web WebApp
           cordova platform add android
 
-      - name: Install Cordova plugins
+      - name: Install Cordova plugins (excluding push)
         run: |
           cd android-webapp
           cordova plugin add cordova-plugin-inappbrowser
           cordova plugin add cordova-plugin-background-mode
-          cordova plugin add phonegap-plugin-push --variable SENDER_ID="${{ github.event.inputs.push_sender_id }}"
 
       - name: Patch config.xml
         run: |
@@ -48,7 +43,6 @@ jobs:
 
       - name: Copy custom index.js
         run: |
-          # Assumes you have a custom www/js/index.js committed in repo
           cp www/js/index.js android-webapp/www/js/index.js
 
       - name: Configure WebView URL
@@ -67,6 +61,6 @@ jobs:
           path: android-webapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
 
 # Note:
-# 1. Create a file www/js/index.js in your repo with the in-app link, state persistence, and background-mode logic.
-# 2. Cordova debug APK is auto-signed with debug keystore.
-# 3. On device: uninstall old version, enable unknown sources, install 'app-debug.apk'.
+# - Push plugin removed to avoid google-services errors. To use push, add valid google-services.json to platforms/android/app/ and re-add plugin.
+# - Ensure www/js/index.js contains in-app link overrides, URL persistence, and background mode logic.
+# - On device: uninstall old version, enable unknown sources, install 'app-debug.apk'."
