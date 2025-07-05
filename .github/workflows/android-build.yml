@@ -9,11 +9,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout source
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # 2. Cài Android SDK & Build Tools
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
         with:
@@ -22,14 +20,18 @@ jobs:
             build-tools;33.0.2
             platforms;android-33
 
-      # 3. Copy Web assets vào Android assets
       - name: Prepare Web assets
         run: |
-          rm -rf android/app/src/main/assets/public
-          mkdir -p android/app/src/main/assets/public
-          cp -R Web/* android/app/src/main/assets/public/
+          DEST=android/app/src/main/assets/public
+          rm -rf "$DEST"
+          mkdir -p "$DEST"
+          # Nếu bạn có thư mục Web/, copy nó; nếu không, copy tất cả file ở root
+          if [ -d Web ]; then
+            cp -R Web/* "$DEST"
+          else
+            cp -R * "$DEST"
+          fi
 
-      # 4. Build Android release với Gradle
       - name: Build Android Release
         run: |
           cd android
@@ -37,7 +39,6 @@ jobs:
         env:
           GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
-      # 5. Upload APK artifact để tải về
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
