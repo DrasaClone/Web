@@ -26,7 +26,7 @@ jobs:
           npx cap init DrasaCloneWeb com.drasaclone.web --web-dir=www
 
       - name: Add Android platform
-        run: npx cap add android --npm-client npm
+        run: npx cap add android
 
       - name: Copy web assets
         run: npx cap copy android
