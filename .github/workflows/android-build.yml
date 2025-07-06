@@ -1,35 +1,42 @@
-# .github/workflows/build-pwa-apk.yml
-name: Build PWA APK via PWABuilder
+name: Build PWA APK
 
 on:
   workflow_dispatch:
 
 jobs:
-  build_apk:
+  build:
     runs-on: ubuntu-latest
     steps:
+      # 1. Lấy code của bạn
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Build APK with PWABuilder Action
-        uses: pwa-builder/pwabuilder-action@v1
+      # 2. Cài Java 17 để Gradle / PWABuilder CLI dùng
+      - name: Setup Java
+        uses: actions/setup-java@v3
         with:
-          url: https://drasaclone.github.io/Web/
+          distribution: temurin
+          java-version: '17'
 
-      - name: Download APK artifact
+      # 3. Cài PWABuilder CLI
+      - name: Install PWABuilder CLI
+        run: npm install -g pwabuilder  # :contentReference[oaicite:0]{index=0}
+
+      # 4. Tạo project Android từ PWA manifest của bạn
+      - name: Generate Android project
         run: |
-          # The PWABuilder action uploads artifacts named *.apk.zip
-          mkdir -p output
-          for file in $(ls *.apk.zip); do
-            unzip "$file" -d output
-          done
+          pwabuilder https://drasaclone.github.io/Web/ \
+            --platforms android \
+            --directory twa-project
 
-      - name: Upload final APK
+      # 5. Build universal debug APK bằng Gradle
+      - name: Build APK
+        working-directory: twa-project/android
+        run: ./gradlew clean assembleDebug
+
+      # 6. Upload artifact APK để bạn tải về
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: drasaclone-pwa-apk
-          path: output/*.apk
-
-# Note:
-# - This workflow uses PWABuilder's GitHub Action to build the APK from your PWA URL.
-# - Simply run this workflow, then download the 'drasaclone-pwa-apk' artifact (APK file) to install.
+          path: twa-project/android/app/build/outputs/apk/debug/app-debug.apk
