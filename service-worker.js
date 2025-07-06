@@ -1,81 +1,47 @@
-// service-worker.js
+// This is the "Offline page" service worker
 
-// Tăng phiên bản cache để buộc cập nhật
-const CACHE_NAME = 'matran-cache-v1.7'; 
-const START_URL = './index.html';
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
 
-// Danh sách các file cốt lõi
-const CORE_ASSETS = [
-  './', 
-  START_URL,
-  './old.html',
-  // Thêm các file tĩnh khác nếu có, ví dụ icon nếu bạn host riêng
-  'https://www.gstatic.com/images/branding/product/1x/firebase_192dp.png', // Cache luôn icon
-  'https://www.gstatic.com/images/branding/product/1x/firebase_512dp.png'
-];
+const CACHE = "pwabuilder-page";
 
+// TODO: replace the following with the correct offline fallback page i.e.: const offlineFallbackPage = "offline.html";
+const offlineFallbackPage = "ToDo-replace-this-name.html";
 
-// --- 1. GIAI ĐOẠN CÀI ĐẶT ---
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[SW] Caching core assets on install');
-        return cache.addAll(CORE_ASSETS);
-      })
-      .then(() => self.skipWaiting())
-  );
-});
-
-
-// --- 2. GIAI ĐOẠN KÍCH HOẠT ---
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
-  );
-});
-
-
-// --- 3. GIAI ĐOẠN FETCH (QUAN TRỌNG NHẤT) ---
-// Sử dụng chiến lược "Stale-While-Revalidate"
-self.addEventListener('fetch', event => {
-  // Chỉ xử lý các yêu cầu GET
-  if (event.request.method !== 'GET') return;
-  
-  // Bỏ qua các yêu cầu đến Firebase và các dịch vụ bên thứ 3 để tránh lỗi
-  const requestUrl = new URL(event.request.url);
-  if (requestUrl.hostname.includes('firebase') || requestUrl.hostname.includes('pubnub') || requestUrl.hostname.includes('googleapis') || requestUrl.hostname.includes('facebook')) {
-    return; 
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
   }
+});
 
-  event.respondWith(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.match(event.request)
-        .then(cachedResponse => {
-          // Lấy yêu cầu mới từ mạng song song
-          const fetchPromise = fetch(event.request).then(networkResponse => {
-            // Nếu thành công, cập nhật cache
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
-
-          // Trả về bản cache ngay lập tức (nếu có), hoặc chờ fetch thành công
-          return cachedResponse || fetchPromise;
-        })
-    })
+self.addEventListener('install', async (event) => {
+  event.waitUntil(
+    caches.open(CACHE)
+      .then((cache) => cache.add(offlineFallbackPage))
   );
 });
 
-// Sự kiện click vào thông báo
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  event.waitUntil(clients.openWindow(START_URL));
+if (workbox.navigationPreload.isSupported()) {
+  workbox.navigationPreload.enable();
+}
+
+self.addEventListener('fetch', (event) => {
+  if (event.request.mode === 'navigate') {
+    event.respondWith((async () => {
+      try {
+        const preloadResp = await event.preloadResponse;
+
+        if (preloadResp) {
+          return preloadResp;
+        }
+
+        const networkResp = await fetch(event.request);
+        return networkResp;
+      } catch (error) {
+
+        const cache = await caches.open(CACHE);
+        const cachedResp = await cache.match(offlineFallbackPage);
+        return cachedResp;
+      }
+    })());
+  }
 });
