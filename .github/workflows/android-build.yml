@@ -1,4 +1,3 @@
-# .github/workflows/build-twa.yml
 name: Build TWA APK
 
 on:
@@ -8,28 +7,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
-        with: node-version: '18'
+        with:
+          node-version: '18'
 
-      - name: Install Bubblewrap
+      - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
 
-      - name: Init TWA project
-        run: >
+      - name: Initialize TWA project
+        run: |
           npx bubblewrap init \
             --manifest=https://drasaclone.github.io/Web/manifest.json \
             --packageId=com.drasaclone.web \
             --appVersionName=1.0.0 \
             --appVersionCode=1
 
-      - name: Build APK
-        run: bubblewrap build
+      - name: Build TWA APK
+        run: |
+          npx bubblewrap build
 
-      - name: Upload APK
+      - name: Upload TWA APK
         uses: actions/upload-artifact@v4
         with:
           name: drasaclone-twa-apk
