@@ -1,5 +1,5 @@
 # .github/workflows/build-android.yml
-name: "Build WebView APK with In-App Links & State Persistence"
+name: "Build WebView APK"
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Setup Node.js
@@ -16,60 +16,33 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install Cordova CLI
+      - name: Install Cordova
         run: npm install -g cordova
 
-      - name: Create Cordova project
+      - name: Prepare Cordova project
         run: |
           rm -rf android-webapp
-          mkdir -p android-webapp
+          mkdir android-webapp
           cd android-webapp
           cordova create . com.drasaclone.web WebApp
           cordova platform add android
 
-      - name: Install Cordova plugins
+      - name: Add Cordova plugins
         run: |
           cd android-webapp
           cordova plugin add cordova-plugin-inappbrowser
           cordova plugin add cordova-plugin-background-mode
 
-      - name: Patch config.xml
+      - name: Copy www assets
         run: |
-          cd android-webapp
-          sed -i '/<widget /a <allow-navigation href="https://drasaclone.github.io/Web/*" />' config.xml
+          cp -r ../www/* android-webapp/www/
 
-      - name: Copy custom index.js
-        run: |
-          cp www/js/index.js android-webapp/www/js/index.js
-
-      - name: Configure WebView URL
+      - name: Configure Android
         run: |
           sed -i 's|<content src=.*|<content src="https://drasaclone.github.io/Web/" />|' android-webapp/config.xml
-
-      - name: Set Android preferences
-        run: |
-          # Set minimum SDK and disable ABI splits in config.xml
           sed -i '/<platform name="android"/a <preference name="android-minSdkVersion" value="16" />' android-webapp/config.xml
 
-      - name: Add build-extras.gradle
-        run: |
-          cat <<EOF > android-webapp/platforms/android/app/build-extras.gradle
-android {
-  defaultConfig {
-    minSdkVersion 16
-  }
-  splits {
-    abi {
-      enable false
-    }
-  }
-}
-EOF
-
-      - name: Build signed debug APK
-        run: |
-          cd android-webapp
-          cordova build android --debug -- --gradleArg=-PcdvBuildMultipleApks=false
+      - name: Build Debug APK
         run: |
           cd android-webapp
           cordova build android --debug -- --gradleArg=-PcdvBuildMultipleApks=false
@@ -77,10 +50,10 @@ EOF
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: drasaclone-web-app-debug
+          name: app-debug-apk
           path: android-webapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
 
-# Note:
-# - Using Cordova CLI ensures proper Gradle invocation and universal APK.
-# - Cordova debug APK is auto-signed with debug keystore.
-# - On device: uninstall old version, enable unknown sources, install app-debug.apk.
+# Notes:
+# - Debug APK is auto-signed by Cordova.
+# - Ensure you uninstall previous versions and enable installations from unknown sources.
+# - Custom logic (inappbrowser, background-mode, state persistence) should be in www/js/index.js in your repo.
