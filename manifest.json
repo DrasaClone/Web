@@ -48,5 +48,9 @@
     "social",
     "utilities"
   ],
-  "id": "heygo"
+  "prefer_related_applications": true,
+  "id": "heygo",
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
 }
