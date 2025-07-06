@@ -20,6 +20,7 @@ jobs:
         run: npm install -g @bubblewrap/cli
 
       - name: Setup Java
+        id: setup-java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
