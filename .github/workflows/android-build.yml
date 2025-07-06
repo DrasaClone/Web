@@ -27,7 +27,9 @@ jobs:
 
       - name: Generate Android project
         run: |
-          pwabuilder https://drasaclone.github.io/Web/ \
+          # Generate Android project using local manifest.json
+          pwabuilder \
+            --manifest-file manifest.json \
             --platforms android \
             --directory twa-project
 
