@@ -1,5 +1,5 @@
-# .github/workflows/build-twa.yml
-name: Build TWA APK
+# .github/workflows/build-capacitor-android.yml
+name: Build Capacitor Android APK
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Setup Node.js
@@ -16,37 +16,36 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Setup Java
-        id: setup-java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+      - name: Install Capacitor CLI
+        run: npm install -g @capacitor/cli
 
-      - name: Install Bubblewrap CLI
-        run: npm install -g @bubblewrap/cli
-
-      - name: Initialize TWA project
-        env:
-          JAVA_HOME: ${{ steps.setup-java.outputs.java-home }}
+      - name: Initialize Capacitor project
         run: |
-          npx bubblewrap init \
-            --manifest=https://drasaclone.github.io/Web/manifest.json \
-            --packageId=com.drasaclone.web \
-            --appVersionName=1.0.0 \
-            --appVersionCode=1 \
-            --interactive=false \
-            --jdkPath="$JAVA_HOME"
+          npm install # install dependencies and ensure 'www/' exists
+          npx cap init DrasaCloneWeb com.drasaclone.web --web-dir=www --force
 
-      - name: Build TWA APK
-        run: npx bubblewrap build
+      - name: Add Android platform
+        run: npx cap add android --npm-client npm
 
-      - name: Upload TWA APK
+      - name: Copy web assets
+        run: npx cap copy android
+
+      - name: Configure Android
+        run: |
+          # Allow all navigation within WebView
+          sed -i '/<activity/a \    <intent-filter>\n      <action android:name="android.intent.action.VIEW" />\n      <category android:name="android.intent.category.DEFAULT" />\n      <category android:name="android.intent.category.BROWSABLE" />\n      <data android:scheme="https" android:host="drasaclone.github.io" />\n    </intent-filter>' android/app/src/main/AndroidManifest.xml
+
+      - name: Build APK
+        run: |
+          cd android && ./gradlew clean assembleDebug
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: drasaclone-twa-apk
-          path: twa-build/*.apk
+          name: drasaclone-capacitor-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
 
-# Note:
-# - Ensure manifest.json and sw.js are available at https://drasaclone.github.io/Web/
-# - This workflow builds a debug-signed, universal TWA APK ready for installation.
+# Notes:
+# - This uses Capacitor instead of Cordova/Bubblewrap.
+# - No interactive prompts; fully non-interactive build of universal, debug-signed APK.
+# - Install 'app-debug.apk' on Android (enable unknown sources, uninstall previous version).
