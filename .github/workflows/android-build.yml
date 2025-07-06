@@ -19,7 +19,15 @@ jobs:
       - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
 
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
       - name: Initialize TWA project
+        env:
+          JAVA_HOME: ${{ steps.setup-java.outputs.java-home }}
         run: |
           npx bubblewrap init \
             --manifest=https://drasaclone.github.io/Web/manifest.json \
