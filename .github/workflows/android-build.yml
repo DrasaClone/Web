@@ -1,3 +1,4 @@
+# .github/workflows/build-twa.yml
 name: Build TWA APK
 
 on:
@@ -24,7 +25,8 @@ jobs:
             --manifest=https://drasaclone.github.io/Web/manifest.json \
             --packageId=com.drasaclone.web \
             --appVersionName=1.0.0 \
-            --appVersionCode=1
+            --appVersionCode=1 \
+            --interactive=false
 
       - name: Build TWA APK
         run: |
@@ -35,3 +37,7 @@ jobs:
         with:
           name: drasaclone-twa-apk
           path: twa-build/*.apk
+
+# Note:
+# - Ensure manifest.json and sw.js are present at https://drasaclone.github.io/Web/.
+# - Bubblewrap produces a debug-signed, universal APK ready to install.
