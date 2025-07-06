@@ -35,7 +35,14 @@ jobs:
 
       - name: Copy www assets
         run: |
-          cp -r ../www/* android-webapp/www/
+          # Copy all project files except workflow and android-webapp into WebView www
+          cd $GITHUB_WORKSPACE
+          mkdir -p android-webapp/www
+          for item in *; do
+            if [[ "$item" != "android-webapp" && "$item" != ".github" && "$item" != ".git" ]]; then
+              cp -r "$item" android-webapp/www/
+            fi
+          done
 
       - name: Configure Android
         run: |
