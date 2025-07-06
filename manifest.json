@@ -16,7 +16,7 @@
     {
       "src": "https://www.gstatic.com/images/branding/product/1x/firebase_512dp.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
       "purpose": "any"
     },
     {
@@ -28,7 +28,7 @@
     {
       "src": "https://www.gstatic.com/images/branding/product/1x/firebase_512dp.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
       "purpose": "markable"
     }
   ],
