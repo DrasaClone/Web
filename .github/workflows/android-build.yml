@@ -27,10 +27,10 @@ jobs:
           java-version: '17'
 
       - name: Initialize TWA project
-        env:
-          JAVA_HOME: "${{ steps.setup-java.outputs.java-home }}"
         run: |
-          npx bubblewrap init \
+          # use non-interactive by piping 'n' to skip JDK install prompt
+          printf "n
+" | npx bubblewrap init \
             --manifest=https://drasaclone.github.io/Web/manifest.json \
             --packageId=com.drasaclone.web \
             --appVersionName=1.0.0 \
