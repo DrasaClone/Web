@@ -27,9 +27,8 @@ jobs:
 
       - name: Generate Android project
         run: |
-          # Generate Android project using local manifest.json
-          pwabuilder \
-            --manifest-file manifest.json \
+          # Generate Android project using local manifest.json file
+          pwabuilder manifest.json \
             --platforms android \
             --directory twa-project
 
