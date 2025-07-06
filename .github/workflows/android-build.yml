@@ -1,5 +1,5 @@
 # .github/workflows/build-pwa-apk.yml
-name: Build PWA APK
+name: Build PWA APK via Bubblewrap Action
 
 on:
   workflow_dispatch:
@@ -11,39 +11,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Java 17
+      - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Install PWABuilder CLI
-        run: npm install -g pwabuilder
-
-      - name: Patch manifest.json
-        run: |
-          # Ensure manifest.json uses valid purposes
-          sed -i 's/"purpose"\s*:\s*"markable"/"purpose":"maskable"/g' manifest.json
-
-      - name: Generate Android project
-        run: |
-          # Generate Android project using local manifest.json file
-          pwabuilder manifest.json \
-            --platforms android \
-            --directory twa-project
-
-      - name: Build APK
-        run: |
-          cd twa-project/android
-          ./gradlew clean assembleDebug
+      - name: Build APK via Bubblewrap Action
+        uses: GoogleChromeLabs/bubblewrap-action@v1
+        with:
+          manifest: https://drasaclone.github.io/Web/manifest.json
+          packageId: com.drasaclone.web
+          appVersion: 1.0.0
+          appVersionCode: 1
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: drasaclone-pwa-apk
-          path: twa-project/android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
 
-# Notes:
-# - This workflow uses PWABuilder CLI to generate an Android project from your PWA.
-# - The sed step corrects any 'markable' typos to 'maskable' in manifest.json.
-# - The generated APK is a universal, debug-signed APK ready to install on any Android device.
+# Note:
+# - This uses the Bubblewrap GitHub Action to init and build a Trusted Web Activity APK.
+# - Ensure manifest.json on your site has valid "purpose": "maskable" for icons.
+# - Artifact 'drasaclone-pwa-apk' is a universal, debug-signed APK ready to install.
