@@ -16,12 +16,23 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install Capacitor CLI
-        run: npm install -g @capacitor/cli
-
-      - name: Initialize Capacitor project
+      - name: Prepare Capacitor project
         run: |
-          npm install # install dependencies and ensure 'www/' exists
+          # Create minimal package.json for Capacitor
+          cat <<EOF > package.json
+{
+  "name": "DrasaCloneWeb",
+  "version": "1.0.0",
+  "dependencies": {
+    "@capacitor/core": "^5.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^5.0.0"
+  }
+}
+EOF
+          # Install Capacitor CLI and core
+          npm install
           npx cap init DrasaCloneWeb com.drasaclone.web --web-dir=www --force
 
       - name: Add Android platform
@@ -30,14 +41,14 @@ jobs:
       - name: Copy web assets
         run: npx cap copy android
 
-      - name: Configure Android
+      - name: Configure AndroidManifest for in-app links
         run: |
-          # Allow all navigation within WebView
           sed -i '/<activity/a \    <intent-filter>\n      <action android:name="android.intent.action.VIEW" />\n      <category android:name="android.intent.category.DEFAULT" />\n      <category android:name="android.intent.category.BROWSABLE" />\n      <data android:scheme="https" android:host="drasaclone.github.io" />\n    </intent-filter>' android/app/src/main/AndroidManifest.xml
 
-      - name: Build APK
+      - name: Build Debug APK
         run: |
-          cd android && ./gradlew clean assembleDebug
+          cd android
+          ./gradlew clean assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -46,6 +57,6 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
 # Notes:
-# - This uses Capacitor instead of Cordova/Bubblewrap.
-# - No interactive prompts; fully non-interactive build of universal, debug-signed APK.
-# - Install 'app-debug.apk' on Android (enable unknown sources, uninstall previous version).
+# - This workflow creates a minimal Capacitor project, adds Android platform, copies web assets, and builds a universal, debug-signed APK.
+# - Ensure your static web files are in the 'www/' directory at the root of the repo.
+# - On Android device: uninstall previous version, enable unknown sources, install 'app-debug.apk'."
