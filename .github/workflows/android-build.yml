@@ -1,3 +1,4 @@
+# .github/workflows/build-pwa-apk.yml
 name: Build PWA APK
 
 on:
@@ -10,7 +11,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Java
+      - name: Setup Java 17
         uses: actions/setup-java@v3
         with:
           distribution: temurin
@@ -19,6 +20,11 @@ jobs:
       - name: Install PWABuilder CLI
         run: npm install -g pwabuilder
 
+      - name: Patch manifest.json
+        run: |
+          # Ensure manifest.json uses valid purposes
+          sed -i 's/"purpose"\s*:\s*"markable"/"purpose":"maskable"/g' manifest.json
+
       - name: Generate Android project
         run: |
           pwabuilder https://drasaclone.github.io/Web/ \
@@ -26,11 +32,17 @@ jobs:
             --directory twa-project
 
       - name: Build APK
-        working-directory: twa-project/android
-        run: ./gradlew clean assembleDebug
+        run: |
+          cd twa-project/android
+          ./gradlew clean assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: drasaclone-pwa-apk
           path: twa-project/android/app/build/outputs/apk/debug/app-debug.apk
+
+# Notes:
+# - This workflow uses PWABuilder CLI to generate an Android project from your PWA.
+# - The sed step corrects any 'markable' typos to 'maskable' in manifest.json.
+# - The generated APK is a universal, debug-signed APK ready to install on any Android device.
