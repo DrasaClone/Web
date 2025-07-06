@@ -1,5 +1,5 @@
-# .github/workflows/build-android.yml
-name: "Build WebView APK"
+# .github/workflows/build-twa.yml
+name: Build TWA APK
 
 on:
   workflow_dispatch:
@@ -8,59 +8,29 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
-        with:
-          node-version: '18'
+        with: node-version: '18'
 
-      - name: Install Cordova
-        run: npm install -g cordova
+      - name: Install Bubblewrap
+        run: npm install -g @bubblewrap/cli
 
-      - name: Prepare Cordova project
-        run: |
-          rm -rf android-webapp
-          mkdir android-webapp
-          cd android-webapp
-          cordova create . com.drasaclone.web WebApp
-          cordova platform add android
+      - name: Init TWA project
+        run: >
+          npx bubblewrap init \
+            --manifest=https://drasaclone.github.io/Web/manifest.json \
+            --packageId=com.drasaclone.web \
+            --appVersionName=1.0.0 \
+            --appVersionCode=1
 
-      - name: Add Cordova plugins
-        run: |
-          cd android-webapp
-          cordova plugin add cordova-plugin-inappbrowser
-          cordova plugin add cordova-plugin-background-mode
-
-      - name: Copy www assets
-        run: |
-          # Copy all project files except workflow and android-webapp into WebView www
-          cd $GITHUB_WORKSPACE
-          mkdir -p android-webapp/www
-          for item in *; do
-            if [[ "$item" != "android-webapp" && "$item" != ".github" && "$item" != ".git" ]]; then
-              cp -r "$item" android-webapp/www/
-            fi
-          done
-
-      - name: Configure Android
-        run: |
-          sed -i 's|<content src=.*|<content src="https://drasaclone.github.io/Web/" />|' android-webapp/config.xml
-          sed -i '/<platform name="android"/a <preference name="android-minSdkVersion" value="16" />' android-webapp/config.xml
-
-      - name: Build Debug APK
-        run: |
-          cd android-webapp
-          cordova build android --debug -- --gradleArg=-PcdvBuildMultipleApks=false
+      - name: Build APK
+        run: bubblewrap build
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
-          path: android-webapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
-
-# Notes:
-# - Debug APK is auto-signed by Cordova.
-# - Ensure you uninstall previous versions and enable installations from unknown sources.
-# - Custom logic (inappbrowser, background-mode, state persistence) should be in www/js/index.js in your repo.
+          name: drasaclone-twa-apk
+          path: twa-build/*.apk
