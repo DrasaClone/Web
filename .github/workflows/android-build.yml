@@ -46,7 +46,30 @@ jobs:
         run: |
           sed -i 's|<content src=.*|<content src="https://drasaclone.github.io/Web/" />|' android-webapp/config.xml
 
+      - name: Set Android preferences
+        run: |
+          # Set minimum SDK and disable ABI splits in config.xml
+          sed -i '/<platform name="android"/a <preference name="android-minSdkVersion" value="16" />' android-webapp/config.xml
+
+      - name: Add build-extras.gradle
+        run: |
+          cat <<EOF > android-webapp/platforms/android/app/build-extras.gradle
+android {
+  defaultConfig {
+    minSdkVersion 16
+  }
+  splits {
+    abi {
+      enable false
+    }
+  }
+}
+EOF
+
       - name: Build signed debug APK
+        run: |
+          cd android-webapp
+          cordova build android --debug -- --gradleArg=-PcdvBuildMultipleApks=false
         run: |
           cd android-webapp
           cordova build android --debug -- --gradleArg=-PcdvBuildMultipleApks=false
