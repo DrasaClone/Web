@@ -30,6 +30,18 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "markable"
+    },
+    {
+      "src": "https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://www.gstatic.com/images/branding/product/1x/firebase_512dp.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "dir": "auto",
