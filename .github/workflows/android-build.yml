@@ -7,34 +7,28 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # 1. Lấy code của bạn
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Cài Java 17 để Gradle / PWABuilder CLI dùng
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: '17'
 
-      # 3. Cài PWABuilder CLI
       - name: Install PWABuilder CLI
-        run: npm install -g pwabuilder  # :contentReference[oaicite:0]{index=0}
+        run: npm install -g pwabuilder
 
-      # 4. Tạo project Android từ PWA manifest của bạn
       - name: Generate Android project
         run: |
           pwabuilder https://drasaclone.github.io/Web/ \
             --platforms android \
             --directory twa-project
 
-      # 5. Build universal debug APK bằng Gradle
       - name: Build APK
         working-directory: twa-project/android
         run: ./gradlew clean assembleDebug
 
-      # 6. Upload artifact APK để bạn tải về
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
