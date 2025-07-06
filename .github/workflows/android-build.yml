@@ -1,52 +1,35 @@
-# .github/workflows/build-capacitor-android.yml
-name: Build Capacitor Android APK
+# .github/workflows/build-pwa-apk.yml
+name: Build PWA APK via PWABuilder
 
 on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build_apk:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Build APK with PWABuilder Action
+        uses: pwa-builder/pwabuilder-action@v1
         with:
-          node-version: '18'
+          url: https://drasaclone.github.io/Web/
 
-      - name: Prepare Capacitor project
+      - name: Download APK artifact
         run: |
-          # Create minimal package.json for Capacitor
-          echo '{"name":"DrasaCloneWeb","version":"1.0.0","dependencies":{"@capacitor/core":"^5.0.0","@capacitor/android":"^5.0.0"},"devDependencies":{"@capacitor/cli":"^5.0.0"}}' > package.json
-          # Install Capacitor CLI and core
-          npm install
-          # Initialize Capacitor project non-interactive
-          npx cap init DrasaCloneWeb com.drasaclone.web --web-dir=www
+          # The PWABuilder action uploads artifacts named *.apk.zip
+          mkdir -p output
+          for file in $(ls *.apk.zip); do
+            unzip "$file" -d output
+          done
 
-      - name: Add Android platform
-        run: npx cap add android
-
-      - name: Copy web assets
-        run: npx cap copy android
-
-      - name: Configure AndroidManifest for in-app links
-        run: |
-          sed -i '/<activity/a \    <intent-filter>\n      <action android:name="android.intent.action.VIEW" />\n      <category android:name="android.intent.category.DEFAULT" />\n      <category android:name="android.intent.category.BROWSABLE" />\n      <data android:scheme="https" android:host="drasaclone.github.io" />\n    </intent-filter>' android/app/src/main/AndroidManifest.xml
-
-      - name: Build Debug APK
-        run: |
-          cd android
-          ./gradlew clean assembleDebug
-
-      - name: Upload APK
+      - name: Upload final APK
         uses: actions/upload-artifact@v4
         with:
-          name: drasaclone-capacitor-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: drasaclone-pwa-apk
+          path: output/*.apk
 
-# Notes:
-# - This workflow creates a minimal Capacitor project, adds Android platform, copies web assets, and builds a universal, debug-signed APK.
-# - Ensure your static web files are in the 'www/' directory at the root of the repo.
-# - On Android device: uninstall previous version, enable unknown sources, install 'app-debug.apk'."
+# Note:
+# - This workflow uses PWABuilder's GitHub Action to build the APK from your PWA URL.
+# - Simply run this workflow, then download the 'drasaclone-pwa-apk' artifact (APK file) to install.
