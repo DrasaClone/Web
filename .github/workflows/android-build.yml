@@ -27,7 +27,7 @@ jobs:
           cordova create . com.drasaclone.web WebApp
           cordova platform add android
 
-      - name: Install Cordova plugins (excluding push)
+      - name: Install Cordova plugins
         run: |
           cd android-webapp
           cordova plugin add cordova-plugin-inappbrowser
@@ -36,10 +36,7 @@ jobs:
       - name: Patch config.xml
         run: |
           cd android-webapp
-          # Allow in-app navigation
           sed -i '/<widget /a <allow-navigation href="https://drasaclone.github.io/Web/*" />' config.xml
-          # Add notifications permission
-          sed -i '/<platform name="android"/a <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/uses-permission"><uses-permission android:name="android.permission.POST_NOTIFICATIONS" /></edit-config>' config.xml
 
       - name: Copy custom index.js
         run: |
@@ -49,10 +46,10 @@ jobs:
         run: |
           sed -i 's|<content src=.*|<content src="https://drasaclone.github.io/Web/" />|' android-webapp/config.xml
 
-      - name: Build signed debug APK
+      - name: Build APK via Gradle
         run: |
-          cd android-webapp
-          cordova build android --debug -- --gradleArg=-PcdvBuildMultipleApks=false
+          cd android-webapp/platforms/android
+          ./gradlew clean assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -61,6 +58,6 @@ jobs:
           path: android-webapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
 
 # Note:
-# - Push plugin removed to avoid google-services errors. To use push, add valid google-services.json to platforms/android/app/ and re-add plugin.
-# - Ensure www/js/index.js contains in-app link overrides, URL persistence, and background mode logic.
-# - On device: uninstall old version, enable unknown sources, install 'app-debug.apk'."
+# - Using direct Gradle assembleDebug to ensure a universal APK.
+# - Cordova debug APK is auto-signed with debug keystore.
+# - On device: uninstall old version, enable unknown sources, install app-debug.apk.
