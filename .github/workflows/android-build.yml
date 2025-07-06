@@ -16,9 +16,6 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install Bubblewrap CLI
-        run: npm install -g @bubblewrap/cli
-
       - name: Setup Java
         id: setup-java
         uses: actions/setup-java@v3
@@ -26,20 +23,16 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Install Bubblewrap CLI
+        run: npm install -g @bubblewrap/cli
+
       - name: Initialize TWA project
         run: |
-          # Pipe 'n' to skip JDK install prompt and run non-interactive
-          printf 'n
-' | npx bubblewrap init \
-            --manifest=https://drasaclone.github.io/Web/manifest.json \
-            --packageId=com.drasaclone.web \
-            --appVersionName=1.0.0 \
-            --appVersionCode=1 \
-            --interactive=false
+          # Skip JDK install prompt and run non-interactive init
+          printf 'n\n' | npx bubblewrap init --manifest=https://drasaclone.github.io/Web/manifest.json --packageId=com.drasaclone.web --appVersionName=1.0.0 --appVersionCode=1 --interactive=false
 
       - name: Build TWA APK
-        run: |
-          npx bubblewrap build
+        run: npx bubblewrap build
 
       - name: Upload TWA APK
         uses: actions/upload-artifact@v4
@@ -48,5 +41,5 @@ jobs:
           path: twa-build/*.apk
 
 # Note:
-# - Ensure manifest.json and sw.js are present at https://drasaclone.github.io/Web/.
-# - Bubblewrap produces a debug-signed, universal APK ready to install.
+# - Ensure manifest.json and sw.js are available at https://drasaclone.github.io/Web/
+# - This workflow builds a debug-signed, universal TWA APK ready for installation.
