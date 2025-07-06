@@ -28,9 +28,9 @@ jobs:
 
       - name: Initialize TWA project
         run: |
-          # use non-interactive by piping 'n' to skip JDK install prompt
-          printf "n
-" | npx bubblewrap init \
+          # Pipe 'n' to skip JDK install prompt and run non-interactive
+          printf 'n
+' | npx bubblewrap init \
             --manifest=https://drasaclone.github.io/Web/manifest.json \
             --packageId=com.drasaclone.web \
             --appVersionName=1.0.0 \
