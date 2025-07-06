@@ -17,27 +17,10 @@ const urlsToCache = [
 ];
 
 // 1. Cài đặt Service Worker và lưu cache
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache and added core files');
-        return cache.addAll(urlsToCache);
-      })
-  );
-  self.skipWaiting(); // Kích hoạt service worker mới ngay lập tức
-});
+
 
 // 2. Lấy dữ liệu từ cache khi offline
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Nếu có trong cache thì trả về, không thì fetch từ network
-        return response || fetch(event.request);
-      })
-  );
-});
+
 
 // 3. Xóa các cache cũ khi có phiên bản mới
 self.addEventListener('activate', event => {
@@ -58,7 +41,6 @@ self.addEventListener('activate', event => {
 });
 
 // TODO: replace the following with the correct offline fallback page i.e.: const offlineFallbackPage = "offline.html";
-const offlineFallbackPage = "ToDo-replace-this-name.html";
 
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
