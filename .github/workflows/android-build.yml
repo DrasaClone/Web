@@ -27,9 +27,16 @@ jobs:
         run: npm install -g @bubblewrap/cli
 
       - name: Initialize TWA project
+        env:
+          JAVA_HOME: ${{ steps.setup-java.outputs.java-home }}
         run: |
-          # Skip JDK install prompt and run non-interactive init
-          printf 'n\n' | npx bubblewrap init --manifest=https://drasaclone.github.io/Web/manifest.json --packageId=com.drasaclone.web --appVersionName=1.0.0 --appVersionCode=1 --interactive=false
+          npx bubblewrap init \
+            --manifest=https://drasaclone.github.io/Web/manifest.json \
+            --packageId=com.drasaclone.web \
+            --appVersionName=1.0.0 \
+            --appVersionCode=1 \
+            --interactive=false \
+            --jdkPath="$JAVA_HOME"
 
       - name: Build TWA APK
         run: npx bubblewrap build
