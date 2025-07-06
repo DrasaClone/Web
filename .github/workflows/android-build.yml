@@ -23,7 +23,7 @@ jobs:
           # Install Capacitor CLI and core
           npm install
           # Initialize Capacitor project non-interactive
-          npx cap init DrasaCloneWeb com.drasaclone.web --web-dir=www --force
+          npx cap init DrasaCloneWeb com.drasaclone.web --web-dir=www
 
       - name: Add Android platform
         run: npx cap add android --npm-client npm
