@@ -3,7 +3,7 @@
   "short_name": "MaTrận",
   "description": "Hệ thống giao tiếp thời gian thực phi tập trung.",
   "start_url": "./index.html",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#0d0d0d",
   "theme_color": "#00ff41",
   "icons": [
@@ -19,11 +19,18 @@
       "type": "image/png"
     }
   ],
+  "dir": "auto",
+  "scope": "0k",
+  "orientation": "natural",
+  "lang": "vi",
   "categories": [
     "education",
     "entertainment",
     "games",
+    "lifestyle",
+    "news",
     "personalization",
+    "photo",
     "security",
     "social",
     "utilities"
