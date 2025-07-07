@@ -1,4 +1,3 @@
-# .github/workflows/build-pwa-apk.yml
 name: Build PWA APK
 
 on:
@@ -7,8 +6,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Setup Java 17
@@ -20,13 +20,10 @@ jobs:
       - name: Install PWABuilder CLI
         run: npm install -g pwabuilder
 
-      - name: Generate Android project from URL
-        run: |
-          pwabuilder https://drasaclone.github.io/Web/ \
-            --platforms android \
-            --directory twa-project
+      - name: Generate Android project
+        run: pwabuilder https://drasaclone.github.io/Web/ --platforms android --directory twa-project
 
-      - name: Build debug APK
+      - name: Build APK
         run: |
           cd twa-project/android
           ./gradlew clean assembleDebug
