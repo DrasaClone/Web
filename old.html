@@ -2214,6 +2214,12 @@ window.addEventListener('load', () => {
   }
 });
 
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-61XJ390Q30');
+
     // (Có thể bổ sung thêm push notifications, caching offline, ...)
 
     // (Hàm updatePresence có thể được định nghĩa thêm nếu cần để quản lý danh sách online)
