@@ -1959,6 +1959,12 @@ window.addEventListener('load', () => {
     navigator.serviceWorker.register('service-worker.js')
   }
 
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-61XJ390Q30');
+          
   </script>
 </body>
 </html>
