@@ -11,6 +11,11 @@ jobs:
     env:
       ANDROID_SDK_ROOT: /opt/android-sdk
 
+    defaults:
+      run:
+        # Chạy mọi lệnh trong thư mục Web
+        working-directory: Web
+
     steps:
       - name: 📥 Checkout source
         uses: actions/checkout@v3
@@ -21,7 +26,7 @@ jobs:
           distribution: temurin
           java-version: 11
 
-      - name: 🛠️ Install Android SDK tools (fixed)
+      - name: 🛠️ Install Android SDK tools
         run: |
           sudo mkdir -p $ANDROID_SDK_ROOT
           sudo chown $USER:$USER $ANDROID_SDK_ROOT
@@ -48,7 +53,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('Web/**/*.gradle*', 'Web/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
@@ -69,6 +74,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: latest
+          # Đường dẫn tương đối từ Web/
           files: app/build/outputs/apk/debug/app-debug.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
