@@ -52,12 +52,19 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+      - name: "🔍 Determine Android project root"
+        run: |
+          PROJECT_ROOT=$(find . -maxdepth 2 -type f -name settings.gradle | head -n1 | xargs dirname)
+          echo "Project root: $PROJECT_ROOT"
+          echo "PROJECT_ROOT=$PROJECT_ROOT" >> $GITHUB_ENV
+
       - name: "🚧 Build Debug APK"
-        run: gradle assembleDebug -p app --no-daemon
+        run: |
+          gradle assembleDebug -p $PROJECT_ROOT --no-daemon
 
       - name: "🔍 Locate APK"
         run: |
-          APK=$(find app -type f -path '*/app/build/outputs/apk/debug/*.apk' | head -n1)
+          APK=$(find $PROJECT_ROOT -type f -path '*/build/outputs/apk/debug/*.apk' | head -n1)
           echo "Found APK at $APK"
           echo "APK_PATH=$APK" >> $GITHUB_ENV
 
