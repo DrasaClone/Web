@@ -39,8 +39,8 @@ jobs:
             "platforms;android-30" \
             "build-tools;30.0.3"
 
-      - name: ⚙️ Grant execute permission to gradlew
-        run: chmod +x Web/gradlew
+      - name: ⚙️ Grant execute permission to Gradle Wrapper
+        run: chmod +x ./gradlew
 
       - name: 📦 Cache Gradle
         uses: actions/cache@v3
@@ -48,12 +48,12 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('Web/**/*.gradle*', 'Web/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
       - name: 🚧 Build Debug APK
-        run: ./Web/gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --no-daemon
 
       - name: 🏷️ Create or update “latest” Release
         id: create_release
@@ -69,6 +69,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: latest
-          files: Web/app/build/outputs/apk/debug/app-debug.apk
+          files: app/build/outputs/apk/debug/app-debug.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
