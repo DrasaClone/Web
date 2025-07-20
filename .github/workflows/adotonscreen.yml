@@ -18,18 +18,20 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Bước tạo file vẫn giữ nguyên như cũ
+      # ================================== SỬA LỖI Ở BƯỚC NÀY ==================================
+      # Thay đổi cách ghi file để tránh lỗi cú pháp YAML
       - name: Create Android Project Files from a Single YAML
         run: |
-          # (Giữ nguyên toàn bộ phần dài tạo file từ lệnh echo và tee ở đây)
-          # ...
-          # ... (bỏ qua để không lặp lại, bạn chỉ cần giữ nguyên phần này)
+          # Tạo cấu trúc thư mục
           mkdir -p app/src/main/java/com/example/overlayapp
           mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/drawable
+          mkdir -p gradle
 
-          echo '<?xml version="1.0" encoding="utf-8"?>
+          # --- 1. Tạo AndroidManifest.xml ---
+          tee app/src/main/AndroidManifest.xml > /dev/null <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools">
               <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -52,8 +54,12 @@ jobs:
                   </activity>
                   <service android:name=".OverlayService" android:enabled="true" android:exported="false"/>
               </application>
-          </manifest>' > app/src/main/AndroidManifest.xml
-          echo '<?xml version="1.0" encoding="utf-8"?>
+          </manifest>
+EOF
+
+          # --- 2. Tạo các tệp layout XML ---
+          tee app/src/main/res/layout/overlay_layout.xml > /dev/null <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
           <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:id="@+id/overlay_container"
               android:layout_width="match_parent"
@@ -85,8 +91,10 @@ jobs:
                       android:max="100"
                       android:progress="50" />
               </LinearLayout>
-          </FrameLayout>' > app/src/main/res/layout/overlay_layout.xml
-          echo '<?xml version="1.0" encoding="utf-8"?>
+          </FrameLayout>
+EOF
+          tee app/src/main/res/layout/control_button.xml > /dev/null <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
           <ImageButton xmlns:android="http://schemas.android.com/apk/res/android"
               android:id="@+id/control_btn"
               android:layout_width="50dp"
@@ -94,8 +102,10 @@ jobs:
               android:background="@drawable/control_button_background"
               android:src="@drawable/ic_control"
               android:scaleType="center"
-              android:contentDescription="Control Button" />' > app/src/main/res/layout/control_button.xml
-          echo '<?xml version="1.0" encoding="utf-8"?>
+              android:contentDescription="Control Button" />
+EOF
+          tee app/src/main/res/layout/trash_layout.xml > /dev/null <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
            <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
               android:id="@+id/trash_icon"
               android:layout_width="80dp"
@@ -103,15 +113,22 @@ jobs:
               android:src="@drawable/ic_trash"
               android:padding="20dp"
               android:background="@drawable/trash_background"
-              android:contentDescription="Trash" />' > app/src/main/res/layout/trash_layout.xml
+              android:contentDescription="Trash" />
+EOF
+
+          # --- 3. Tạo các tệp Drawable ---
           echo '<?xml version="1.0" encoding="utf-8"?><shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval"><solid android:color="#42A5F5"/><size android:width="50dp" android:height="50dp"/></shape>' > app/src/main/res/drawable/control_button_background.xml
           echo '<?xml version="1.0" encoding="utf-8"?><shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval"><solid android:color="#99FF0000"/></shape>' > app/src/main/res/drawable/trash_background.xml
           echo '<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24.0" android:viewportHeight="24.0"><path android:fillColor="#FFFFFF" android:pathData="M19,13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></vector>' > app/src/main/res/drawable/ic_control.xml
           echo '<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24.0" android:viewportHeight="24.0"><path android:fillColor="#FFFFFF" android:pathData="M6,19c0,1.1 0.9,2 2,2h8c1.1,0 2,-0.9 2,-2V7H6v12zM19,4h-3.5l-1,-1h-5l-1,1H5v2h14V4z"/></vector>' > app/src/main/res/drawable/ic_trash.xml
           echo '<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24"><path android:fillColor="#FFFF0000" android:pathData="M12,2C6.47,2 2,6.47 2,12s4.47,10 10,10 10,-4.47 10,-10S17.53,2 12,2z"/></vector>' > app/src/main/res/drawable/ic_launcher.xml
-          echo '<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">Overlay App</string></resources>' > app/src/main/res/values/strings.xml
-          echo '<?xml version="1.0" encoding="utf-8"?><resources><style name="Theme.OverlayApp" parent="android:Theme.Material.Light.NoActionBar" /></resources>' > app/src/main/res/values/themes.xml
-          tee app/src/main/java/com/example/overlayapp/MainActivity.kt > /dev/null <<EOF
+          
+          # --- 4. Tạo tệp values/strings.xml và values/themes.xml ---
+          echo '<resources><string name="app_name">Overlay App</string></resources>' > app/src/main/res/values/strings.xml
+          echo '<resources><style name="Theme.OverlayApp" parent="android:Theme.Material.Light.NoActionBar" /></resources>' > app/src/main/res/values/themes.xml
+
+          # --- 5. Tạo mã nguồn Kotlin (vẫn dùng `tee` như cũ vì nó đã đúng) ---
+          tee app/src/main/java/com/example/overlayapp/MainActivity.kt > /dev/null <<'EOF'
           package com.example.overlayapp
           import android.app.Activity
           import android.content.Intent
@@ -148,7 +165,7 @@ jobs:
               }
           }
 EOF
-          tee app/src/main/java/com/example/overlayapp/OverlayService.kt > /dev/null <<EOF
+          tee app/src/main/java/com/example/overlayapp/OverlayService.kt > /dev/null <<'EOF'
           package com.example.overlayapp
           import android.annotation.SuppressLint
           import android.app.Notification
@@ -190,8 +207,6 @@ EOF
                   val inflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
                   overlayView = inflater.inflate(R.layout.overlay_layout, null) as FrameLayout
                   val crosshair = overlayView.findViewById<View>(R.id.crosshair_view)
-                  val settingsPanel = overlayView.findViewById<View>(R.id.settings_panel)
-                  val opacitySeekBar = overlayView.findViewById<SeekBar>(R.id.opacity_seekbar)
                   opacitySeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                       override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) { crosshair.alpha = progress / 100f }
                       override fun onStartTrackingTouch(seekBar: SeekBar?) {}
@@ -212,18 +227,13 @@ EOF
                       overlayView.visibility = if(isOverlayVisible) View.VISIBLE else View.GONE
                   }
                   controlButton.setOnTouchListener(object : View.OnTouchListener {
-                      private var initialX: Int = 0
-                      private var initialY: Int = 0
-                      private var initialTouchX: Float = 0.toFloat()
-                      private var initialTouchY: Float = 0.toFloat()
-                      private val CLICK_DRAG_TOLERANCE = 10f
+                      private var initialX: Int = 0; private var initialY: Int = 0; private var initialTouchX: Float = 0f; private var initialTouchY: Float = 0f; private val CLICK_DRAG_TOLERANCE = 10f
                       override fun onTouch(v: View, event: MotionEvent): Boolean {
                           when (event.action) {
                               MotionEvent.ACTION_DOWN -> { initialX = controlParams.x; initialY = controlParams.y; initialTouchX = event.rawX; initialTouchY = event.rawY; trashView.visibility = View.VISIBLE; return true }
                               MotionEvent.ACTION_MOVE -> { val newX = initialX + (event.rawX - initialTouchX).toInt(); val newY = initialY + (event.rawY - initialTouchY).toInt(); controlParams.x = newX; controlParams.y = newY; windowManager.updateViewLayout(controlButton, controlParams); val trashRect = Rect(); trashView.getGlobalVisibleRect(trashRect); if (trashRect.contains(event.rawX.toInt(), event.rawY.toInt())) { (trashView as ImageView).setColorFilter(Color.RED) } else { (trashView as ImageView).clearColorFilter() }; return true }
-                              MotionEvent.ACTION_UP -> { trashView.visibility = View.GONE; val trashRect = Rect(); trashView.getGlobalVisibleRect(trashRect); if (trashRect.contains(event.rawX.toInt(), event.rawY.toInt())) { stopSelf(); return true }; val xDiff = abs(event.rawX - initialTouchX); val yDiff = abs(event.rawY - initialTouchY); if (xDiff < CLICK_DRAG_TOLERANCE && yDiff < CLICK_DRAG_TOLERANCE) { v.performClick() }; return true }
-                          }
-                          return false
+                              MotionEvent.ACTION_UP -> { trashView.visibility = View.GONE; val trashRect = Rect(); trashView.getGlobalVisibleRect(trashRect); if (trashRect.contains(event.rawX.toInt(), event.rawY.toInt())) { stopSelf(); return true }; if (abs(event.rawX - initialTouchX) < CLICK_DRAG_TOLERANCE && abs(event.rawY - initialTouchY) < CLICK_DRAG_TOLERANCE) { v.performClick() }; return true }
+                          }; return false
                       }
                   })
               }
@@ -232,43 +242,102 @@ EOF
                   private val paint = Paint().apply { color = Color.RED; style = Paint.Style.STROKE; strokeWidth = 4f; isAntiAlias = true }
                   override fun onDraw(canvas: Canvas) {
                       super.onDraw(canvas); val centerX = width / 2f; val centerY = height / 2f; val radius = 50f; val crosshairLength = 30f
-                      canvas.drawCircle(centerX, centerY, radius, paint)
-                      canvas.drawLine(centerX - crosshairLength, centerY, centerX + crosshairLength, centerY, paint)
-                      canvas.drawLine(centerX, centerY - crosshairLength, centerX, centerY + crosshairLength, paint)
+                      canvas.drawCircle(centerX, centerY, radius, paint); canvas.drawLine(centerX - crosshairLength, centerY, centerX + crosshairLength, centerY, paint); canvas.drawLine(centerX, centerY - crosshairLength, centerX, centerY + crosshairLength, paint)
                   }
               }
           }
 EOF
-          echo 'pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } } dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }; rootProject.name = "Overlay App"; include(":app")' > settings.gradle.kts
-          echo 'plugins { alias(libs.plugins.androidApplication) apply false; alias(libs.plugins.kotlinAndroid) apply false }' > build.gradle.kts
-          mkdir -p gradle
-          echo '[versions]; agp = "8.4.1"; kotlin = "1.9.20"; coreKtx = "1.13.1"; appcompat = "1.7.0"; material = "1.12.0"; [libraries]; core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }; appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }; material = { group = "com.google.android.material", name = "material", version.ref = "material" }; [plugins]; androidApplication = { id = "com.android.application", version.ref = "agp" }; kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }' > gradle/libs.versions.toml
-          echo "plugins { alias(libs.plugins.androidApplication); alias(libs.plugins.kotlinAndroid) }; android { namespace = \"com.example.overlayapp\"; compileSdk = 34; defaultConfig { applicationId = \"com.example.overlayapp\"; minSdk = 24; targetSdk = 34; versionCode = 1; versionName = \"1.0\" }; buildTypes { release { isMinifyEnabled = false; proguardFiles(getDefaultProguardFile(\"proguard-android-optimize.txt\"), \"proguard-rules.pro\") } }; compileOptions { sourceCompatibility = JavaVersion.VERSION_1_8; targetCompatibility = JavaVersion.VERSION_1_8 }; kotlinOptions { jvmTarget = \"1.8\" }; buildFeatures { viewBinding = true } }; dependencies { implementation(libs.core.ktx); implementation(libs.appcompat); implementation(libs.material) }" > app/build.gradle.kts
+
+          # --- 6. Tạo các tệp cấu hình Gradle (Sử dụng `tee <<'EOF'` cho tất cả) ---
+          tee settings.gradle.kts > /dev/null <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "Overlay App"
+          include(":app")
+EOF
+          tee build.gradle.kts > /dev/null <<'EOF'
+          plugins {
+              alias(libs.plugins.androidApplication) apply false
+              alias(libs.plugins.kotlinAndroid) apply false
+          }
+EOF
+          tee gradle/libs.versions.toml > /dev/null <<'EOF'
+          [versions]
+          agp = "8.4.1"
+          kotlin = "1.9.20"
+          coreKtx = "1.13.1"
+          appcompat = "1.7.0"
+          material = "1.12.0"
+          
+          [libraries]
+          core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+          appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+          material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+          
+          [plugins]
+          androidApplication = { id = "com.android.application", version.ref = "agp" }
+          kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+EOF
+          tee app/build.gradle.kts > /dev/null <<'EOF'
+          plugins {
+              alias(libs.plugins.androidApplication)
+              alias(libs.plugins.kotlinAndroid)
+          }
+
+          android {
+              namespace = "com.example.overlayapp"
+              compileSdk = 34
+
+              defaultConfig {
+                  applicationId = "com.example.overlayapp"
+                  minSdk = 24
+                  targetSdk = 34
+                  versionCode = 1
+                  versionName = "1.0"
+              }
+
+              buildTypes {
+                  release {
+                      isMinifyEnabled = false
+                      proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+                  }
+              }
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_1_8
+                  targetCompatibility = JavaVersion.VERSION_1_8
+              }
+              kotlinOptions {
+                  jvmTarget = "1.8"
+              }
+          }
+
+          dependencies {
+              implementation(libs.core.ktx)
+              implementation(libs.appcompat)
+              implementation(libs.material)
+          }
+EOF
+          # Thêm file trống `proguard-rules.pro`
           touch app/proguard-rules.pro
           
-      # ================== THAY ĐỔI Ở ĐÂY ==================
-      
-      # Bước 1: (MỚI) Dùng action của Gradle để tự tạo ra file gradlew
-      # Nó sẽ chạy lệnh `gradle wrapper` để tạo ra gradlew, gradlew.bat, và thư mục gradle/wrapper.
-      - name: Generate Gradle Wrapper
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-        with:
-          # `gradle-version: wrapper` nghĩa là sử dụng wrapper nếu có,
-          # nếu không có, sẽ dùng một phiên bản Gradle mặc định để chạy lệnh `wrapper` tạo ra nó.
-          # Tuy nhiên để chắc chắn, ta chỉ định một phiên bản.
-          gradle-version: 8.6
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      # Bước 2: (THAY ĐỔI) Bây giờ file gradlew đã tồn tại, ta có thể chạy build
-      # Vẫn dùng action của Gradle để chạy build, nó sẽ tự động dùng gradlew.
+      
       - name: Build with Gradle
         run: ./gradlew app:assembleDebug
-        
-      # ========================================================
-      
-      # Bước Upload artifact vẫn giữ nguyên
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
