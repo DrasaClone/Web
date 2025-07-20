@@ -342,5 +342,5 @@ EOF
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dot-overlay-app
+          name: dot-overlay-app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
