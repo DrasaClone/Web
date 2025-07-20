@@ -53,12 +53,11 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: "🚧 Build Debug APK"
-        # Điều chỉnh đường dẫn project Android
-        run: gradle assembleDebug -p Web/app --no-daemon
+        run: gradle assembleDebug -p app --no-daemon
 
       - name: "🔍 Locate APK"
         run: |
-          APK=$(find Web/app -type f -path '*app/build/outputs/apk/debug/*.apk' | head -n1)
+          APK=$(find app -type f -path '*/app/build/outputs/apk/debug/*.apk' | head -n1)
           echo "Found APK at $APK"
           echo "APK_PATH=$APK" >> $GITHUB_ENV
 
