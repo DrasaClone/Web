@@ -46,3 +46,5 @@ self.addEventListener('fetch', (event) => {
     })());
   }
 });
+
+Delete it */
