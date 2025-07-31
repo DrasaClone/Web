@@ -1,4 +1,4 @@
-/* Delete it when Google lập chỉ mục
+
 // This is the "Offline page" service worker
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
@@ -47,4 +47,3 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
-Delete it */
