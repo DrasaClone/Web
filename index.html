@@ -2007,7 +2007,30 @@ window.addEventListener('load', () => {
   gtag('js', new Date());
 
   gtag('config', 'G-61XJ390Q30');
-          
+
+    const catCursor = document.querySelector('.cat-cursor');
+    
+    // Cập nhật vị trí con trỏ khi chuột di chuyển
+    document.addEventListener('mousemove', (e) => {
+        catCursor.style.left = e.clientX + 'px';
+        catCursor.style.top = e.clientY + 'px';
+    });
+    
+    // Tìm tất cả các phần tử có thể nhấp
+    const clickableElements = document.querySelectorAll(
+        'a, button, input[type="submit"], input[type="button"], select, label, .clickable'
+    );
+    
+    // Thêm và xóa lớp 'pointer-active' khi di chuột vào/ra
+    clickableElements.forEach(el => {
+        el.addEventListener('mouseenter', () => {
+            catCursor.classList.add('pointer-active');
+        });
+        el.addEventListener('mouseleave', () => {
+            catCursor.classList.remove('pointer-active');
+        });
+    });
+
   </script>
 </body>
 </html>
