@@ -382,9 +382,31 @@ body, a, button {
   </header>
   
   <!-- Loading overlay -->
-  <div id="loading-overlay" class="loading-overlay">
-    <h1>[ >_ INITIALIZING CONNECTION... ]</h1>
-  </div>
+<!-- === BẮT ĐẦU: DẢI LED VĨNH VIỄN VÀ MÀN HÌNH TẢI TRANG === -->
+
+<!-- Thành phần 1: Dải LED RGB sẽ luôn hiển thị -->
+<div id="permanent-rgb-border">
+    <div class="rgb-border top"></div>
+    <div class="rgb-border right"></div>
+    <div class="rgb-border bottom"></div>
+    <div class="rgb-border left"></div>
+</div>
+
+<!-- Thành phần 2: Lớp phủ tải trang chỉ chứa quả cầu (sẽ biến mất) -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="sphere-container">
+        <div class="sphere">
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+        </div>
+    </div>
+</div>
+
+<!-- === KẾT THÚC: DẢI LED VÀ MÀN HÌNH TẢI TRANG === -->
 
   <!-- ĐẶT VÀO TRONG THẺ <body> CỦA BẠN -->
   <div class="cat-cursor"></div>
