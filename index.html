@@ -187,19 +187,83 @@
     .theme-hacker ::placeholder { color: #008f25; opacity: 1; }
 
     /* Loading Overlay */
-    .loading-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: #0d0d0d;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      font-size: 2rem;
-      color: #00ff41;
-      display: none;
-    }
+/* === CSS CHO MÀN HÌNH TẢI TRANG VÀ LED VĨNH VIỄN === */
+
+/* --- Lớp phủ tải trang (Chỉ chứa quả cầu) --- */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #0d0d0d; /* Nền đen tuyền */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999; /* Luôn nổi trên cùng nhất để che cả dải LED */
+    transition: opacity 0.75s ease-out; /* Hiệu ứng mờ dần khi biến mất */
+}
+/* Lớp này được thêm bằng JavaScript để ẩn màn hình tải trang */
+#loading-overlay.hidden {
+    opacity: 0;
+    pointer-events: none; /* Không bắt sự kiện chuột khi đang ẩn */
+}
+
+/* --- Dải LED RGB Vĩnh Viễn --- */
+@keyframes rgb-flow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+#permanent-rgb-border {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999; /* Luôn nổi trên nội dung trang, nhưng dưới màn hình tải trang */
+    pointer-events: none; /* CỰC KỲ QUAN TRỌNG: Cho phép nhấp "xuyên qua" */
+}
+.rgb-border {
+    position: absolute;
+    background: linear-gradient(90deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+    background-size: 200% auto;
+    animation: rgb-flow 3s linear infinite;
+}
+.rgb-border.top { top: 0; left: 0; width: 100%; height: 5px; }
+.rgb-border.right { top: 0; right: 0; width: 5px; height: 100%; }
+.rgb-border.bottom { bottom: 0; left: 0; width: 100%; height: 5px; }
+.rgb-border.left { top: 0; left: 0; width: 5px; height: 100%; }
+
+/* --- Hiệu ứng Quả cầu Xoay 3D --- */
+@keyframes rotate-sphere {
+    from { transform: rotateY(0deg) rotateX(20deg); }
+    to { transform: rotateY(360deg) rotateX(20deg); }
+}
+.sphere-container {
+    perspective: 800px;
+}
+.sphere {
+    width: 200px;
+    height: 200px;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: rotate-sphere 12s linear infinite;
+}
+.ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid #00ff41; /* Màu xanh lá đặc trưng */
+    box-shadow: 0 0 10px #00ff41, inset 0 0 10px #00ff41;
+}
+.ring:nth-child(1) { transform: rotateY(0deg); }
+.ring:nth-child(2) { transform: rotateY(30deg); }
+.ring:nth-child(3) { transform: rotateY(60deg); }
+.ring:nth-child(4) { transform: rotateY(90deg); }
+.ring:nth-child(5) { transform: rotateY(120deg); }
+.ring:nth-child(6) { transform: rotateY(150deg); }
     .progress-circle { display: none; } /* Hide for hacker theme */
 
     /* Chat Window */
