@@ -525,18 +525,33 @@ body, a, button {
       <button class="nav-btn" data-target="help-section">Help</button>
     </div>
   </header>
-  
-  <!-- Loading overlay -->
-  <div id="loading-overlay" class="loading-overlay">
-    <h1>Loading...</h1>
-    <div class="progress-circle" data-percentage="75">
-      <svg viewBox="0 0 150 150">
-        <circle class="bg" cx="75" cy="75" r="70"></circle>
-        <circle class="progress" cx="75" cy="75" r="70"></circle>
-      </svg>
-      <div class="percentage">100%</div>
+    <!-- Loading overlay -->
+<!-- === BẮT ĐẦU: DẢI LED VĨNH VIỄN VÀ MÀN HÌNH TẢI TRANG === -->
+
+<!-- Thành phần 1: Dải LED RGB sẽ luôn hiển thị -->
+<div id="permanent-rgb-border">
+    <div class="rgb-border top"></div>
+    <div class="rgb-border right"></div>
+    <div class="rgb-border bottom"></div>
+    <div class="rgb-border left"></div>
+</div>
+
+<!-- Thành phần 2: Lớp phủ tải trang chỉ chứa quả cầu (sẽ biến mất) -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="sphere-container">
+        <div class="sphere">
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+        </div>
     </div>
-  </div>
+</div>
+
+<!-- === KẾT THÚC: DẢI LED VÀ MÀN HÌNH TẢI TRANG === -->
+
 
   <!-- ĐẶT VÀO TRONG THẺ <body> CỦA BẠN -->
   <div class="cat-cursor"></div>
