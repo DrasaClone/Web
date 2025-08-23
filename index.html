@@ -319,6 +319,46 @@
         background-color: #0a0a0a;
     }
 
+/* --- Mã CSS cho con trỏ mèo --- */
+
+/* Ẩn con trỏ chuột mặc định trên toàn bộ trang */
+body, a, button {
+    cursor: none;
+}
+
+/* Định dạng cho con trỏ tùy chỉnh */
+.cat-cursor {
+    position: fixed; /* Giúp nó di chuyển tự do */
+    z-index: 9999;
+    pointer-events: none; /* Cho phép nhấp "xuyên" qua nó */
+    
+    /* Căn giữa hình ảnh vào đúng vị trí của con trỏ */
+    transform: translate(-50%, -50%); 
+
+    width: 50px; /* Điều chỉnh kích thước của đầu mèo */
+    height: 50px;
+    
+    /* Hình ảnh đầu mèo mặc định (mã hóa Base64 SVG) */
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+CjxwYXRoIGQ9Ik00IDExLjVDNCA3LjA0Mzk2IDcuNTgzNzkgMy41IDIgOC41IDMuNSA4IDMuNSAyMCAxNi41QzIxLjA0ODcgMy41IDI0LjUgMy41IDI0LjUgOC41QzI0LjUgMTIgMjEuMDQ4NyAxNi41IDE2LjUgMTYuNUMxMi44OTU0IDE2LjUgMTIuMjk3OCAxNS4wOTE1IDggMTUuMzkxNUgxNkM4IDE1LjM5MTUgOC4xMDQ1NyAxNi41IDQuNSAxNi41QzIuODcxMjYgMTYuNSAwIDE1LjQwNTIgMCAxMy4yNVYxMi41WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTkuNSAxMC41QzkuNSAxMC43NzYxIDkuMjU5MzkgMTEgOC45OTM5MiAxMUM4LjcyODQ2IDExIDguNSA5Ljc3NjE0IDguNSA5LjVDOC41IDkuMjIzODYgOC43Mjg0NiA5IDguOTkzOTIgOUM5LjI1OTM5IDkgOS41IDkuMjIzODYgOS41IDEwLjVaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMTUuNSAxMC41QzE1LjUgMTAuNzc2MSAxNS4yNTkzIDExIDE0Ljk5MzkgMTFDMTQuNzI4NSAxMSAxNC41IDkuNzc2MTQgMTQuNSA5LjVDMTQuNSA5LjMjMzg2IDE0LjcyODUgOSAxNC45OTM5IDlDMTUuMjU5MyA5IDE1LjUgOS4yMjM4NiAxNS41IDEwLjVaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMTAuOTk3MSAxMi45MDY2QzExLjU0OTUgMTMuMzA2MiAxMi40NDg4IDEzLjMwNjIgMTIuOTk0NyAxMi45MDY2Ii8+CjwvZz4KPC9zdmc+Cg==');
+    background-size: contain; /* Đảm bảo hình ảnh vừa vặn */
+    background-repeat: no-repeat;
+    
+    /* Hiệu ứng chuyển động mượt mà */
+    transition: transform 0.2s ease, background-image 0.2s ease, width 0.2s ease, height 0.2s ease;
+}
+
+/* Định dạng khi nó trở thành con trỏ "chọn" (dấu tay mèo) */
+.cat-cursor.pointer-active {
+    width: 35px; /* Điều chỉnh kích thước của dấu tay */
+    height: 35px;
+
+    /* Dịch chuyển con trỏ lên một chút để đầu ngón tay là điểm chọn */
+    transform: translate(-40%, -40%);
+    
+    /* Hình ảnh dấu tay mèo (mã hóa Base64 SVG) */
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+CjxwYXRoIGQ9Ik05IDE4QzEwLjY1NjkgMTggMTIgMTYuNjU2OSAxMiAxNUMxMiAxMy4zNDMxIDEwLjY1NjkgMTIgOSAxMkw2IDEyQzQuMzQzMTUgMTIgMyAxMy4zNDMxIDMgMTVDMyAxNi42NTY5IDQuMzQzMTUgMTggNiAxOEg5WiIgZmlsbD0id2hpdGUiLz4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTggNCkiPgo8cGF0aCBkPSJNMSA1QzEuODI4NDMgNSA1IDEuODI4NDMgNSA2QzIuODczNjcgNi40NjU4NCAxLjUgNS41IDIgN0MzLjUgOS41IDIgOSA1IDEyQzguNSA5LjUgOC41IDUuNSA4LjUgNC41QzguNSA0IDggMS4yNDAyOCA0IDEuMjQwMjhDMSAxLjI0MDI4IDAgMy4yODQyNyAwIDVDMCA2LjY1Njg1IDEuMzQzMTUgOCAzIDhDNS41IDggNS41IDUgNS41IDQuNUM1LjUgMy41IDMuNSAxIDMgMVoiIGZpbGw9IndoaXRlIi8+CjwvZz4KPGNpcmNsZSBjeD0iNiIgb3BhY2l0eT0iMCIgY3k9IjQiIHI9IjIiIGZpbGw9ImJsYWNrIi8+CjxwYXRoIGQ9Ik0xOCAxMEMxOS4xMDQ2IDEwIDIwIDkuMTA0NTcgMjAgOEMyMCA2Ljg5NTQzIDE5LjEwNDYgNiAxOCA2QzE2Ljg5NTQgNiAxNiA2Ljg5NTQzIDE2IDhDMTYgOS4xMDQ1NyAxNi44OTU0IDEwIDE4IDEwWiIgZmlsbD0id2hpdGUiLz4KPC9nPgo8L3N2Zz4K');
+}
+          
   </style>
 </head>
 <body class="theme-hacker"> <!-- SET HACKER THEME AS DEFAULT -->
