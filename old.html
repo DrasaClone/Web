@@ -2370,6 +2370,24 @@ window.addEventListener('load', () => {
         });
     });
 
+    // === JAVASCRIPT ĐỂ ẨN MÀN HÌNH TẢI TRANG SAU KHI TẢI XONG ===
+    window.addEventListener('load', function() {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        
+        // Thêm lớp .hidden để kích hoạt hiệu ứng mờ dần trong CSS
+        loadingOverlay.classList.add('hidden');
+        
+        // Sau khi hiệu ứng kết thúc, ẩn hoàn toàn phần tử để không chiếm tài nguyên
+        setTimeout(() => {
+            loadingOverlay.style.display = 'none';
+        }, 750); // Con số này (750ms) phải khớp với transition-duration trong CSS (0.75s)
+    });
+    // ================================================================
+
+    // Toàn bộ mã JavaScript cũ của bạn bắt đầu từ đây
+    // ### CORE JAVASCRIPT LOGIC - UNCHANGED ###
+    // ...
+
           
   </script>
 </body>
