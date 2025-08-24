@@ -24,11 +24,29 @@
         *{box-sizing:border-box}body{margin:0;padding:0;height:100vh;overflow:hidden;background:var(--bg-color);color:var(--text-color);font-family:var(--font-primary);text-shadow:var(--text-shadow);transition:background .3s ease,color .3s ease}.view{display:none;width:100%;height:100%;overflow:hidden;flex-direction:column}.view.active{display:flex}
         #main-app-view{flex-direction:column}.app-container{display:flex;width:100%;height:100%}#main-nav{display:flex;flex-direction:column;align-items:center;background:var(--panel-bg);padding:10px 0;border-right:1px solid var(--primary-border-color); z-index: 10;}.nav-btn{background:none;border:none;color:var(--secondary-text-color);cursor:pointer;padding:15px;width:60px;height:60px;border-radius:8px;margin-bottom:10px;display:flex;justify-content:center;align-items:center;transition:all .2s}.nav-btn.active,.nav-btn:hover{color:var(--active-text-color);background:var(--active-bg)}.nav-btn svg{width:24px;height:24px}#content-container{flex-grow:1;display:flex;position:relative;overflow:hidden;}
         .content-page{display:flex;position:absolute;width:100%;height:100%;left:0;top:0;opacity:0;pointer-events:none;transform:translateX(20px);transition:opacity .3s, transform .3s;}.content-page.active{opacity:1;pointer-events:auto;transform:translateX(0)}
-        #left-panel{width:320px;border-right:1px solid var(--primary-border-color);display:flex;flex-direction:column;flex-shrink:0}#panel-header{padding:15px;border-bottom:1px solid var(--primary-border-color);flex-shrink:0;display:flex;justify-content:space-between;align-items:center}#panel-header h4{margin:0}.item-list{flex-grow:1;overflow-y:auto;list-style:none;padding:10px}.item-list li{display:flex;align-items:center;gap:10px;padding:10px;cursor:pointer;border-radius:4px;transition:background .2s}.item-list li.active,.item-list li:hover{background:var(--hover-bg)}.info{display:flex;flex-direction:column;flex-grow:1;overflow:hidden}.username{font-weight:700;font-family:var(--font-secondary)}.last-message{font-size:.8em;color:var(--secondary-text-color);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}.item-list li.unread .username{color:var(--accent-color)}.item-list li.unread .last-message{color:var(--text-color);font-weight:700}
-        .chat-container{flex-grow:1;display:flex;flex-direction:column}#chat-header{padding:10px 15px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--primary-border-color);flex-shrink:0}#chat-messages{flex-grow:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column-reverse}#chat-input{padding:15px;border-top:1px solid var(--primary-border-color);display:flex;gap:10px;flex-shrink:0}#message-input{flex-grow:1;padding:10px;background:var(--input-bg);border:1px solid var(--primary-border-color);color:var(--text-color);border-radius:8px;font-family:inherit}
+        #left-panel{width:320px;border-right:1px solid var(--primary-border-color);display:flex;flex-direction:column;flex-shrink:0}#panel-header{padding:15px;border-bottom:1px solid var(--primary-border-color);flex-shrink:0;display:flex;justify-content:space-between;align-items:center}#panel-header h4{margin:0}#panel-header-actions{display:flex;gap:10px;}
+        .tab-controls { display: flex; border-bottom: 1px solid var(--primary-border-color); }
+        .tab-btn { flex: 1; padding: 10px; background: none; border: none; color: var(--secondary-text-color); cursor: pointer; border-bottom: 2px solid transparent; }
+        .tab-btn.active { color: var(--accent-color); border-bottom-color: var(--accent-color); }
+        .item-list{flex-grow:1;overflow-y:auto;list-style:none;padding:10px; display: none;}.item-list.active{display:block;}
+        .item-list li{display:flex;align-items:center;gap:10px;padding:10px;cursor:pointer;border-radius:4px;transition:background .2s}.item-list li.active,.item-list li:hover{background:var(--hover-bg)}.info{display:flex;flex-direction:column;flex-grow:1;overflow:hidden}.username{font-weight:700;font-family:var(--font-secondary)}.last-message{font-size:.8em;color:var(--secondary-text-color);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}.item-list li.unread .username{color:var(--accent-color)}.item-list li.unread .last-message{color:var(--text-color);font-weight:700}
+        .chat-container{flex-grow:1;display:flex;flex-direction:column}#chat-header{padding:10px 15px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--primary-border-color);flex-shrink:0}
+        #chat-header-info { flex-grow: 1; } .chat-header-menu { position: relative; } #chat-menu-btn { background: none; border: none; color: var(--text-color); padding: 5px; }
+        #chat-menu { display: none; position: absolute; right: 0; top: 100%; background: var(--panel-bg); border: 1px solid var(--primary-border-color); border-radius: 5px; z-index: 10; list-style: none; padding: 5px 0; margin: 0;}
+        #chat-menu li { padding: 8px 15px; cursor: pointer; } #chat-menu li:hover { background: var(--hover-bg); } .menu-item-danger { color: #c0392b; }
+        #chat-messages{flex-grow:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column-reverse}#chat-input{padding:15px;border-top:1px solid var(--primary-border-color);display:flex;gap:10px;flex-shrink:0}#message-input{flex-grow:1;padding:10px;background:var(--input-bg);border:1px solid var(--primary-border-color);color:var(--text-color);border-radius:8px;font-family:inherit}
         .user-item{width:40px;height:40px;border-radius:50%;flex-shrink:0;object-fit:cover}.status-online{border:2px solid var(--accent-color)}.status-offline{border:2px solid var(--secondary-text-color)}
         .message-bubble{padding:8px 15px;border-radius:18px;max-width:70%;margin-bottom:2px;width:fit-content;animation:slideIn .3s ease-out;position:relative;transition:transform .1s ease}.message-bubble:hover{transform:scale(1.02)}.message-bubble img{max-width:250px;border-radius:10px;margin-top:5px;display:block}.message-bubble.mine{background-color:var(--active-bg);color:var(--active-text-color);align-self:flex-end}.message-bubble.other{background-color:var(--hover-bg);align-self:flex-start}.message-timestamp{font-size:.7em;color:var(--secondary-text-color);margin-top:5px;align-self:flex-end}.message-bubble.mine .message-timestamp{color:rgba(255,255,255,.7)}
-        @media (max-width:768px){#main-nav{position:fixed;bottom:0;left:0;right:0;width:100%;height:60px;flex-direction:row;justify-content:space-around;z-index:100;border-right:none;border-top:1px solid var(--primary-border-color)}.app-container{padding-bottom:60px;}.chat-container{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg-color);transform:translateX(100%);transition:transform .3s ease-in-out;z-index:200}.chat-container.active{transform:translateX(0)}}
+        .message-sender-name { font-size: 0.8em; font-weight: bold; color: var(--accent-color); margin-bottom: 3px; }
+        /* Modal Styles */
+        .modal { position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: var(--modal-bg); display: none; justify-content: center; align-items: center; }
+        .modal-content { background-color: var(--panel-bg); padding: 20px; border: 1px solid var(--primary-border-color); width: 90%; max-width: 500px; border-radius: 8px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--primary-border-color); padding-bottom: 10px; margin-bottom: 15px; }
+        .modal-header h2 { margin: 0; } .close-modal-btn { font-size: 28px; font-weight: bold; cursor: pointer; }
+        #modal-friends-list { max-height: 300px; overflow-y: auto; }
+        #modal-friends-list .friend-item { display: flex; align-items: center; padding: 8px; } #modal-friends-list label { flex-grow: 1; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        @media (max-width:768px){#left-panel{width: 100%; border-right: none;} #main-nav{position:fixed;bottom:0;left:0;right:0;width:100%;height:60px;flex-direction:row;justify-content:space-around;z-index:100;border-right:none;border-top:1px solid var(--primary-border-color)}.app-container{padding-bottom:60px;}.chat-container{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg-color);transform:translateX(100%);transition:transform .3s ease-in-out;z-index:200}.chat-container.active{transform:translateX(0)} #back-to-list-btn { display: block !important; }}
         .page-container{width:100%;height:100%;padding:30px;display:flex;flex-direction:column;align-items:center;overflow-y:auto;}.page-content{background:var(--panel-bg);padding:30px;border-radius:8px;width:100%;max-width:500px}.form-group{margin-bottom:15px}label{display:block;margin-bottom:5px;color:var(--secondary-text-color)}
         #login-view{justify-content:center;align-items:center;padding:15px}.auth-container{width:100%;max-width:400px}.auth-form{background:var(--panel-bg);border:1px solid var(--primary-border-color);padding:30px;border-radius:8px}.auth-form h2{color:var(--accent-color);text-align:center}
         .reaction-toolbar{position:absolute;bottom:90%;left:50%;transform:translateX(-50%);background:var(--panel-bg);padding:5px;border-radius:20px;display:flex;gap:5px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s,bottom .2s}.message-bubble:hover .reaction-toolbar{opacity:1;pointer-events:auto;bottom:100%}
@@ -36,6 +54,7 @@
         .reactions{display:flex;gap:5px;margin-top:4px;position:absolute;bottom:-15px;right:5px;background:var(--panel-bg);padding:2px 5px;border-radius:10px;box-shadow:var(--shadow)}.reaction{font-size:.8em;color:var(--text-color)}
         #toast-container{position:fixed;bottom:80px;right:20px;z-index:100001}.toast{background:var(--panel-bg);color:var(--text-color);padding:15px;border-radius:8px;margin-top:10px;box-shadow:var(--shadow);border-left:4px solid var(--active-bg);opacity:0;transform:translateX(100%);animation:toastIn .5s forwards}.toast.hide{animation:toastOut .5s forwards}@keyframes toastIn{to{opacity:1;transform:translateX(0)}}@keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(100%)}}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .btn-danger { background-color: #c0392b; color: white; }
     </style>
 </head>
 <body class="theme-hacker">
@@ -43,27 +62,58 @@
     <div id="permanent-rgb-border"><div class="rgb-border top"></div><div class="rgb-border right"></div><div class="rgb-border bottom"></div><div class="rgb-border left"></div></div>
     <div id="loading-overlay"><div class="sphere-container"><div class="sphere"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div></div></div>
     
+    <!-- MODALS -->
+    <div id="create-group-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Tạo Nhóm Mới</h2><span class="close-modal-btn">&times;</span></div><div class="form-group"><label for="group-name-input">Tên nhóm</label><input id="group-name-input" type="text" placeholder="Nhập tên nhóm..."/></div><div class="form-group"><label>Thêm thành viên (bạn bè)</label><div id="modal-friends-list"></div></div><div class="modal-actions"><button id="create-group-confirm-btn">Tạo Nhóm</button></div></div></div>
+    <div id="manage-group-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Quản lý nhóm</h2><span class="close-modal-btn">&times;</span></div><h4>Thành viên</h4><div id="group-members-list" class="item-list" style="display:block;"></div><div class="modal-actions"><button id="add-members-btn">Thêm thành viên</button><button id="delete-group-btn" class="btn-danger">Xóa Nhóm</button></div></div></div>
+    <div id="add-members-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Thêm thành viên</h2><span class="close-modal-btn">&times;</span></div><div id="add-members-friends-list" class="item-list" style="display:block;"></div><div class="modal-actions"><button id="add-members-confirm-btn">Thêm</button></div></div></div>
+    <div id="confirm-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Xác nhận</h2><span class="close-modal-btn">&times;</span></div><p id="confirm-modal-text"></p><div class="modal-actions"><button id="confirm-modal-cancel-btn">Hủy</button><button id="confirm-modal-confirm-btn" class="btn-danger">Xác nhận</button></div></div></div>
+    <div id="delete-account-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Xóa tài khoản</h2><span class="close-modal-btn">&times;</span></div><p>Hành động này không thể hoàn tác. Tất cả dữ liệu của bạn sẽ bị xóa. Vui lòng nhập mật khẩu của bạn để xác nhận.</p><div class="form-group"><input type="password" id="delete-account-password" placeholder="Nhập mật khẩu của bạn"></div><div class="modal-actions"><button id="delete-account-cancel-btn">Hủy</button><button id="delete-account-confirm-btn" class="btn-danger">Xóa Tài Khoản</button></div></div></div>
+    <!-- END MODALS -->
+
     <div id="login-view" class="view"><div class="auth-container"><div class="auth-form"><h2>Đăng Nhập/Đăng Ký</h2><div class="form-group"><input type="text" id="reg-displayname" placeholder="Tên hiển thị"><input type="text" id="reg-username" placeholder="Tên đăng nhập (viết liền)"><input type="password" id="reg-password" placeholder="Mật khẩu"><button id="register-btn">Tạo Tài Khoản Mới</button></div><hr style="border:0;border-top:1px solid var(--primary-border-color)"><div class="form-group" style="margin-top:20px"><input type="text" id="login-username" placeholder="Tên đăng nhập"><input type="password" id="login-password" placeholder="Mật khẩu"><button id="login-btn">Đăng Nhập</button></div></div></div></div>
 
     <div id="main-app-view" class="view">
         <div class="app-container">
             <nav id="main-nav">
-                <button class="nav-btn" data-page="friends-view" title="Trò chuyện"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"></path></svg></button>
+                <button class="nav-btn active" data-page="friends-view" title="Trò chuyện"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"></path></svg></button>
                 <button class="nav-btn" data-page="discover-view" title="Khám phá"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg></button>
                 <button class="nav-btn" data-page="requests-view" title="Yêu cầu kết bạn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"></path></svg></button>
                 <button class="nav-btn" data-page="settings-view" title="Cài đặt"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17-.59-1.69-.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12-.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"></path></svg></button>
             </nav>
             <main id="content-container">
-                <section id="friends-view" class="content-page"><div id="left-panel"><div id="panel-header"><h4>Cuộc trò chuyện</h4></div><ul id="friends-list" class="item-list"></ul></div></section>
-                <section id="discover-view" class="content-page"><div class="page-container"><h2>Khám Phá & Kết Nối</h2><div class="page-content"><div class="form-group"><h4>Tìm kiếm</h4><input id="search-input" type="text" placeholder="Nhập username để tìm..."/></div><div id="search-results-list" class="item-list"></div></div></div></section>
-                <section id="requests-view" class="content-page"><div class="page-container"><div class="page-content"><h2>Yêu cầu kết bạn</h2><div id="friend-requests-list" class="item-list"></div></div></div></section>
-                <section id="settings-view" class="content-page"><div class="page-container"><div class="page-content"><h2>Cài đặt tài khoản</h2><div class="form-group"><label>Ảnh đại diện</label><div style="display:flex; gap:10px; flex-wrap: wrap;"><input id="avatar-url-input" type="text" placeholder="Dán URL ảnh vào đây" style="flex-grow:1;"><button id="save-avatar-url-btn" style="width:auto;padding:0 15px;">Lưu</button><button id="upload-avatar-btn" style="width:auto;padding:0 15px;">Tải lên</button></div></div><hr style="border:0;border-top:1px solid var(--primary-border-color)"/><div class="form-group"><label>Giao diện</label><div style="display:flex;gap:10px;align-items:center"><input id="theme-color-picker" type="color"><button id="save-theme-btn">Lưu Preset</button></div></div><hr style="border:0;border-top:1px solid var(--primary-border-color)"/><div class="form-group"><label>Tên hiển thị</label><input id="settings-displayname" type="text"/><button id="save-displayname-btn">Lưu tên</button></div><hr style="border:0;border-top:1px solid var(--primary-border-color)"/><div class="form-group"><h4>Đổi mật khẩu</h4><input id="current-password" type="password" placeholder="Mật khẩu hiện tại"/><input id="new-password" type="password" placeholder="Mật khẩu mới"/><button id="change-password-btn">Đổi mật khẩu</button></div><hr style="border:0;border-top:1px solid var(--primary-border-color)"/><button class="logout-btn" style="background-color: #c0392b; color: white;">Đăng xuất</button></div></div></section>
+                <section id="friends-view" class="content-page active"><div id="left-panel">
+                    <div id="panel-header"><h4>Trò chuyện</h4><div id="panel-header-actions"><button id="create-group-btn" title="Tạo nhóm mới">+</button></div></div>
+                    <div class="tab-controls">
+                        <button class="tab-btn active" data-tab="friends-list">Bạn bè</button>
+                        <button class="tab-btn" data-tab="groups-list">Nhóm</button>
+                    </div>
+                    <ul id="friends-list" class="item-list active"></ul>
+                    <ul id="groups-list" class="item-list"></ul>
+                </div></section>
+                <section id="discover-view" class="content-page"><div class="page-container"><h2>Khám Phá & Kết Nối</h2><div class="page-content"><div class="form-group"><h4>Tìm kiếm</h4><input id="search-input" type="text" placeholder="Nhập username để tìm..."/></div><div id="search-results-list" class="item-list" style="display:block;"></div></div></div></section>
+                <section id="requests-view" class="content-page"><div class="page-container"><div class="page-content"><h2>Yêu cầu kết bạn</h2><div id="friend-requests-list" class="item-list" style="display:block;"></div></div></div></section>
+                <section id="settings-view" class="content-page"><div class="page-container"><div class="page-content">
+                    <h2>Cài đặt tài khoản</h2>
+                    <div class="form-group"><label>Ảnh đại diện</label><div style="display:flex; gap:10px; flex-wrap: wrap;"><input id="avatar-url-input" type="text" placeholder="Dán URL ảnh vào đây" style="flex-grow:1;"><button id="save-avatar-url-btn">Lưu</button><button id="upload-avatar-btn">Tải lên</button></div></div><hr/>
+                    <div class="form-group"><label>Giao diện</label><div style="display:flex;gap:10px;align-items:center"><input id="theme-color-picker" type="color"><button id="save-theme-btn">Lưu Preset</button></div></div><hr/>
+                    <div class="form-group"><label>Tên hiển thị</label><input id="settings-displayname" type="text"/><button id="save-displayname-btn">Lưu tên</button></div><hr/>
+                    <div class="form-group"><h4>Đổi mật khẩu</h4><input id="current-password" type="password" placeholder="Mật khẩu hiện tại"/><input id="new-password" type="password" placeholder="Mật khẩu mới"/><button id="change-password-btn">Đổi mật khẩu</button></div><hr/>
+                    <div class="form-group"><h4>Hành động Nguy hiểm</h4><button id="show-delete-account-modal-btn" class="btn-danger">Xóa tài khoản</button></div><hr/>
+                    <button class="logout-btn btn-danger">Đăng xuất</button>
+                </div></div></section>
             </main>
         </div>
         <div id="chat-container" class="chat-container">
-             <div id="chat-header"><button id="back-to-list-btn" style="display:none">←</button><div id="chat-header-info"></div></div>
+             <div id="chat-header">
+                <button id="back-to-list-btn" style="display:none">←</button>
+                <div id="chat-header-info"></div>
+                <div class="chat-header-menu">
+                    <button id="chat-menu-btn" title="Tùy chọn">⋮</button>
+                    <ul id="chat-menu"></ul>
+                </div>
+            </div>
              <div id="chat-messages"></div>
-             <div id="chat-input"><button id="upload-image-btn" style="width:auto;padding:0 12px;margin-right:5px;" title="Gửi ảnh"><svg viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px"><path d="M2.5 19.5c-.28 0-.53-.11-.71-.29-.18-.18-.29-.43-.29-.71V5.5c0-.28.11-.53.29-.71.18-.18.43-.29.71-.29h6.25l2.5 2.5h7.25c.28 0 .53.11.71.29.18.18.29.43.29.71v9c0 .28-.11-.53-.29.71-.18.18-.43.29-.71.29H2.5z"/></svg></button><input id="message-input" type="text" placeholder="Nhập tin nhắn..."/><button id="send-btn" style="width:auto;padding:0 15px">Gửi</button></div>
+             <div id="chat-input"><button id="upload-image-btn" title="Gửi ảnh"><svg viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px"><path d="M2.5 19.5c-.28 0-.53-.11-.71-.29-.18-.18-.29-.43-.29-.71V5.5c0-.28.11-.53.29-.71.18-.18.43-.29.71-.29h6.25l2.5 2.5h7.25c.28 0 .53.11.71.29.18.18.29.43.29.71v9c0 .28-.11-.53-.29.71-.18.18-.43.29-.71.29H2.5z"/></svg></button><input id="message-input" type="text" placeholder="Nhập tin nhắn..."/><button id="send-btn">Gửi</button></div>
         </div>
     </div>
     
@@ -78,13 +128,14 @@
       messagingSenderId: "967881370128",
       appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
       measurementId: "G-61XJ390Q30"
-    };
-        const CLOUDINARY_CLOUD_NAME = 'dgbux4wzo';
-        const CLOUDINARY_UPLOAD_PRESET = 'okeqfdx4';
+        };
+        const CLOUDINARY_CLOUD_NAME = 'dgbux4wzo'; // Thay bằng cloud name Cloudinary
+        const CLOUDINARY_UPLOAD_PRESET = 'okeqfdx4'; // Thay bằng upload preset
         
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth(); const db = firebase.database();
-        let currentUser = null, currentChatPartner = null, messageListener = null, oldestMessageKey = null;
+        
+        let currentUser = null, currentChat = null, messageListener = null;
 
         // --- CORE LOGIC & UI SETUP ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -97,21 +148,52 @@
         });
         
         function initializeApp() {
-            showView('main-app-view'); showContentPage('friends-view'); document.querySelector('.nav-btn[data-page="friends-view"]').classList.add('active');
-            if (currentUser.themePreset) applyThemePreset(currentUser.themePreset);
-            setupNavigation(); setupPresenceSystem(); listenForFriends(); listenForFriendRequests();
-            const searchInput = document.getElementById('search-input'); let searchTimeout; searchInput.addEventListener('input', () => { const e = searchInput.value.trim().toLowerCase(); clearTimeout(searchTimeout); searchTimeout = setTimeout(() => performSearch(e), 300); });
-            document.getElementById('message-input').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(e.target.value.trim()); } });
-            document.getElementById('send-btn').addEventListener('click', e => { e.preventDefault(); sendMessage(document.getElementById('message-input').value.trim()); });
-            document.getElementById('upload-image-btn').addEventListener('click', () => { currentChatPartner ? cloudinaryWidgetChat.open() : showToast("Vui lòng chọn một cuộc trò chuyện.") });
+            showView('main-app-view'); 
+            showContentPage('friends-view');
+            setupNavigation(); setupPresenceSystem();
+            listenForFriends(); listenForFriendRequests(); listenForGroups();
+
+            // Event listeners
+            document.getElementById('message-input').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
+            document.getElementById('send-btn').addEventListener('click', e => { e.preventDefault(); sendMessage(); });
+            document.getElementById('upload-image-btn').addEventListener('click', () => { currentChat ? cloudinaryWidgetChat.open() : showToast("Vui lòng chọn một cuộc trò chuyện.") });
             document.getElementById('settings-displayname').value = currentUser.displayName;
-            document.getElementById('save-displayname-btn').addEventListener('click', () => { const newName = document.getElementById('settings-displayname').value.trim(); if (newName) db.ref(`accounts/${currentUser.uid}/displayName`).set(newName).then(() => { showToast('Đã lưu tên hiển thị!'); currentUser.displayName = newName; }); });
+            document.getElementById('save-displayname-btn').addEventListener('click', saveDisplayName);
             document.getElementById('change-password-btn').addEventListener('click', changePassword);
             document.querySelectorAll('.logout-btn').forEach(btn => btn.addEventListener('click', logoutUser));
-            document.getElementById('back-to-list-btn').addEventListener('click', () => { document.getElementById('chat-container').classList.remove('active'); currentChatPartner = null; if (messageListener) messageListener.off() });
+            document.getElementById('back-to-list-btn').addEventListener('click', () => { document.getElementById('chat-container').classList.remove('active'); currentChat = null; if (messageListener) messageListener.off() });
             document.getElementById('upload-avatar-btn').addEventListener('click', () => cloudinaryWidgetAvatar.open());
             document.getElementById('save-avatar-url-btn').addEventListener('click', saveAvatarUrl);
             document.getElementById('save-theme-btn').addEventListener('click', saveThemePreset);
+            document.getElementById('chat-menu-btn').addEventListener('click', () => { const menu = document.getElementById('chat-menu'); menu.style.display = menu.style.display === 'block' ? 'none' : 'block'; });
+            document.getElementById('show-delete-account-modal-btn').addEventListener('click', () => showModal('delete-account-modal'));
+            
+            // Tab control
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.dataset.tab;
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.querySelectorAll('.item-list').forEach(list => list.classList.remove('active'));
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+
+            // Group modal listeners
+            document.getElementById('create-group-btn').addEventListener('click', openCreateGroupModal);
+            document.getElementById('create-group-confirm-btn').addEventListener('click', createGroup);
+
+            // Close modals
+            document.querySelectorAll('.close-modal-btn').forEach(btn => btn.onclick = () => btn.closest('.modal').style.display = 'none');
+            window.onclick = (event) => { if (event.target.classList.contains('modal')) event.target.style.display = 'none'; };
+
+            // Apply theme
+            if (currentUser.themePreset) applyThemePreset(currentUser.themePreset);
+
+            const searchInput = document.getElementById('search-input'); 
+            let searchTimeout; 
+            searchInput.addEventListener('input', () => { const e = searchInput.value.trim().toLowerCase(); clearTimeout(searchTimeout); searchTimeout = setTimeout(() => performSearch(e), 300); });
+        
             updateClickableElements();
         }
 
@@ -119,25 +201,332 @@
         function setupNavigation() { const navButtons = document.querySelectorAll('.nav-btn'); navButtons.forEach(btn => { btn.addEventListener('click', () => { const pageId = btn.dataset.page; showContentPage(pageId); navButtons.forEach(b => b.classList.remove('active')); btn.classList.add('active') }) }) }
         function showContentPage(pageId) { document.querySelectorAll('.content-page').forEach(page => page.classList.remove('active')); document.getElementById(pageId).classList.add('active') }
         function setupPresenceSystem() { const e = db.ref(`/accounts/${currentUser.uid}`); db.ref(".info/connected").on("value", t => { if (!1 === t.val()) return; e.onDisconnect().update({ status: "offline", lastOnline: firebase.database.ServerValue.TIMESTAMP }).then(() => e.update({ status: "online" })) }) }
+        
+        // === AUTHENTICATION & ACCOUNT ===
         function registerUser() { const d = document.getElementById("reg-displayname").value.trim(), e = document.getElementById("reg-username").value.trim().toLowerCase(), t = document.getElementById("reg-password").value; if (!d || !e || !t) return showToast("Vui lòng điền đủ thông tin.", "error"); if (!/^[a-z0-9_]+$/.test(e)) return showToast("Tên đăng nhập chỉ hợp lệ với chữ thường, số, và gạch dưới.", "error"); const o = `${e}@yourapp.com`; db.ref("accounts").orderByChild("username").equalTo(e).once("value", r => { if (r.exists()) return showToast("Tên đăng nhập đã tồn tại!", "error"); auth.createUserWithEmailAndPassword(o, t).then(t => { db.ref(`accounts/${t.user.uid}`).set({ username: e, displayName: d, email: o, profilePicture: "https://i.imgur.com/sC0zt4c.png", status: "offline", lastOnline: firebase.database.ServerValue.TIMESTAMP }).then(() => showToast("Đăng ký thành công! Vui lòng đăng nhập.")) }).catch(e => showToast(e.message, "error")) }) }
         function loginUser() { const e = document.getElementById("login-username").value.trim().toLowerCase(), t = document.getElementById("login-password").value; if (!e || !t) return; db.ref("accounts").orderByChild("username").equalTo(e).once("value", a => { if (!a.exists()) return showToast("Tên đăng nhập không tồn tại!", "error"); const o = Object.values(a.val())[0]; auth.signInWithEmailAndPassword(o.email, t).catch(a => { showToast("Sai mật khẩu!", "error") }) }) }
         function logoutUser() { db.ref(`accounts/${currentUser.uid}`).update({ status: "offline", lastOnline: firebase.database.ServerValue.TIMESTAMP }).then(() => auth.signOut()) }
         function changePassword() { const e = document.getElementById("current-password").value, t = document.getElementById("new-password").value; if (!e || !t) return showToast("Vui lòng nhập đủ thông tin.", "error"); if (t.length < 6) return showToast("Mật khẩu mới phải có ít nhất 6 ký tự.", "error"); const a = auth.currentUser, o = firebase.auth.EmailAuthProvider.credential(a.email, e); a.reauthenticateWithCredential(o).then(() => (a.updatePassword(t))).then(() => { showToast('Đổi mật khẩu thành công!'); document.getElementById('current-password').value = ''; document.getElementById('new-password').value = '' }).catch(e => { showToast('Lỗi: ' + e.message, "error") }) }
+        function saveDisplayName() { const newName = document.getElementById('settings-displayname').value.trim(); if (newName) db.ref(`accounts/${currentUser.uid}/displayName`).set(newName).then(() => { showToast('Đã lưu tên hiển thị!'); currentUser.displayName = newName; }); }
+        
+        document.getElementById('delete-account-confirm-btn').addEventListener('click', () => {
+            const password = document.getElementById('delete-account-password').value;
+            if (!password) return showToast("Vui lòng nhập mật khẩu", "error");
+            
+            const user = auth.currentUser;
+            const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+
+            user.reauthenticateWithCredential(credential).then(() => {
+                // IMPORTANT: In a real-world app, you'd use a Cloud Function triggered by auth user deletion
+                // to clean up database records. A client-side cleanup is a best-effort approach.
+                const updates = {};
+                updates[`accounts/${user.uid}`] = null; // Delete user's own profile
+                db.ref().update(updates).then(() => {
+                    user.delete().then(() => {
+                        showToast("Tài khoản đã được xóa.");
+                        // The onAuthStateChanged listener will handle redirecting to login.
+                    }).catch(error => showToast(`Lỗi xóa authentication: ${error.message}`, 'error'));
+                });
+            }).catch(error => {
+                showToast("Mật khẩu không chính xác.", 'error');
+            });
+        });
+
+        // === FRIENDS & SOCIAL ===
         function listenForFriendRequests() { const e = document.getElementById('friend-requests-list'); db.ref(`friend_requests/${currentUser.uid}`).on('value', t => { e.innerHTML = ''; if (!t.exists()) { e.innerHTML = "<li>Không có lời mời nào.</li>"; return; } t.forEach(c => { db.ref(`accounts/${c.key}`).once('value', u => { const a = u.val(); e.innerHTML += `<li class="item-list-entry"><img src="${a.profilePicture}" class="user-item"><div class="info"><span class="username">${a.displayName}</span><small>@${a.username}</small></div> <button onclick="acceptFriendRequest('${c.key}')">✔</button><button onclick="declineFriendRequest('${c.key}')">✖</button></li>` }); updateClickableElements(); }) }) }
-        function acceptFriendRequest(e) { const t = {}; t[`friends/${currentUser.uid}/${e}`] = { timestamp: firebase.database.ServerValue.TIMESTAMP }, t[`friends/${e}/${currentUser.uid}`] = { timestamp: firebase.database.ServerValue.TIMESTAMP }, t[`friend_requests/${currentUser.uid}/${e}`] = null, db.ref().update(t); showToast("Đã chấp nhận kết bạn!") }
+        function acceptFriendRequest(e) { const t = {}; t[`friends/${currentUser.uid}/${e}`] = { timestamp: firebase.database.ServerValue.TIMESTAMP, read: true }; t[`friends/${e}/${currentUser.uid}`] = { timestamp: firebase.database.ServerValue.TIMESTAMP, read: false }; t[`friend_requests/${currentUser.uid}/${e}`] = null, db.ref().update(t); showToast("Đã chấp nhận kết bạn!") }
         function declineFriendRequest(e) { db.ref(`friend_requests/${currentUser.uid}/${e}`).remove(); showToast("Đã từ chối kết bạn.") }
-        function listenForFriends(){const e=document.getElementById("friends-list");db.ref(`friends/${currentUser.uid}`).orderByChild("timestamp").on("value",t=>{const a=[];t.forEach(c=>{a.push({uid:c.key,...c.val()})});e.innerHTML="";a.reverse().forEach(o=>{db.ref(`accounts/${o.uid}`).on("value",u=>{const t=u.val(),n=e.querySelector(`#friend-${o.uid}`);n&&n.remove();const s=document.createElement("li");s.id=`friend-${o.uid}`;!1===o.read&&s.classList.add("unread");if(currentChatPartner&&currentChatPartner.uid===o.uid)s.classList.add('active');let i=o.lastMessage||"";"[Hình ảnh]"===i?i=i:i.startsWith(currentUser.uid+":")?i="Bạn: "+i.substring(currentUser.uid.length+1).trim():i.startsWith(o.uid+":")&&(i=i.substring(o.uid.length+1).trim());s.innerHTML=`<img src="${t.profilePicture}" class="user-item ${"online"===t.status?"status-online":"status-offline"}"> <div class="info"> <span class="username">${t.displayName}</span> <span class="last-message">${i}</span> </div>`;s.onclick=()=>startChat(o.uid,t);e.appendChild(s)})});updateClickableElements()})}
+        function unfriendUser(friendId) {
+            showConfirmModal("Bạn có chắc muốn hủy kết bạn với người này?", () => {
+                const updates = {};
+                updates[`friends/${currentUser.uid}/${friendId}`] = null;
+                updates[`friends/${friendId}/${currentUser.uid}`] = null;
+                db.ref().update(updates).then(() => {
+                    showToast("Đã hủy kết bạn.");
+                    if(currentChat && currentChat.type === 'private' && currentChat.uid === friendId) {
+                        document.getElementById('chat-container').classList.remove('active');
+                        currentChat = null;
+                    }
+                });
+            });
+        }
+        function listenForFriends(){const e=document.getElementById("friends-list");db.ref(`friends/${currentUser.uid}`).orderByChild("timestamp").on("value",t=>{const a=[];t.forEach(c=>{a.push({uid:c.key,...c.val()})});e.innerHTML="";a.reverse().forEach(o=>{db.ref(`accounts/${o.uid}`).on("value",u=>{const t=u.val(),n=e.querySelector(`#friend-${o.uid}`);n&&n.remove();const s=document.createElement("li");s.id=`friend-${o.uid}`;!1===o.read&&s.classList.add("unread");if(currentChat&&'private'===currentChat.type&&currentChat.uid===o.uid)s.classList.add('active');let i=o.lastMessage||"";"[Hình ảnh]"===i?i=i:i.startsWith("SYS:")?i=`<i>${i.substring(4)}</i>`:i.includes(':')&&(i=i.substring(i.indexOf(":")+1).trim());s.innerHTML=`<img src="${t.profilePicture}" class="user-item ${"online"===t.status?"status-online":"status-offline"}"> <div class="info"> <span class="username">${t.displayName}</span> <span class="last-message">${i}</span> </div>`;s.onclick=()=>startPrivateChat(o.uid,t);e.appendChild(s)})});updateClickableElements()})}
         function performSearch(e){const searchResultsUI=document.getElementById("search-results-list");searchResultsUI.innerHTML="";if(!e)return;db.ref("accounts").orderByChild("username").startAt(e).endAt(e+'\uf8ff').once("value",t=>{searchResultsUI.innerHTML='';if(!t.exists()){searchResultsUI.innerHTML="<li>Không tìm thấy ai.</li>";return}t.forEach(c=>{if(c.key===currentUser.uid)return;const a=c.val();searchResultsUI.innerHTML+=`<li class="item-list-entry"><img src="${a.profilePicture}" class="user-item"><div class="info"><span class="username">${a.displayName}</span><small>@${a.username}</small></div> <button onclick="sendFriendRequest('${c.key}')">Kết bạn</button></li>`});updateClickableElements()})}
         function sendFriendRequest(e){db.ref(`friends/${currentUser.uid}/${e}`).once("value",snapshot=>{if(snapshot.exists()){showToast("Bạn đã là bạn bè!","error");return}db.ref(`friend_requests/${e}/${currentUser.uid}`).set({senderName:currentUser.displayName,timestamp:firebase.database.ServerValue.TIMESTAMP}).then(()=>showToast("Đã gửi yêu cầu!"))})}
-        function startChat(partnerUid, partnerData) { document.getElementById('chat-container').classList.add('active'); currentChatPartner = { uid: partnerUid, ...partnerData }; document.querySelector('#chat-header-info').innerHTML = `<img src="${partnerData.profilePicture}" class="user-item ${partnerData.status === "online" ? "status-online" : "status-offline"}"> <div><strong class="username">${partnerData.displayName}</strong><br><small>@${partnerData.username}</small></div>`; const messagesUI = document.getElementById('chat-messages'); messagesUI.innerHTML = ''; oldestMessageKey = null; if (messageListener) messageListener.off(); db.ref(`friends/${currentUser.uid}/${partnerUid}/read`).set(true); const chatRoomId = currentUser.uid < partnerUid ? `${currentUser.uid}_${partnerUid}` : `${partnerUid}_${currentUser.uid}`; const chatRef = db.ref(`private_chats/${chatRoomId}`); const reactionsRef = db.ref(`reactions/${chatRoomId}`); chatRef.orderByKey().limitToLast(20).once('value', snapshot => { if (snapshot.exists()) { const messages = []; snapshot.forEach(child => { messages.push({ key: child.key, ...child.val() }) }); if (messages.length > 0) oldestMessageKey = messages[0].key; messages.reverse().forEach(msg => appendMessage(msg, reactionsRef)) } }); messageListener = chatRef.orderByKey().startAt(oldestMessageKey || ' '); messageListener.on('child_added', snapshot => { if (!document.getElementById(`msg-${snapshot.key}`)) { appendMessage({ key: snapshot.key, ...snapshot.val() }, reactionsRef) } }); document.getElementById('friends-list').querySelectorAll('li').forEach(li => li.classList.remove('active')); document.getElementById(`friend-${partnerUid}`)?.classList.add('active'); }
-        function createMessageBubble(msg) { const bubble = document.createElement('div'); bubble.id = `msg-${msg.key}`; bubble.className = `message-bubble ${msg.senderId === currentUser.uid ? 'mine' : 'other'}`; let content = ''; if (msg.text) content = msg.text; else if (msg.imageUrl) content = `<a href="${msg.imageUrl}" target="_blank"><img src="${msg.imageUrl}" alt="Hình ảnh đã gửi"></a>`; bubble.innerHTML = `${content}<span class="message-timestamp">${new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span><div class="reactions"></div><div class="reaction-toolbar"><span class="reaction-btn">❤️</span><span class="reaction-btn">👍</span><span class="reaction-btn">😂</span><span class="reaction-btn">😮</span><span class="reaction-btn">😢</span></div>`; bubble.querySelectorAll('.reaction-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); toggleReaction(msg.key, btn.textContent) })); return bubble }
-        function appendMessage(msg, reactionsRef) { const bubble = createMessageBubble(msg); document.getElementById('chat-messages').insertBefore(bubble, null); listenForReactions(msg.key, reactionsRef); updateClickableElements(); }
-        function toggleReaction(msgKey, emoji) { const chatRoomId = currentUser.uid < currentChatPartner.uid ? `${currentUser.uid}_${currentChatPartner.uid}` : `${currentChatPartner.uid}_${currentUser.uid}`; const reactionRef = db.ref(`reactions/${chatRoomId}/${msgKey}/${emoji}/${currentUser.uid}`); reactionRef.once("value", s => { s.exists() ? reactionRef.remove() : reactionRef.set(true) }) }
-        function listenForReactions(msgKey, reactionsRef) { reactionsRef.child(msgKey).on('value', snapshot => { const reactionsContainer = document.querySelector(`#msg-${msgKey} .reactions`); if (!reactionsContainer) return; reactionsContainer.innerHTML = ''; snapshot.forEach(reactionSnap => { const count = reactionSnap.numChildren(); if (count > 0) { reactionsContainer.innerHTML += `<span class="reaction">${reactionSnap.key} ${count}</span>` } }); updateClickableElements() }) }
-        function sendMessage(text) { if (!text || !currentChatPartner) return; sendChatMessage({ text: text }) }
-        function sendImageMessage(imageUrl) { if (!imageUrl || !currentChatPartner) return; sendChatMessage({ imageUrl: imageUrl }) }
-        function sendChatMessage(content) { const chatRoomId = currentUser.uid < currentChatPartner.uid ? `${currentUser.uid}_${currentChatPartner.uid}` : `${currentChatPartner.uid}_${currentUser.uid}`; const messageData = { ...content, senderId: currentUser.uid, timestamp: firebase.database.ServerValue.TIMESTAMP }; db.ref(`private_chats/${chatRoomId}`).push(messageData); const lastMessagePreview = content.text ? `${currentUser.uid}: ${content.text}` : "[Hình ảnh]"; const updates = {}; updates[`friends/${currentUser.uid}/${currentChatPartner.uid}`] = { lastMessage: lastMessagePreview, timestamp: messageData.timestamp, read: true }; updates[`friends/${currentChatPartner.uid}/${currentChatPartner.uid}`] = { lastMessage: lastMessagePreview, timestamp: messageData.timestamp, read: false }; db.ref().update(updates); if (content.text) document.getElementById('message-input').value = '' }
         
+        // === GROUP CHAT ===
+        function listenForGroups() {
+            const listUI = document.getElementById('groups-list');
+            db.ref(`user_groups/${currentUser.uid}`).orderByChild("timestamp").on('value', snapshot => {
+                listUI.innerHTML = '';
+                if(!snapshot.exists()) return;
+                
+                const groups = [];
+                snapshot.forEach(child => groups.push({ id: child.key, ...child.val() }));
+                
+                groups.reverse().forEach(group => {
+                    db.ref(`groups/${group.id}`).once('value', groupSnap => {
+                        const groupData = groupSnap.val();
+                        if(!groupData) return;
+                        const li = document.createElement('li');
+                        li.id = `group-${group.id}`;
+                        if (!group.read) li.classList.add('unread');
+                        if (currentChat && currentChat.type === 'group' && currentChat.id === group.id) li.classList.add('active');
+                        
+                        let lastMsg = group.lastMessage || 'Bắt đầu cuộc trò chuyện.';
+                        if (lastMsg.startsWith("[Hình ảnh]") || lastMsg.startsWith("SYS:")) {}
+                        else if(lastMsg.includes(':')) { lastMsg = lastMsg.substring(lastMsg.indexOf(":") + 1).trim(); }
+
+                        li.innerHTML = `<img src="${groupData.groupIcon || 'https://i.imgur.com/sC0zt4c.png'}" class="user-item"><div class="info"><span class="username">${groupData.groupName}</span><span class="last-message">${lastMsg}</span></div>`;
+                        li.onclick = () => startGroupChat(group.id, groupData);
+                        listUI.appendChild(li);
+                    });
+                });
+            });
+        }
+
+        async function openCreateGroupModal() {
+            const listUI = document.getElementById('modal-friends-list');
+            listUI.innerHTML = 'Đang tải bạn bè...';
+            showModal('create-group-modal');
+            
+            const friendsSnapshot = await db.ref(`friends/${currentUser.uid}`).once('value');
+            if (!friendsSnapshot.exists()) {
+                listUI.innerHTML = 'Bạn chưa có bạn bè nào để thêm vào nhóm.';
+                return;
+            }
+
+            listUI.innerHTML = '';
+            for (const friend of Object.keys(friendsSnapshot.val())) {
+                const userSnap = await db.ref(`accounts/${friend}`).once('value');
+                const userData = userSnap.val();
+                listUI.innerHTML += `<div class="friend-item">
+                    <input type="checkbox" id="friend-check-${friend}" value="${friend}">
+                    <label for="friend-check-${friend}">
+                        <img src="${userData.profilePicture}" class="user-item" style="width:30px;height:30px;margin-right:10px;">
+                        <span>${userData.displayName} (@${userData.username})</span>
+                    </label>
+                </div>`;
+            }
+        }
+        
+        function createGroup() {
+            const groupName = document.getElementById('group-name-input').value.trim();
+            if (!groupName) return showToast('Vui lòng nhập tên nhóm', 'error');
+
+            const selectedFriends = Array.from(document.querySelectorAll('#modal-friends-list input:checked')).map(el => el.value);
+            
+            const newGroupRef = db.ref('groups').push();
+            const groupId = newGroupRef.key;
+            
+            const members = {};
+            members[currentUser.uid] = { role: 'admin' };
+            selectedFriends.forEach(id => { members[id] = { role: 'member' }; });
+            
+            const timestamp = firebase.database.ServerValue.TIMESTAMP;
+            const groupData = { groupName: groupName, createdBy: currentUser.uid, createdAt: timestamp, groupIcon: 'https://i.imgur.com/N6sY0f4.png' };
+            
+            const updates = {};
+            updates[`groups/${groupId}`] = groupData;
+            updates[`group_members/${groupId}`] = members;
+            Object.keys(members).forEach(memberId => {
+                updates[`user_groups/${memberId}/${groupId}`] = { timestamp: timestamp, read: true };
+            });
+
+            db.ref().update(updates).then(() => {
+                showToast('Tạo nhóm thành công!');
+                hideModal('create-group-modal');
+                document.getElementById('group-name-input').value = '';
+                startGroupChat(groupId, groupData);
+            });
+        }
+
+
+        // === CHAT CORE ===
+        function startPrivateChat(partnerUid, partnerData) {
+            document.getElementById('chat-container').classList.add('active');
+            currentChat = { type: 'private', uid: partnerUid, data: partnerData };
+            document.querySelector('#chat-header-info').innerHTML = `<img src="${partnerData.profilePicture}" class="user-item ${partnerData.status === "online" ? "status-online" : "status-offline"}"> <div><strong class="username">${partnerData.displayName}</strong><br><small>@${partnerData.username}</small></div>`; 
+            
+            const chatRoomId = currentUser.uid < partnerUid ? `${currentUser.uid}_${partnerUid}` : `${partnerUid}_${currentUser.uid}`;
+            setupChatListeners(`private_chats/${chatRoomId}`);
+            
+            db.ref(`friends/${currentUser.uid}/${partnerUid}/read`).set(true);
+
+            // Setup menu
+            document.getElementById('chat-menu').innerHTML = `<li onclick="unfriendUser('${partnerUid}')" class="menu-item-danger">Hủy kết bạn</li>`;
+
+            document.querySelectorAll('#friends-list li, #groups-list li').forEach(li => li.classList.remove('active'));
+            document.getElementById(`friend-${partnerUid}`)?.classList.add('active');
+        }
+
+        function startGroupChat(groupId, groupData) {
+            document.getElementById('chat-container').classList.add('active');
+            currentChat = { type: 'group', id: groupId, data: groupData };
+            document.querySelector('#chat-header-info').innerHTML = `<img src="${groupData.groupIcon || 'https://i.imgur.com/sC0zt4c.png'}" class="user-item"><div><strong>${groupData.groupName}</strong></div>`;
+            
+            setupChatListeners(`group_chats/${groupId}`);
+
+            db.ref(`user_groups/${currentUser.uid}/${groupId}/read`).set(true);
+            
+            // Setup menu
+            const menu = document.getElementById('chat-menu');
+            if (groupData.createdBy === currentUser.uid) {
+                menu.innerHTML = `<li onclick="openManageGroupModal()">Quản lý thành viên</li>`;
+            } else {
+                 menu.innerHTML = `<li>Bạn là thành viên</li>`;
+            }
+
+            document.querySelectorAll('#friends-list li, #groups-list li').forEach(li => li.classList.remove('active'));
+            document.getElementById(`group-${groupId}`)?.classList.add('active');
+        }
+
+        async function openManageGroupModal() {
+            if (!currentChat || currentChat.type !== 'group' || currentChat.data.createdBy !== currentUser.uid) return;
+            showModal('manage-group-modal');
+            
+            const listUI = document.getElementById('group-members-list');
+            listUI.innerHTML = '';
+            
+            const membersSnapshot = await db.ref(`group_members/${currentChat.id}`).once('value');
+            const members = membersSnapshot.val();
+
+            for (const memberId in members) {
+                const userSnap = await db.ref(`accounts/${memberId}`).once('value');
+                const userData = userSnap.val();
+                let actions = '';
+                if (memberId !== currentUser.uid) {
+                    actions = `<button onclick="removeMemberFromGroup('${memberId}')" class="btn-danger">Xóa</button>`;
+                }
+                listUI.innerHTML += `<li class="item-list-entry"><img src="${userData.profilePicture}" class="user-item"><div class="info"><span class="username">${userData.displayName}</span></div> ${actions}</li>`;
+            }
+
+            document.getElementById('delete-group-btn').onclick = () => deleteGroup();
+            updateClickableElements();
+        }
+
+        function deleteGroup() {
+            showConfirmModal("Bạn có chắc muốn xóa nhóm này? Hành động này không thể hoàn tác.", async () => {
+                 if (!currentChat || currentChat.type !== 'group' || currentChat.data.createdBy !== currentUser.uid) return;
+                 const groupId = currentChat.id;
+                 const membersSnapshot = await db.ref(`group_members/${groupId}`).once('value');
+                 const updates = {};
+                 updates[`groups/${groupId}`] = null;
+                 updates[`group_chats/${groupId}`] = null;
+                 updates[`group_members/${groupId}`] = null;
+                 Object.keys(membersSnapshot.val()).forEach(memberId => {
+                    updates[`user_groups/${memberId}/${groupId}`] = null;
+                 });
+
+                 db.ref().update(updates).then(() => {
+                    showToast("Đã xóa nhóm.");
+                    hideModal('manage-group-modal');
+                    document.getElementById('chat-container').classList.remove('active');
+                    currentChat = null;
+                 });
+            });
+        }
+
+        function removeMemberFromGroup(memberId) {
+             showConfirmModal(`Bạn có chắc muốn xóa người này khỏi nhóm?`, async () => {
+                 const updates = {};
+                 updates[`group_members/${currentChat.id}/${memberId}`] = null;
+                 updates[`user_groups/${memberId}/${currentChat.id}`] = null;
+                 
+                 db.ref().update(updates).then(() => {
+                    showToast("Đã xóa thành viên.");
+                    openManageGroupModal(); // Refresh the list
+                 });
+            });
+        }
+
+        function setupChatListeners(chatPath) {
+            const messagesUI = document.getElementById('chat-messages'); 
+            messagesUI.innerHTML = '';
+            oldestMessageKey = null; 
+            if (messageListener) messageListener.off();
+
+            const chatRef = db.ref(chatPath);
+            chatRef.orderByKey().limitToLast(20).once('value', snapshot => { 
+                if (snapshot.exists()) { 
+                    const messages = []; 
+                    snapshot.forEach(child => messages.push({ key: child.key, ...child.val() }));
+                    if (messages.length > 0) oldestMessageKey = messages[0].key; 
+                    messages.reverse().forEach(msg => appendMessage(msg)) 
+                }
+            }); 
+            messageListener = chatRef.orderByKey().startAt(oldestMessageKey || ' '); 
+            messageListener.on('child_added', snapshot => { 
+                if (!document.getElementById(`msg-${snapshot.key}`)) appendMessage({ key: snapshot.key, ...snapshot.val() })
+            });
+        }
+        
+        async function createMessageBubble(msg) {
+            const bubble = document.createElement('div');
+            bubble.id = `msg-${msg.key}`;
+            bubble.className = `message-bubble ${msg.senderId === currentUser.uid ? 'mine' : 'other'}`;
+            let content = '';
+            if (msg.text) content = msg.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            else if (msg.imageUrl) content = `<a href="${msg.imageUrl}" target="_blank"><img src="${msg.imageUrl}" alt="Hình ảnh đã gửi"></a>`;
+            
+            let senderName = '';
+            if (currentChat.type === 'group' && msg.senderId !== currentUser.uid) {
+                const senderSnapshot = await db.ref(`accounts/${msg.senderId}/displayName`).once('value');
+                senderName = `<div class="message-sender-name">${senderSnapshot.val() || '...'}</div>`;
+            }
+            
+            bubble.innerHTML = `${senderName}${content}<span class="message-timestamp">${new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
+            return bubble;
+        }
+        
+        async function appendMessage(msg) { 
+            const bubble = await createMessageBubble(msg);
+            document.getElementById('chat-messages').insertBefore(bubble, null);
+            updateClickableElements();
+        }
+
+        function sendMessage() { 
+            const text = document.getElementById('message-input').value.trim();
+            if (!text || !currentChat) return; 
+            sendChatMessage({ text: text });
+            document.getElementById('message-input').value = '';
+        }
+
+        function sendImageMessage(imageUrl) {
+            if (!imageUrl || !currentChat) return;
+            sendChatMessage({ imageUrl: imageUrl });
+        }
+        
+        function sendChatMessage(content) {
+            const messageData = { ...content, senderId: currentUser.uid, timestamp: firebase.database.ServerValue.TIMESTAMP };
+            const updates = {};
+            let lastMessagePreview = content.text ? `${currentUser.displayName}: ${content.text}` : "[Hình ảnh]";
+            
+            if (currentChat.type === 'private') {
+                const partnerUid = currentChat.uid;
+                const chatRoomId = currentUser.uid < partnerUid ? `${currentUser.uid}_${partnerUid}` : `${partnerUid}_${currentUser.uid}`;
+                const newMessageKey = db.ref(`private_chats/${chatRoomId}`).push().key;
+
+                updates[`private_chats/${chatRoomId}/${newMessageKey}`] = messageData;
+                updates[`friends/${currentUser.uid}/${partnerUid}`] = { lastMessage: lastMessagePreview, timestamp: messageData.timestamp, read: true };
+                updates[`friends/${partnerUid}/${currentUser.uid}`] = { lastMessage: lastMessagePreview, timestamp: messageData.timestamp, read: false };
+            } else if (currentChat.type === 'group') {
+                const groupId = currentChat.id;
+                const newMessageKey = db.ref(`group_chats/${groupId}`).push().key;
+
+                updates[`group_chats/${groupId}/${newMessageKey}`] = messageData;
+                db.ref(`group_members/${groupId}`).once('value', snapshot => {
+                    snapshot.forEach(member => {
+                        updates[`user_groups/${member.key}/${groupId}`] = { lastMessage: lastMessagePreview, timestamp: messageData.timestamp, read: member.key === currentUser.uid };
+                    });
+                    db.ref().update(updates);
+                });
+                return; // Early return to avoid double update
+            }
+            db.ref().update(updates);
+        }
+
+        // === WIDGETS & HELPERS ===
         const cloudinaryWidgetChat = cloudinary.createUploadWidget({ cloudName: CLOUDINARY_CLOUD_NAME, uploadPreset: CLOUDINARY_UPLOAD_PRESET, sources: ["local", "url", "camera"], multiple: !1 }, (err, res) => { if (!err && res && "success" === res.event) { sendImageMessage(res.info.secure_url) } });
         const cloudinaryWidgetAvatar = cloudinary.createUploadWidget({ cloudName: CLOUDINARY_CLOUD_NAME, uploadPreset: CLOUDINARY_UPLOAD_PRESET, sources: ["local", "url", "camera"], multiple: !1, cropping: !0, showAdvancedOptions: !1 }, (err, res) => { if (!err && res && "success" === res.event) { db.ref(`accounts/${currentUser.uid}/profilePicture`).set(res.info.secure_url).then(() => showToast("Đã cập nhật ảnh đại diện!")) } });
         function saveAvatarUrl() { const url = document.getElementById('avatar-url-input').value.trim(); if (url && url.startsWith('http')) { db.ref(`accounts/${currentUser.uid}/profilePicture`).set(url).then(() => showToast("Đã cập nhật ảnh đại diện!")) } else { showToast("URL không hợp lệ.", "error") } }
@@ -148,6 +537,25 @@
         function initCursor() { const e = document.querySelector(".cat-cursor"); document.addEventListener("mousemove", t => { e.style.left = t.clientX + "px", e.style.top = t.clientY + "px" }); updateClickableElements() }
         function updateClickableElements() { const e = document.querySelector(".cat-cursor"); document.querySelectorAll("a, button, input, li, .clickable, .reaction-btn").forEach(t => { t.addEventListener("mouseenter", () => { e.classList.add("pointer-active") }); t.addEventListener("mouseleave", () => { e.classList.remove("pointer-active") }) }) }
         function showToast(message, type = 'success') { const container = document.getElementById('toast-container'); const toast = document.createElement('div'); toast.className = 'toast'; toast.textContent = message; toast.style.borderLeftColor = type === 'error' ? '#c0392b' : 'var(--accent-color)'; container.appendChild(toast); setTimeout(() => { toast.classList.add('hide'); toast.addEventListener('animationend', () => toast.remove()) }, 3000) }
+        function showModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
+        function hideModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+        function showConfirmModal(text, onConfirm) {
+            const modal = document.getElementById('confirm-modal');
+            document.getElementById('confirm-modal-text').textContent = text;
+            showModal('confirm-modal');
+            const confirmBtn = document.getElementById('confirm-modal-confirm-btn');
+            
+            // Clone and replace the button to remove old event listeners
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+            newConfirmBtn.onclick = () => {
+                onConfirm();
+                hideModal('confirm-modal');
+            };
+            document.getElementById('confirm-modal-cancel-btn').onclick = () => hideModal('confirm-modal');
+        }
+
     </script>
 </body>
 </html>
