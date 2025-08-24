@@ -15,89 +15,57 @@
     <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <style>
-        /* === [UPGRADE] HỆ THỐNG BIẾN CSS ĐỂ DỄ QUẢN LÝ THEME === */
-        :root, body.theme-hacker {
-            --bg-color: #0d0d0d;
-            --text-color: #00ff41;
-            --accent-color: #afff9c;
-            --primary-border-color: #00ff41;
-            --secondary-border-color: #008f25;
-            --tertiary-border-color: #004f14;
-            --panel-bg: rgba(0, 30, 0, 0.5);
-            --hover-bg: #003000;
-            --input-bg: #0a0a0a;
-            --bubble-mine-bg: #003000;
-            --bubble-other-bg: #1a1a1a;
-            --font-primary: 'Share Tech Mono', monospace;
-            --font-secondary: 'Share Tech Mono', monospace;
-            --text-shadow: 0 0 3px var(--text-color);
-        }
-        body.theme-default {
-            --bg-color: linear-gradient(135deg, #667eea, #764ba2);
-            --text-color: #fff;
-            --accent-color: #fff;
-            --primary-border-color: rgba(255,255,255,0.3);
-            --secondary-border-color: rgba(255,255,255,0.2);
-            --panel-bg: rgba(0,0,0,0.3);
-            --hover-bg: rgba(0,0,0,0.4);
-            --input-bg: rgba(255,255,255,0.1);
-            --font-primary: "Dosis", cursive;
-            --text-shadow: none;
-        }
-        body.theme-light {
-            --bg-color: #f1f1f1;
-            --text-color: #333;
-            --accent-color: #007bff;
-            --primary-border-color: #ddd;
-            --secondary-border-color: #eee;
-            --panel-bg: #fff;
-            --hover-bg: #f5f5f5;
-            --input-bg: #fff;
-            --bubble-mine-bg: #007bff;
-            --bubble-other-bg: #e9ecef;
-            color: var(--text-color);
-            --font-primary: "Dosis", cursive;
-            --text-shadow: none;
-        }
-
-        /* === HIỆU ỨNG NỀN & LOADING (KHÔNG ĐỔI) === */
+        :root, body.theme-hacker {--bg-color:#0d0d0d;--text-color:#00ff41;--accent-color:#afff9c;--primary-border-color:#00ff41;--secondary-border-color:#008f25;--tertiary-border-color:#004f14;--panel-bg:rgba(0,30,0,.5);--hover-bg:#003000;--input-bg:#0a0a0a;--bubble-mine-bg:#003000;--bubble-other-bg:#1a1a1a;--font-primary:'Share Tech Mono',monospace;--text-shadow:0 0 3px var(--text-color)}
+        body.theme-default {--bg-color:linear-gradient(135deg,#667eea,#764ba2);--text-color:#fff;--accent-color:#fff;--primary-border-color:rgba(255,255,255,.3);--secondary-border-color:rgba(255,255,255,.2);--panel-bg:rgba(0,0,0,.3);--hover-bg:rgba(0,0,0,.4);--input-bg:rgba(255,255,255,.1);--font-primary:"Dosis",cursive;--text-shadow:none}
+        body.theme-light {--bg-color:#f1f1f1;--text-color:#333;--accent-color:#007bff;--primary-border-color:#ddd;--secondary-border-color:#eee;--panel-bg:#fff;--hover-bg:#f5f5f5;--input-bg:#fff;--bubble-mine-bg:#007bff;color:#fff;--bubble-other-bg:#e9ecef;--font-primary:"Dosis",cursive;--text-shadow:none}
         #loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:#0d0d0d;display:flex;justify-content:center;align-items:center;z-index:99999;transition:opacity .75s ease-out}#loading-overlay.hidden{opacity:0;pointer-events:none}@keyframes rgb-flow{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}#permanent-rgb-border{position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;pointer-events:none;opacity:.75}.rgb-border{position:absolute;background:linear-gradient(90deg,#ff0000,#ff7300,#fffb00,#48ff00,#00ffd5,#002bff,#7a00ff,#ff00c8,#ff0000);background-size:200% auto;animation:rgb-flow 3s linear infinite;filter:blur(15px)}.rgb-border.top{top:-10px;left:0;width:100%;height:30px}.rgb-border.right{top:0;right:-10px;width:30px;height:100%}.rgb-border.bottom{bottom:-10px;left:0;width:100%;height:30px}.rgb-border.left{top:0;left:-10px;width:30px;height:100%}@keyframes rotate-sphere{from{transform:rotateY(0deg) rotateX(20deg)}to{transform:rotateY(360deg) rotateX(20deg)}}.sphere-container{perspective:800px}.sphere{width:200px;height:200px;position:relative;transform-style:preserve-3d;animation:rotate-sphere 12s linear infinite}.ring{position:absolute;width:100%;height:100%;border-radius:50%;border:2px solid #00ff41;box-shadow:0 0 10px #00ff41,inset 0 0 10px #00ff41}.ring:nth-child(1){transform:rotateY(0deg)}.ring:nth-child(2){transform:rotateY(30deg)}.ring:nth-child(3){transform:rotateY(60deg)}.ring:nth-child(4){transform:rotateY(90deg)}.ring:nth-child(5){transform:rotateY(120deg)}.ring:nth-child(6){transform:rotateY(150deg)}
-        
-        /* === GIAO DIỆN CỐT LÕI SỬ DỤNG BIẾN CSS === */
         body { margin:0; padding:0; height:100vh; overflow:hidden; background: var(--bg-color); color: var(--text-color); font-family: var(--font-primary); text-shadow: var(--text-shadow); transition: background .3s ease, color .3s ease; }
-        .view { display:none; width:100%; height:100%; overflow-y:auto; }
+        .view { display:none; width:100%; height:100%; overflow:hidden; }
         .view.active { display:flex; }
-        .auth-form { background:var(--panel-bg); border:1px solid var(--primary-border-color); padding:30px; width:300px; margin-bottom: 20px; transition: background .3s, border .3s; }
+        .auth-form { background:var(--panel-bg); border:1px solid var(--primary-border-color); padding:30px; width:300px; margin-bottom: 20px; transition: background .3s, border .3s; border-radius: 8px;}
         .auth-form h2 { color:var(--accent-color); }
-        input[type=text], input[type=password] { width: calc(100% - 22px); padding:10px; background-color:var(--input-bg); border:1px solid var(--primary-border-color); color:var(--text-color); margin-bottom:15px; font-family:inherit; border-radius:3px; }
+        input[type=text], input[type=password] { box-sizing: border-box; width: 100%; padding:10px; background-color:var(--input-bg); border:1px solid var(--primary-border-color); color:var(--text-color); margin-bottom:15px; font-family:inherit; border-radius:3px; }
         button { width:100%; padding:10px; background:transparent; border:1px solid var(--primary-border-color); color:var(--text-color); cursor:pointer; transition:all .2s ease; border-radius:3px; }
         button:hover { background-color:var(--accent-color); color:var(--bg-color); box-shadow:0 0 15px var(--accent-color); text-shadow:none; }
-        header { padding:10px 20px; background:#0a0a0a; border-bottom:1px solid var(--primary-border-color); display:flex; justify-content:space-between; align-items:center; }
-        #left-panel, #right-panel { padding:15px; }
-        #left-panel { border-right:1px solid var(--primary-border-color); overflow-y:auto; }
-        #right-panel { flex-grow:1; display:flex; flex-direction:column; }
+        header { padding:10px 20px; background:rgba(10,10,10,0.8); backdrop-filter: blur(5px); border-bottom:1px solid var(--primary-border-color); display:flex; justify-content:space-between; align-items:center; }
+        #left-panel, #right-panel { padding:15px; height: 100%; box-sizing: border-box; }
+        #left-panel { overflow-y:auto; }
+        #right-panel { display:flex; flex-direction:column; }
         .panel-section h4 { border-bottom:1px dashed var(--secondary-border-color); padding-bottom:5px; }
         .item-list{list-style:none;padding:0}.item-list li{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--tertiary-border-color);cursor:pointer; border-radius: 4px; animation: fadeIn .3s ease-in-out;}.item-list li:hover{background-color:var(--hover-bg)}.item-list li .info{display:flex;flex-direction:column;flex-grow:1;overflow:hidden}.item-list button{width:auto;font-size:.8em;padding:3px 6px;margin-left:auto}
-        .user-item{width:40px;height:40px;border-radius:50%;flex-shrink:0}.status-online{border:2px solid #00ff41}.status-offline{border:2px solid #555}#user-search{display:flex;gap:10px}
-        #chat-area{flex-grow:1;display:flex;flex-direction:column;margin-top:20px;border:1px solid var(--primary-border-color);padding:10px;border-radius:4px;}#messages-container{flex-grow:1;overflow-y:auto;display:flex;flex-direction:column-reverse}#message-form{display:flex;gap:10px;margin-top:10px}.message-bubble{padding:10px;border-radius:5px;max-width:70%;margin-bottom:10px;display:flex;flex-direction:column;width:fit-content;animation:fadeIn .3s ease;}.message-bubble.mine{background-color:var(--bubble-mine-bg);align-self:flex-end}.message-bubble.other{background-color:var(--bubble-other-bg);align-self:flex-start}#profile-view{justify-content:center;align-items:center;text-align:center;flex-direction:column}#profile-container{background:var(--panel-bg);border:1px solid var(--primary-border-color);padding:40px;width:80%;max-width:400px;border-radius:8px;}#profile-pic{width:150px;height:150px;border-radius:50%;border:3px solid var(--accent-color)}#profile-status-dot{display:inline-block;width:15px;height:15px;border-radius:50%;margin-left:10px}.online{background:#00ff41;box-shadow:0 0 10px #00ff41}.offline{background:#555}
+        .user-item{width:40px;height:40px;border-radius:50%;flex-shrink:0}.status-online{border:2px solid #00ff41}.status-offline{border:2px solid #555}
+        #chat-area{flex-grow:1;display:flex;flex-direction:column;margin-top:20px;padding:10px;}#messages-container{flex-grow:1;overflow-y:auto;display:flex;flex-direction:column-reverse}#message-form{display:flex;gap:10px;margin-top:10px}.message-bubble{padding:10px;border-radius:8px;max-width:70%;margin-bottom:10px;width:fit-content;animation:slideIn .3s ease-out;}.message-bubble.mine{background-color:var(--bubble-mine-bg);align-self:flex-end}.message-bubble.other{background-color:var(--bubble-other-bg);align-self:flex-start}#profile-view{justify-content:center;align-items:center;text-align:center;flex-direction:column}#profile-container{background:var(--panel-bg);border:1px solid var(--primary-border-color);padding:40px;width:80%;max-width:400px;border-radius:8px;}#profile-pic{width:150px;height:150px;border-radius:50%;border:3px solid var(--accent-color)}#profile-status-dot{display:inline-block;width:15px;height:15px;border-radius:50%;margin-left:10px}.online{background:#00ff41;box-shadow:0 0 10px #00ff41}.offline{background:#555}
         #user-search-section{position:relative}#search-results{position:absolute;top:100%;left:0;right:0;background:#0a0a0a;border:1px solid var(--primary-border-color);max-height:250px;overflow-y:auto;z-index:100;border-radius:4px}.search-result-item{padding:10px;display:flex;align-items:center;border-bottom:1px solid var(--tertiary-border-color);cursor:default}.search-result-item a{color:var(--accent-color);text-decoration:none;cursor:pointer}.search-result-item a:hover{text-decoration:underline}.search-result-item button{margin-left:auto}
-        .last-message{font-size:.8em;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}.item-list li.unread .info .username{font-weight:700;color:var(--accent-color)}.item-list li.unread .info .last-message{color:var(--text-color);font-weight:700}.message-timestamp{font-size:.7em;color:#888;margin-top:5px;align-self:flex-end}.typing-indicator{height:20px;font-style:italic;color:#999;transition:opacity .3s}.load-more-messages{text-align:center;padding:10px;cursor:pointer;color:var(--accent-color)}
+        .last-message{font-size:.8em;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}.item-list li.unread .info .username{font-weight:700;color:var(--accent-color)}.item-list li.unread .info .last-message{color:var(--text-color);font-weight:700}.message-timestamp{font-size:.7em;color:#888;margin-top:5px;align-self:flex-end}.typing-indicator{height:20px;font-style:italic;color:#999;transition:opacity .3s}
         
-        /* === [UPGRADE] GIAO DIỆN THÍCH ỨNG (RESPONSIVE) CHO MOBILE === */
+        /* === [MAJOR UPGRADE] GIAO DIỆN MOBILE-FIRST THỰC THỤ === */
         #login-view { padding: 10px; }
         .auth-container { flex-direction: column; width:100%; align-items: center;}
         .auth-form { width: calc(90% - 60px); max-width: 400px;}
-        .app-body { flex-direction: column; }
-        #left-panel { width: calc(100% - 30px); border-right: none; border-bottom: 1px solid var(--primary-border-color); height: 40%; max-height: 300px; }
-        #right-panel { height: 60%; }
         
-        @media (min-width: 768px) {
-            .auth-container { flex-direction: row; }
-            .app-body { flex-direction: row; height: calc(100% - 61px);}
-            #left-panel { width: 300px; border-right: 1px solid var(--primary-border-color); border-bottom: none; height: auto; max-height: none;}
-            #right-panel { height: auto; }
+        .app-body { position: relative; width: 100%; height: calc(100% - 61px); overflow: hidden; }
+        #left-panel, #right-panel { position: absolute; top:0; width:100%; transition: transform .3s ease-in-out; }
+        #left-panel { left: 0; transform: translateX(0); }
+        #right-panel { left: 0; transform: translateX(100%); background: var(--bg-color); }
+        #main-app-view.mobile-chat-active #left-panel { transform: translateX(-100%); }
+        #main-app-view.mobile-chat-active #right-panel { transform: translateX(0); }
+        
+        #back-to-list-btn { display: none; } /* Nút quay lại mặc định ẩn */
+        
+        @media (max-width: 767px) {
+            #chat-header-info { display: none; }
+            #back-to-list-btn { display: inline-block; width: auto; font-size: 1.5em; padding: 0 10px; }
         }
+
+        @media (min-width: 768px) {
+            .app-body { display:flex; position:static; }
+            #left-panel, #right-panel { position:static; transform: translateX(0); }
+            #left-panel { width: 320px; flex-shrink:0; border-right:1px solid var(--primary-border-color); }
+            #right-panel { flex-grow: 1; }
+        }
+
         @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes slideIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
     </style>
 </head>
 <body class="theme-hacker">
@@ -106,53 +74,21 @@
     <div id="permanent-rgb-border"><div class="rgb-border top"></div><div class="rgb-border right"></div><div class="rgb-border bottom"></div><div class="rgb-border left"></div></div>
     <div id="loading-overlay"><div class="sphere-container"><div class="sphere"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div></div></div>
     
-    <!-- === VIEW 1: ĐĂNG NHẬP / ĐĂNG KÝ === -->
-    <div id="login-view" class="view">
-        <div class="auth-container">
-            <div id="register-form" class="auth-form">
-                <h2>Đăng Ký Tài Khoản</h2>
-                <!-- [UPGRADE] Thêm Tên Hiển Thị -->
-                <input type="text" id="reg-displayname" placeholder="Tên hiển thị của bạn" autocomplete="name">
-                <input type="text" id="reg-username" placeholder="Tên đăng nhập (viết liền, không dấu)" autocomplete="off">
-                <input type="password" id="reg-password" placeholder="Mật khẩu">
-                <input type="password" id="reg-backup-code" placeholder="Mã dự phòng (mật khẩu 2)">
-                <button id="register-btn">Tạo Tài Khoản</button>
-            </div>
-            <div id="login-form" class="auth-form">
-                <h2>Đăng Nhập Hệ Thống</h2>
-                <input type="text" id="login-username" placeholder="Tên đăng nhập">
-                <input type="password" id="login-password" placeholder="Mật khẩu hoặc Mã dự phòng">
-                <button id="login-btn">Đăng Nhập</button>
-            </div>
-        </div>
-    </div>
+    <!-- VIEW 1: ĐĂNG NHẬP / ĐĂNG KÝ -->
+    <div id="login-view" class="view"><div class="auth-container"><div id="register-form" class="auth-form"><h2>Đăng Ký Tài Khoản</h2><input type="text" id="reg-displayname" placeholder="Tên hiển thị của bạn" autocomplete="name"><input type="text" id="reg-username" placeholder="Tên đăng nhập (viết liền, không dấu)" autocomplete="off"><input type="password" id="reg-password" placeholder="Mật khẩu"><input type="password" id="reg-backup-code" placeholder="Mã dự phòng"><button id="register-btn">Tạo Tài Khoản</button></div><div id="login-form" class="auth-form"><h2>Đăng Nhập Hệ Thống</h2><input type="text" id="login-username" placeholder="Tên đăng nhập"><input type="password" id="login-password" placeholder="Mật khẩu hoặc Mã dự phòng"><button id="login-btn">Đăng Nhập</button></div></div></div>
 
-    <!-- VIEW 2 (Không đổi cấu trúc HTML) -->
+    <!-- VIEW 2: ỨNG DỤNG CHAT CHÍNH -->
     <div id="main-app-view" class="view">
         <header><div id="user-info">Xin chào, <strong id="current-displayname"></strong></div><div><button id="my-profile-btn" style="width: auto; margin-right: 10px;">Hồ Sơ Của Tôi</button><button id="theme-switcher-btn" style="width: auto; margin-right: 10px;">Đổi Giao Diện</button><button id="logout-btn" style="width: auto;">Đăng Xuất</button></div></header>
-        <div class="app-body"><div id="left-panel"><div id="friend-requests-section" class="panel-section"><h4>Yêu Cầu Kết Bạn</h4><ul id="friend-requests-list" class="item-list"></ul></div><div id="friends-list-section" class="panel-section"><h4>Bạn Bè</h4><ul id="friends-list" class="item-list"></ul></div></div><div id="right-panel"><div id="user-search-section" class="panel-section"><h4>Tìm Kiếm Người Dùng Khác</h4><div id="user-search"><input type="text" id="search-input" placeholder="Bắt đầu gõ để tìm..."><button id="search-btn" style="display: none;">Tìm</button></div><div id="search-results"></div></div><div id="chat-area"><h3 id="chat-with-header">Chọn một người bạn để bắt đầu chat</h3><div id="messages-container"></div><div id="typing-indicator" class="typing-indicator"></div><form id="message-form" style="display: none;"><input type="text" id="message-input" placeholder="Nhập tin nhắn..." autocomplete="off"><button type="submit">Gửi</button></form></div></div></div>
+        <div class="app-body"><div id="left-panel"><div id="friend-requests-section" class="panel-section"><h4>Yêu Cầu Kết Bạn</h4><ul id="friend-requests-list" class="item-list"></ul></div><div id="friends-list-section" class="panel-section"><h4>Bạn Bè</h4><ul id="friends-list" class="item-list"></ul></div></div><div id="right-panel"><div id="user-search-section" class="panel-section"><h4>Tìm Kiếm Người Dùng</h4><div id="user-search"><input type="text" id="search-input" placeholder="Bắt đầu gõ để tìm..."><button style="display: none;">Tìm</button></div><div id="search-results"></div></div><div id="chat-area"><div id="chat-with-header" style="display:flex; align-items:center; gap:10px;"><button id="back-to-list-btn">←</button><span id="chat-header-info">Chọn một người bạn để bắt đầu chat</span></div><div id="messages-container"></div><div id="typing-indicator" class="typing-indicator"></div><form id="message-form" style="display: none;"><input type="text" id="message-input" placeholder="Nhập tin nhắn..." autocomplete="off"><button type="submit">Gửi</button></form></div></div></div>
     </div>
     
-    <!-- === VIEW 3: HỒ SƠ === -->
-    <div id="profile-view" class="view">
-        <div id="profile-container">
-            <img id="profile-pic" src="">
-            <h2 id="profile-displayname"></h2>
-            <p>@<span id="profile-username"></span></p>
-            <p>Trạng thái: <span id="profile-status"></span> <span id="profile-status-dot"></span></p>
-            <div id="edit-profile-section" style="display:none;">
-                 <!-- [UPGRADE] Thêm chỉnh sửa Tên Hiển Thị -->
-                 <input type="text" id="edit-displayname-input" placeholder="Tên hiển thị mới">
-                 <button id="save-displayname-btn" style="width: auto; margin-right: 10px;">Lưu Tên</button>
-                 <button id="upload-widget-btn" style="width: auto;">Đổi Ảnh</button>
-            </div>
-            <button id="back-to-chat-btn" style="margin-top: 20px;">Quay Lại Chat</button>
-        </div>
-    </div>
+    <!-- VIEW 3: HỒ SƠ -->
+    <div id="profile-view" class="view"><div id="profile-container"><img id="profile-pic" src=""><h2 id="profile-displayname"></h2><p>@<span id="profile-username"></span></p><p>Trạng thái: <span id="profile-status"></span> <span id="profile-status-dot"></span></p><div id="edit-profile-section" style="display:none;"><input type="text" id="edit-displayname-input" placeholder="Tên hiển thị mới"><button id="save-displayname-btn" style="width: auto; margin-right: 10px;">Lưu Tên</button><button id="upload-widget-btn" style="width: auto;">Đổi Ảnh</button></div><button id="back-to-chat-btn" style="margin-top: 20px;">Quay Lại Chat</button></div></div>
 
     <script>
         // BƯỚC 1: CẤU HÌNH
-        const firebaseConfig = {       
+        const firebaseConfig = {
       apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
       authDomain: "webai-7642b.firebaseapp.com",
       databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -161,29 +97,44 @@
       messagingSenderId: "967881370128",
       appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
       measurementId: "G-61XJ390Q30"
-      };
+        };
         const CLOUDINARY_CLOUD_NAME = 'dgbux4wzo';
         const CLOUDINARY_UPLOAD_PRESET = 'okeqfdx4';
         
         // --- KHỞI TẠO & BIẾN TOÀN CỤC ---
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth(); const db = firebase.database();
-        let currentUser = null, currentChatPartner = null;
+        let currentUser = null, currentChatPartner = null, messageListener = null, typingTimeout = null, oldestMessageKey = null;
 
-        // --- LOGIC GIAO DIỆN & KHỞI TẠO (KHÔNG ĐỔI) ---
-        window.addEventListener('load',()=>{const o=document.getElementById('loading-overlay');o.classList.add('hidden');setTimeout(()=>o.style.display='none',750)});const themes=['theme-hacker','theme-default','theme-light','theme-dark'];let currentThemeIndex=0;document.getElementById('theme-switcher-btn').addEventListener('click',()=>{currentThemeIndex=(currentThemeIndex+1)%themes.length;document.body.className=themes[currentThemeIndex]});const views=document.querySelectorAll('.view');function showView(e){views.forEach(v=>v.classList.remove('active'));document.getElementById(e).classList.add('active')}async function hashString(str){const encoder=new TextEncoder(),data=encoder.encode(str),hashBuffer=await crypto.subtle.digest('SHA-256',data),hashArray=Array.from(new Uint8Array(hashBuffer));return hashArray.map(b=>b.toString(16).padStart(2,'0')).join('')}
+        // --- LOGIC GIAO DIỆN & KHỞI TẠO ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadingOverlay=document.getElementById('loading-overlay');
+            loadingOverlay.classList.add('hidden');
+            setTimeout(()=>loadingOverlay.style.display='none',750);
+            
+            const themes=['theme-hacker','theme-default','theme-light']; let currentThemeIndex=0;
+            document.getElementById('theme-switcher-btn').addEventListener('click',()=>{currentThemeIndex=(currentThemeIndex+1)%themes.length;document.body.className=themes[currentThemeIndex]});
+            
+            document.getElementById('back-to-list-btn').addEventListener('click', () => {
+                document.getElementById('main-app-view').classList.remove('mobile-chat-active');
+                currentChatPartner = null; // Dừng chat
+                if(messageListener) messageListener.off(); // Ngắt listener cũ
+            });
+
+            // Gắn listener vào các hàm sau khi DOM đã sẵn sàng
+            auth.onAuthStateChanged(user => { if (user) { db.ref(`accounts/${user.uid}`).once('value', s => { s.exists() ? (currentUser={uid:user.uid, ...s.val()}, initializeApp()) : auth.signOut() }) } else { currentUser = null; showView('login-view'); }});
+            // (Tất cả các .addEventListener khác cũng nên được đặt ở đây)
+        });
+        const views=document.querySelectorAll('.view');function showView(e){views.forEach(v=>v.classList.remove('active'));document.getElementById(e).classList.add('active')}async function hashString(str){const encoder=new TextEncoder(),data=encoder.encode(str),hashBuffer=await crypto.subtle.digest('SHA-256',data),hashArray=Array.from(new Uint8Array(hashBuffer));return hashArray.map(b=>b.toString(16).padStart(2,'0')).join('')}
 
         // === HỆ THỐNG TÀI KHOẢN (ĐÃ NÂNG CẤP VỚI DISPLAYNAME) ===
-        auth.onAuthStateChanged(user=>{if(user){db.ref(`accounts/${user.uid}`).once('value',s=>{s.exists()?(currentUser={uid:user.uid,...s.val()},initializeApp()):auth.signOut()})}else{currentUser=null;showView('login-view')}});
         document.getElementById('register-btn').addEventListener('click',async()=>{const e=document.getElementById('reg-username').value.trim().toLowerCase(),t=document.getElementById('reg-password').value,a=document.getElementById('reg-backup-code').value,d=document.getElementById('reg-displayname').value.trim();if(!e||!t||!a||!d)return alert("Vui lòng điền đủ thông tin.");if(!/^[a-z0-9_]+$/.test(e))return alert("Tên đăng nhập chỉ được chứa chữ cái thường, số và dấu gạch dưới.");const o=`${e}@yourapp.com`;const n=await hashString(a);db.ref("accounts").orderByChild("username").equalTo(e).once("value",r=>{if(r.exists())return alert("Tên đăng nhập đã tồn tại!");auth.createUserWithEmailAndPassword(o,t).then(t=>{db.ref(`accounts/${t.user.uid}`).set({username:e,displayName:d,email:o,backupCodeHash:n,profilePicture:"https://i.imgur.com/sC0zt4c.png",status:"offline",lastOnline:firebase.database.ServerValue.TIMESTAMP}).then(()=>alert("Đăng ký thành công!"))}).catch(e=>alert(e.message))})});
         document.getElementById('login-btn').addEventListener('click',async()=>{const e=document.getElementById('login-username').value.trim().toLowerCase(),t=document.getElementById('login-password').value;if(!e||!t)return;db.ref("accounts").orderByChild("username").equalTo(e).once("value",a=>{if(!a.exists())return alert("Tên đăng nhập không tồn tại!");const o=Object.values(a.val())[0];auth.signInWithEmailAndPassword(o.email,t).catch(async a=>{const n=await hashString(t);n===o.backupCodeHash?(alert("Cảnh báo: Đăng nhập bằng mã dự phòng!"),auth.signInWithEmailAndPassword(o.email,t).catch(()=>{}) ):alert("Sai mật khẩu hoặc mã dự phòng!")})})});
         document.getElementById('logout-btn').addEventListener('click',()=>{db.ref(`accounts/${currentUser.uid}`).update({status:"offline",lastOnline:firebase.database.ServerValue.TIMESTAMP}).then(()=>auth.signOut())});
 
-        // --- CHỨC NĂNG CHÍNH CỦA ỨNG DỤNG ---
+        // === CHỨC NĂNG CHÍNH CỦA ỨNG DỤNG ===
         function initializeApp(){document.getElementById('current-displayname').textContent=currentUser.displayName;setupPresenceSystem();listenForFriendRequests();listenForFriends();showView('main-app-view')}
         function setupPresenceSystem(){const e=db.ref(`/accounts/${currentUser.uid}`);db.ref(".info/connected").on("value",t=>{if(!1===t.val())return;e.onDisconnect().update({status:"offline",lastOnline:firebase.database.ServerValue.TIMESTAMP}).then(()=>e.update({status:"online"}))})}
-        
-        // --- BẠN BÈ, YÊU CẦU & TÌM KIẾM ---
         function listenForFriendRequests(){const e=document.getElementById('friend-requests-list');db.ref(`friend_requests/${currentUser.uid}`).on('value',t=>{e.innerHTML='';t.forEach(c=>{db.ref(`accounts/${c.key}`).once('value',u=>{const a=u.val();e.innerHTML+=`<li><img src="${a.profilePicture}" class="user-item"> <div class="info"><span class="username">${a.displayName}</span></div> <button onclick="acceptFriendRequest('${c.key}')">✔</button><button onclick="declineFriendRequest('${c.key}')">✖</button></li>`})})})}
         function acceptFriendRequest(e){const t={};t[`friends/${currentUser.uid}/${e}`]={lastMessage:"Các bạn đã là bạn bè.",timestamp:firebase.database.ServerValue.TIMESTAMP,read:!0},t[`friends/${e}/${currentUser.uid}`]={lastMessage:"Các bạn đã là bạn bè.",timestamp:firebase.database.ServerValue.TIMESTAMP,read:!0},t[`friend_requests/${currentUser.uid}/${e}`]=null,db.ref().update(t)}
         function declineFriendRequest(e){db.ref(`friend_requests/${currentUser.uid}/${e}`).remove()}
@@ -193,12 +144,12 @@
         // --- HỒ SƠ & CLOUDINARY ---
         document.getElementById('my-profile-btn').addEventListener('click',()=>showProfile(currentUser.uid));
         function showProfile(uid){db.ref(`accounts/${uid}`).once('value',s=>{const userData=s.val();document.getElementById('profile-pic').src=userData.profilePicture;document.getElementById('profile-displayname').textContent=userData.displayName;document.getElementById('profile-username').textContent=userData.username;document.getElementById('profile-status').textContent=userData.status;document.getElementById('profile-status-dot').className="online"===userData.status?"online":"offline";const editSection=document.getElementById('edit-profile-section');editSection.style.display=uid===currentUser.uid?"block":"none";if(uid===currentUser.uid){document.getElementById('edit-displayname-input').value=userData.displayName}showView('profile-view')})}
-        document.getElementById('save-displayname-btn').addEventListener('click', () => { const newName = document.getElementById('edit-displayname-input').value.trim(); if(newName) db.ref(`accounts/${currentUser.uid}/displayName`).set(newName).then(() => alert('Đã lưu tên hiển thị!')); });
+        document.getElementById('save-displayname-btn').addEventListener('click',()=>{const newName=document.getElementById('edit-displayname-input').value.trim();if(newName)db.ref(`accounts/${currentUser.uid}/displayName`).set(newName).then(()=>alert('Đã lưu tên hiển thị!'))});
         document.getElementById('back-to-chat-btn').addEventListener('click',()=>showView('main-app-view'));const cloudinaryWidget=cloudinary.createUploadWidget({cloudName:CLOUDINARY_CLOUD_NAME,uploadPreset:CLOUDINARY_UPLOAD_PRESET},(err,res)=>{if(!err&&res&&"success"===res.event){db.ref(`accounts/${currentUser.uid}/profilePicture`).set(res.info.secure_url)}});document.getElementById('upload-widget-btn').addEventListener('click',()=>cloudinaryWidget.open());
 
         // --- HỆ THỐNG CHAT NÂNG CAO ---
-        let messageListener = null, typingTimeout = null, oldestMessageKey = null; const messagesUI = document.getElementById('messages-container'), typingIndicatorUI = document.getElementById('typing-indicator');
-        function startChat(partnerUid, partnerData) { currentChatPartner={uid:partnerUid,...partnerData};document.getElementById('chat-with-header').textContent=`Chat với ${partnerData.displayName}`;document.getElementById('message-form').style.display='flex';messagesUI.innerHTML='';oldestMessageKey=null;if(messageListener)messageListener.off();db.ref(`friends/${currentUser.uid}/${partnerUid}/read`).set(true);const chatRoomId=currentUser.uid<partnerUid?`${currentUser.uid}_${partnerUid}`:`${partnerUid}_${currentUser.uid}`;const chatRef=db.ref(`private_chats/${chatRoomId}`);chatRef.orderByKey().limitToLast(20).once('value',snapshot=>{if(snapshot.exists()){const messages=[];snapshot.forEach(child=>{messages.push({key:child.key,...child.val()})});oldestMessageKey=messages[0].key;messages.reverse().forEach(msg=>appendMessage(msg))}});messageListener=chatRef.orderByKey().startAt(oldestMessageKey||' ');messageListener.on('child_added',snapshot=>{if(!document.getElementById(`msg-${snapshot.key}`)){appendMessage({key:snapshot.key,...snapshot.val()})}});const typingRef=db.ref(`typing_indicator/${chatRoomId}`);typingRef.on('value',snapshot=>{const partnerTyping=snapshot.child(partnerUid).val();typingIndicatorUI.textContent=partnerTyping?`${partnerData.displayName} đang gõ...`:''});typingRef.child(partnerUid).onDisconnect().remove()}
+        const messagesUI = document.getElementById('messages-container'), typingIndicatorUI = document.getElementById('typing-indicator');
+        function startChat(partnerUid,partnerData){document.getElementById('main-app-view').classList.add('mobile-chat-active');currentChatPartner={uid:partnerUid,...partnerData};document.getElementById('chat-header-info').textContent=`Chat với ${partnerData.displayName}`;document.getElementById('message-form').style.display='flex';messagesUI.innerHTML='';oldestMessageKey=null;if(messageListener)messageListener.off();db.ref(`friends/${currentUser.uid}/${partnerUid}/read`).set(true);const chatRoomId=currentUser.uid<partnerUid?`${currentUser.uid}_${partnerUid}`:`${partnerUid}_${currentUser.uid}`;const chatRef=db.ref(`private_chats/${chatRoomId}`);chatRef.orderByKey().limitToLast(20).once('value',snapshot=>{if(snapshot.exists()){const messages=[];snapshot.forEach(child=>{messages.push({key:child.key,...child.val()})});if(messages.length>0)oldestMessageKey=messages[0].key;messages.reverse().forEach(msg=>appendMessage(msg))}});messageListener=chatRef.orderByKey().startAt(oldestMessageKey||' ');messageListener.on('child_added',snapshot=>{if(!document.getElementById(`msg-${snapshot.key}`)){appendMessage({key:snapshot.key,...snapshot.val()})}});const typingRef=db.ref(`typing_indicator/${chatRoomId}`);typingRef.on('value',snapshot=>{const partnerTyping=snapshot.child(partnerUid).val();typingIndicatorUI.textContent=partnerTyping?`${partnerData.displayName} đang gõ...`:''});typingRef.child(partnerUid).onDisconnect().remove()}
         function createMessageBubble(msg){const bubble=document.createElement('div');bubble.id=`msg-${msg.key}`;bubble.className=`message-bubble ${msg.senderId===currentUser.uid?'mine':'other'}`;bubble.innerHTML=`${msg.text} <span class="message-timestamp">${new Date(msg.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>`;return bubble}
         function appendMessage(msg){const bubble=createMessageBubble(msg);messagesUI.insertBefore(bubble,messagesUI.firstChild)}
         document.getElementById('message-input').addEventListener('input',()=>{if(!currentChatPartner)return;const chatRoomId=currentUser.uid<currentChatPartner.uid?`${currentUser.uid}_${currentChatPartner.uid}`:`${currentChatPartner.uid}_${currentUser.uid}`;const myTypingRef=db.ref(`typing_indicator/${chatRoomId}/${currentUser.uid}`);myTypingRef.set(true);clearTimeout(typingTimeout);typingTimeout=setTimeout(()=>myTypingRef.remove(),2e3)});
