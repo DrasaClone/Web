@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Chat CLI</title>
+    
+    <!-- SDKs & Fonts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #0D0D0D;
+            --text-color: #00FF41;
+            --accent-color: #00FF41;
+            --secondary-text-color: #aaa;
+            --border-color: #2a2a2a;
+            --font-primary: 'Share Tech Mono', monospace;
+            --text-shadow: 0 0 5px var(--accent-color);
+        }
+
+        /* Hiệu ứng nền & loading */
+        #loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:#0d0d0d;display:flex;justify-content:center;align-items:center;z-index:99999;transition:opacity .75s ease-out}#loading-overlay.hidden{opacity:0;pointer-events:none}@keyframes rgb-flow{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}#permanent-rgb-border{position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;pointer-events:none;opacity:.75}.rgb-border{position:absolute;background:linear-gradient(90deg,#ff0000,#ff7300,#fffb00,#48ff00,#00ffd5,#002bff,#7a00ff,#ff00c8,#ff0000);background-size:200% auto;animation:rgb-flow 3s linear infinite;filter:blur(15px)}.rgb-border.top{top:-10px;left:0;width:100%;height:30px}.rgb-border.right{top:0;right:-10px;width:30px;height:100%}.rgb-border.bottom{bottom:-10px;left:0;width:100%;height:30px}.rgb-border.left{top:0;left:-10px;width:30px;height:100%}@keyframes rotate-sphere{from{transform:rotateY(0deg) rotateX(20deg)}to{transform:rotateY(360deg) rotateX(20deg)}}.sphere-container{perspective:800px}.sphere{width:200px;height:200px;position:relative;transform-style:preserve-3d;animation:rotate-sphere 12s linear infinite}.ring{position:absolute;width:100%;height:100%;border-radius:50%;border:2px solid var(--accent-color);box-shadow:0 0 10px var(--accent-color),inset 0 0 10px var(--accent-color)}.ring:nth-child(1){transform:rotateY(0deg)}.ring:nth-child(2){transform:rotateY(30deg)}.ring:nth-child(3){transform:rotateY(60deg)}.ring:nth-child(4){transform:rotateY(90deg)}.ring:nth-child(5){transform:rotateY(120deg)}.ring:nth-child(6){transform:rotateY(150deg)}
+        .cat-cursor{position:fixed;z-index:100000;pointer-events:none;transform:translate(-50%,-50%);width:50px;height:50px;background-image:url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIxLjUiIHNcm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+CjxwYXRoIGQ9Ik00IDExLjVDNCA3LjA0Mzk2IDcuNTgzNzkgMy41IDIgOC41IDMuNSA4IDMuNSAyMCAxNi41QzIxLjA0ODcgMy41IDI0LjUgMy41IDI0LjUgOC41QzI0LjUgMTIgMjEuMDQ4NyAxNi41IDE2LjUgMTYuNUMxMi44OTU0IDE2LjUgMTIuMjk3OCAxNS4wOTE1IDggMTUuMzkxNUgxNkM4IDE1LjM5MTUgOC4xMDQ1NyAxNi41IDQuNSAxNi41QzIuODcxMjYgMTYuNSAwIDE1LjQwNTIgMCAxMy4yNVYxMi41WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTkuNSAxMC41QzkuNSAxMC43NzYxIDkuMjU5MzkgMTEgOC45OTM5MiAxMUM4LjcyODQ2IDExIDguNSA5Ljc3NjE0IDguNSA5LjVDOC41IDkuMjIzODYgOC43Mjg0NiA5IDguOTkzOTIgOUM5LjI1OTM5IDkgOS41IDkuMjIzODYgOS45IDEwLjVaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMTUuNSAxMC45QzE1LjUgMTAuNzcZMSAxNS4yNTkzIDExIDE0Ljk5MzkgMTFDMTQuNzI4NSAxMSAxNC41IDkuNzc2MTQgMTQuNSA5LjVDMTQuNSA5LjMjMzg2IDE0LjcyODUgOSAxNC45OTM5IDlDMTUuMjU5MyA5IDE1LjUgOS4yMjM4NiAxNS41IDEwLjVaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMTAuOTk3MSAxMi45MDY2QzExLjU0OTUgMTMuMzA2MiAxMi40NDg4IDEzLjMwNjIgMTIuOTk0NyAxMi45MDY2Ii8+CjwvZz4KPC9zdmc+Cg==');background-size:contain;background-repeat:no-repeat;transition:transform .2s ease,background-image .2s ease,width .2s ease,height .2s ease}
+
+        /* CLI Styles */
+        html, body {
+            box-sizing: border-box; margin: 0; padding: 0; height: 100vh;
+            background: var(--bg-color); color: var(--text-color); font-family: var(--font-primary);
+            text-shadow: var(--text-shadow); cursor: none;
+        }
+        .terminal-window {
+            width: 100%; height: 100%; padding: 20px; display: flex; flex-direction: column;
+            border: 1px solid var(--border-color); box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+        }
+        #output-area {
+            flex-grow: 1; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word;
+        }
+        .output-line { margin: 0; padding: 2px 0; }
+        .system-message { color: var(--secondary-text-color); font-style: italic; }
+        .error-message { color: #ff4757; }
+        .input-line { display: flex; align-items: center; margin-top: 10px; }
+        #prompt { white-space: nowrap; }
+        #command-input {
+            background: transparent; border: none; outline: none; flex-grow: 1;
+            color: inherit; font-family: inherit; font-size: 1em; padding-left: 10px;
+        }
+        ::placeholder { color: #555; }
+    </style>
+</head>
+<body>
+    <div class="cat-cursor"></div>
+    <div id="permanent-rgb-border"><div class="rgb-border top"></div><div class="rgb-border right"></div><div class="rgb-border bottom"></div><div class="rgb-border left"></div></div>
+    <div id="loading-overlay"><div class="sphere-container"><div class="sphere"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div></div></div>
+
+    <div class="terminal-window">
+        <div id="output-area"></div>
+        <div class="input-line">
+            <span id="prompt">guest></span>
+            <input type="text" id="command-input" autofocus autocomplete="off" placeholder="gõ 'help' để xem các lệnh">
+        </div>
+    </div>
+    
+    <script>
+        // === BƯỚC 1: CẤU HÌNH FIREBASE ===
+        const firebaseConfig = {
+      apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
+      authDomain: "webai-7642b.firebaseapp.com",
+      databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "webai-7642b",
+      storageBucket: "webai-7642b.firebasestorage.app",
+      messagingSenderId: "967881370128",
+      appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
+      measurementId: "G-61XJ390Q30"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+        
+        // --- CÁC BIẾN TRẠNG THÁI ---
+        let currentUser = null;
+        let currentRoom = { id: null, listener: null };
+        let commandState = { type: 'default', data: {} };
+        const userColors = ['#ff79c6', '#8be9fd', '#50fa7b', '#f1fa8c', '#bd93f9', '#ffb86c', '#ff5555', '#f8f82'];
+        const helpText = `
+Các Lệnh Có Sẵn:
+  help                    - Hiển thị danh sách các lệnh này.
+  new                     - Đăng ký một tài khoản mới.
+  login                   - Đăng nhập vào tài khoản của bạn.
+  logout                  - Đăng xuất khỏi phiên hiện tại.
+  check                   - Kiểm tra thông tin tài khoản hiện tại của bạn.
+  create                  - Tạo một địa chỉ phòng chat mới, duy nhất.
+  goto <address>          - Đi vào một phòng chat để bắt đầu nhắn tin.
+  manage                  - Liệt kê tất cả các phòng bạn đã tạo hoặc tham gia.
+  exit                    - (Khi ở trong phòng) Rời khỏi phòng chat hiện tại.
+  setting name <new_name> - Thay đổi tên hiển thị của bạn.
+  setting pass            - Thay đổi mật khẩu tài khoản của bạn.
+  setting delete          - Xóa vĩnh viễn tài khoản của bạn.
+`;
+
+        // --- CORE LOGIC & UI SETUP ---
+        const outputArea = document.getElementById('output-area');
+        const commandInput = document.getElementById('command-input');
+        const promptEl = document.getElementById('prompt');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            loadingOverlay.classList.add('hidden');
+            setTimeout(() => loadingOverlay.style.display = 'none', 750);
+
+            initCursor();
+            printOutput("Chào mừng bạn đến với Hệ Thống Chat CLI.", "system-message");
+            printOutput("Gõ 'help' để xem danh sách các lệnh.", "system-message");
+
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    db.ref(`cli_accounts/${user.uid}`).once('value', snapshot => {
+                        if (snapshot.exists()) {
+                            currentUser = { uid: user.uid, email: user.email, ...snapshot.val() };
+                            setPrompt(`${currentUser.username}>`);
+                            printOutput(`\nĐã đăng nhập với tư cách ${currentUser.username}(${currentUser.displayName}).`, 'system-message');
+                        } else {
+                            auth.signOut();
+                        }
+                    });
+                } else {
+                    currentUser = null;
+                    setPrompt('guest>');
+                    if (currentRoom.id) exitRoom(false); // Buộc rời phòng khi đăng xuất
+                }
+            });
+
+            commandInput.addEventListener('keydown', handleInput);
+            document.body.addEventListener('click', () => commandInput.focus());
+        });
+
+        // --- BỘ XỬ LÝ LỆNH ---
+        function handleInput(e) {
+            if (e.key !== 'Enter') return;
+            e.preventDefault();
+
+            const input = commandInput.value.trim();
+            printOutput(`${promptEl.textContent} ${input}`); // Lặp lại lệnh
+            commandInput.value = '';
+
+            if (commandState.type !== 'default') {
+                handleStatefulInput(input);
+            } else if (currentRoom.id) {
+                handleChatInput(input);
+            } else {
+                handleCommand(input);
+            }
+
+            outputArea.scrollTop = outputArea.scrollHeight;
+        }
+
+        function handleCommand(input) {
+            if (!input) return;
+            const [command, ...args] = input.toLowerCase().split(' ').filter(Boolean);
+
+            switch(command) {
+                case 'help': printOutput(helpText); break;
+                case 'new': startNewUserProcess(); break;
+                case 'login': startLoginProcess(); break;
+                case 'logout': logout(); break;
+                case 'check': checkUser(); break;
+                case 'create': createRoom(); break;
+                case 'goto': gotoRoom(args[0]); break;
+                case 'manage': manageRooms(); break;
+                case 'setting': handleSetting(args); break;
+                default: printError(`Không tìm thấy lệnh: ${command}`); break;
+            }
+        }
+        
+        function handleChatInput(text) {
+            if (!text) return;
+            if (text.toLowerCase() === 'exit') {
+                exitRoom();
+                return;
+            }
+
+            const colorIndex = simpleHash(currentUser.uid) % userColors.length;
+
+            const messageData = {
+                uid: currentUser.uid,
+                username: currentUser.username,
+                displayName: currentUser.displayName,
+                text: text,
+                color: userColors[colorIndex],
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            };
+            db.ref(`cli_chat_messages/${currentRoom.id}`).push(messageData);
+        }
+
+        // --- CÁC HÀM THỰC THI LỆNH ---
+
+        function checkUser() {
+            if (!currentUser) {
+                printError("Bạn chưa đăng nhập. Sử dụng lệnh 'login' hoặc 'new'.");
+                return;
+            }
+            printOutput(`Thông Tin Người Dùng Hiện Tại:
+  UID: ${currentUser.uid}
+  Username: ${currentUser.username}
+  Tên hiển thị: ${currentUser.displayName}
+  Email: ${currentUser.email}
+`);
+        }
+
+        function createRoom() {
+            if (!currentUser) return printError("Bạn phải đăng nhập để tạo phòng.");
+            
+            const newRoomRef = db.ref('cli_rooms').push();
+            const newRoomId = newRoomRef.key;
+
+            const roomData = { createdBy: currentUser.uid, createdAt: firebase.database.ServerValue.TIMESTAMP };
+            
+            const updates = {};
+            updates[`cli_rooms/${newRoomId}`] = roomData;
+            updates[`cli_user_activity/${currentUser.uid}/${newRoomId}`] = { joinedAt: firebase.database.ServerValue.TIMESTAMP };
+            
+            db.ref().update(updates).then(() => {
+                 printOutput(`Phòng mới đã được tạo. Địa chỉ: ${newRoomId}`);
+                 printOutput("Dùng lệnh 'goto " + newRoomId + "' để vào phòng.");
+            });
+        }
+        
+        async function gotoRoom(roomId) {
+            if (!currentUser) return printError("Bạn phải đăng nhập để tham gia phòng.");
+            if (!roomId) return printError("Cú pháp: goto <địa_chỉ_phòng>");
+
+            const roomRef = db.ref(`cli_rooms/${roomId}`);
+            const snapshot = await roomRef.once('value');
+
+            if (!snapshot.exists()) return printError(`Không tìm thấy phòng với địa chỉ '${roomId}'.`);
+            
+            currentRoom.id = roomId;
+            setPrompt(`[${roomId.substring(0, 6)}...]>`);
+            outputArea.innerHTML = ''; 
+            printOutput(`Đang vào phòng ${roomId}... Gõ 'exit' để rời khỏi.`);
+            printOutput('----------------------------------------------------', 'system-message');
+            
+            db.ref(`cli_user_activity/${currentUser.uid}/${roomId}`).set({ joinedAt: firebase.database.ServerValue.TIMESTAMP });
+            
+            const joinMessage = { system: true, text: `${currentUser.username}(${currentUser.displayName}) đã tham gia phòng.` };
+            db.ref(`cli_chat_messages/${roomId}`).push(joinMessage);
+            
+            const messagesRef = db.ref(`cli_chat_messages/${roomId}`).orderByChild('timestamp').limitToLast(50);
+            currentRoom.listener = messagesRef.on('child_added', (snap) => {
+                const msg = snap.val();
+                if (msg.system) {
+                    printOutput(msg.text, 'system-message');
+                } else {
+                    const coloredName = `<span style="color:${msg.color};">${msg.username}(${msg.displayName})</span>`;
+                    printOutput(`${coloredName}: ${msg.text}`);
+                }
+            });
+        }
+
+        function exitRoom(notify = true) {
+            if (!currentRoom.id) return;
+            
+            if (notify) {
+                 const leaveMessage = { system: true, text: `${currentUser.username}(${currentUser.displayName}) đã rời khỏi phòng.` };
+                 db.ref(`cli_chat_messages/${currentRoom.id}`).push(leaveMessage);
+            }
+           
+            if (currentRoom.listener) {
+                db.ref(`cli_chat_messages/${currentRoom.id}`).off('child_added', currentRoom.listener);
+            }
+            
+            printOutput('----------------------------------------------------', 'system-message');
+            printOutput("Đang rời phòng...", 'system-message');
+
+            currentRoom = { id: null, listener: null };
+            setPrompt(currentUser ? `${currentUser.username}>` : 'guest>');
+            setTimeout(() => {
+                outputArea.innerHTML = '';
+                printOutput("Bạn đã rời khỏi phòng.");
+            }, 500);
+        }
+
+        async function manageRooms() {
+             if (!currentUser) return printError("Bạn phải đăng nhập để quản lý phòng.");
+             const activityRef = db.ref(`cli_user_activity/${currentUser.uid}`);
+             const snapshot = await activityRef.once('value');
+             
+             if (!snapshot.exists()) {
+                printOutput("Bạn chưa tham gia hay tạo bất kỳ phòng nào.");
+                return;
+             }
+
+             printOutput("Các phòng của bạn (đã tạo hoặc tham gia):");
+             const rooms = snapshot.val();
+             Object.keys(rooms).forEach(roomId => {
+                printOutput(`- ${roomId}`);
+             });
+        }
+        
+        function handleSetting(args) {
+             if (!currentUser) return printError("Bạn phải đăng nhập để chỉnh sửa cài đặt.");
+             const [subCommand, ...values] = args;
+             switch(subCommand) {
+                case 'name':
+                    const newName = values.join(' ');
+                    if(!newName) return printError("Cú pháp: setting name <tên_hiển_thị_mới>");
+                    db.ref(`cli_accounts/${currentUser.uid}/displayName`).set(newName).then(() => {
+                        currentUser.displayName = newName;
+                        printOutput("Tên hiển thị đã được đổi thành công thành '" + newName + "'.");
+                    });
+                    break;
+                case 'pass': startChangePasswordProcess(); break;
+                case 'delete': startDeleteAccountProcess(); break;
+                default: printError("Cài đặt không hợp lệ. Sử dụng 'name', 'pass', hoặc 'delete'.");
+             }
+        }
+        
+        function logout() {
+            if (!currentUser) return printError("Bạn chưa đăng nhập.");
+            auth.signOut().then(() => {
+                printOutput("Bạn đã đăng xuất thành công.");
+            });
+        }
+        
+        // --- CÁC TIẾN TRÌNH NHIỀU BƯỚC ---
+
+        function handleStatefulInput(input) {
+            switch(commandState.type) {
+                case 'awaiting_username': commandState.data.username = input.toLowerCase(); promptFor("Tên hiển thị:"); commandState.type = 'awaiting_displayname'; break;
+                case 'awaiting_displayname': commandState.data.displayName = input; promptFor("Mật khẩu (tối thiểu 6 ký tự):", true); commandState.type = 'awaiting_password'; break;
+                case 'awaiting_password': commandState.data.password = input; promptFor("Mật khẩu thứ hai (để khôi phục):", true); commandState.type = 'awaiting_password2'; break;
+                case 'awaiting_password2': commandState.data.password2 = input; registerUser(); break;
+                
+                case 'awaiting_login_username': commandState.data.username = input.toLowerCase(); promptFor("Mật khẩu:", true); commandState.type = 'awaiting_login_password'; break;
+                case 'awaiting_login_password': commandState.data.password = input; loginUser(); break;
+
+                case 'awaiting_current_pass': commandState.data.currentPassword = input; promptFor("Mật khẩu mới:", true); commandState.type = 'awaiting_new_pass'; break;
+                case 'awaiting_new_pass': commandState.data.newPassword = input; changePassword(); break;
+
+                case 'awaiting_delete_confirm':
+                    if (input.toLowerCase() === 'delete') {
+                        promptFor("Nhập mật khẩu chính của bạn để xác nhận:", true);
+                        commandState.type = 'awaiting_delete_pass';
+                    } else { resetCommandState(); printError("Đã hủy bỏ việc xóa tài khoản."); }
+                    break;
+                case 'awaiting_delete_pass': commandState.data.password = input; deleteAccount(); break;
+            }
+        }
+        
+        function startNewUserProcess() { promptFor("Nhập username mong muốn (viết liền, không dấu):"); commandState.type = 'awaiting_username'; }
+        function startLoginProcess() { promptFor("Username:"); commandState.type = 'awaiting_login_username'; }
+        function startChangePasswordProcess() { promptFor("Mật khẩu hiện tại:", true); commandState.type = 'awaiting_current_pass'; }
+        function startDeleteAccountProcess() {
+            printError("HÀNH ĐỘNG NÀY KHÔNG THỂ HOÀN TÁC và sẽ xóa tất cả dữ liệu của bạn.");
+            printError("Gõ 'delete' để xác nhận bạn muốn tiếp tục.");
+            commandState.type = 'awaiting_delete_confirm';
+        }
+
+        async function registerUser() {
+            const { username, displayName, password, password2 } = commandState.data;
+            if (!/^[a-z0-9_]+$/.test(username)) { resetCommandState(); return printError("Username không hợp lệ. Chỉ sử dụng chữ thường, số và dấu gạch dưới."); }
+            if (password.length < 6) { resetCommandState(); return printError("Mật khẩu chính phải có ít nhất 6 ký tự."); }
+            if (password2.length < 6) { resetCommandState(); return printError("Mật khẩu thứ hai phải có ít nhất 6 ký tự."); }
+            
+            const usernameSnapshot = await db.ref('cli_accounts').orderByChild('username').equalTo(username).once('value');
+            if (usernameSnapshot.exists()) { resetCommandState(); return printError("Username này đã tồn tại."); }
+            
+            const email = `${username}@cli.chat`;
+            auth.createUserWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    db.ref(`cli_accounts/${userCredential.user.uid}`).set({ username, displayName, password2 })
+                    .then(() => {
+                        printOutput("Tài khoản đã được tạo thành công. Dùng lệnh 'login' để bắt đầu.", 'system-message');
+                        resetCommandState();
+                    });
+                })
+                .catch(error => { resetCommandState(); printError(error.message); });
+        }
+        
+        async function loginUser() {
+            const { username, password } = commandState.data;
+            const email = `${username}@cli.chat`;
+            auth.signInWithEmailAndPassword(email, password)
+                .catch(error => printError("Username hoặc mật khẩu không hợp lệ."));
+            resetCommandState();
+        }
+
+        function changePassword() {
+            const { currentPassword, newPassword } = commandState.data;
+            if (newPassword.length < 6) { resetCommandState(); return printError("Mật khẩu mới phải có ít nhất 6 ký tự."); }
+
+            const user = auth.currentUser;
+            const credential = firebase.auth.EmailAuthProvider.credential(user.email, currentPassword);
+            
+            user.reauthenticateWithCredential(credential)
+                .then(() => user.updatePassword(newPassword))
+                .then(() => printOutput("Đổi mật khẩu thành công."))
+                .catch(error => printError("Xác thực thất bại. Vui lòng kiểm tra lại mật khẩu hiện tại."))
+                .finally(resetCommandState);
+        }
+
+        function deleteAccount() {
+            const { password } = commandState.data;
+            const user = auth.currentUser;
+            const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+
+            user.reauthenticateWithCredential(credential).then(() => {
+                const uid = user.uid;
+                db.ref(`cli_accounts/${uid}`).remove().then(() => {
+                    db.ref(`cli_user_activity/${uid}`).remove().then(() => {
+                        user.delete().then(() => {
+                            printOutput("Tài khoản đã được xóa vĩnh viễn.", "system-message");
+                        }).catch(err => printError(`Không thể xóa người dùng: ${err.message}`));
+                    });
+                });
+            }).catch(error => {
+                printError("Sai mật khẩu. Đã hủy bỏ việc xóa tài khoản.");
+            }).finally(resetCommandState);
+        }
+
+        function resetCommandState() {
+            commandInput.type = 'text';
+            commandState = { type: 'default', data: {} };
+        }
+        
+        // --- CÁC HÀM TIỆN ÍCH ---
+        function printOutput(text, className = '') {
+            const p = document.createElement('p');
+            p.className = `output-line ${className}`;
+            p.innerHTML = text.replace(/\n/g, '<br>');
+            outputArea.appendChild(p);
+            outputArea.scrollTop = outputArea.scrollHeight;
+        }
+        function printError(text) { printOutput(`Lỗi: ${text}`, 'error-message'); }
+        function setPrompt(text) { promptEl.textContent = text; }
+        function promptFor(text, isPassword = false) {
+            printOutput(text, "system-message");
+            commandInput.type = isPassword ? 'password' : 'text';
+            commandInput.focus();
+        }
+        function initCursor() { const e = document.querySelector(".cat-cursor"); document.addEventListener("mousemove", t => { e.style.left = t.clientX + "px", e.style.top = t.clientY + "px" }); }
+        function simpleHash(str) { let hash = 0; for (let i = 0; i < str.length; i++) { const char = str.charCodeAt(i); hash = ((hash << 5) - hash) + char; hash |= 0; } return Math.abs(hash); }
+    </script>
+</body>
+</html>
