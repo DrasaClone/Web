@@ -161,12 +161,12 @@ Các Lệnh Có Sẵn:
         function handleCommand(input) {
             if (!input) return;
 
-            // ***** START: PHẦN SỬA LỖI *****
+            // ***** START: PHẦN SỬA LỖI QUAN TRỌNG *****
             // Tách lệnh và tham số. Chỉ chuyển lệnh thành chữ thường.
             const parts = input.split(' ').filter(Boolean);
             const command = parts.shift().toLowerCase(); // Lấy phần tử đầu tiên, chuyển thành chữ thường
             const args = parts; // Các phần tử còn lại là tham số, giữ nguyên case
-            // ***** END: PHẦN SỬA LỖI *****
+            // ***** END: PHẦN SỬA LỖI QUAN TRỌNG *****
 
             switch(command) {
                 case 'help': printOutput(helpText); break;
