@@ -5,24 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ Thống Chat</title>
     
-    <!-- PWA & SEO -->
-    <meta name="theme-color" content="#00ff41"/>
-    <link rel="apple-touch-icon" href="https://www.gstatic.com/images/branding/product/1x/firebase_512dp.png">
-    <link rel="manifest" href="manifestchat.json"> <!-- <<< THAY LINK Ở ĐÂY -->
-    
     <!-- SDKs & Fonts -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
-    <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Dosis:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <style>
-        /* === BẢN NÂNG CẤP CSS (GIỮ NGUYÊN CSS CŨ VÀ THÊM VÀO) === */
         :root, body.theme-hacker {--bg-color:#0d0d0d;--panel-bg:#121212;--modal-bg:rgba(18,18,18,.95);--text-color:#e0e0e0;--accent-color:#00ff41;--secondary-text-color:#aaa;--primary-border-color:#2a2a2a;--hover-bg:#222;--active-bg:var(--accent-color);--active-text-color:#0d0d0d;--font-primary:'Share Tech Mono',monospace;--font-secondary:"Dosis",cursive;--text-shadow:0 0 3px var(--accent-color);--shadow:0 4px 6px rgba(0,0,0,.1)}
         body.theme-light {--bg-color:#f4f5f7;--panel-bg:#fff;--modal-bg:rgba(255,255,255,.95);--text-color:#333;--accent-color:#007bff;--secondary-text-color:#6c757d;--primary-border-color:#e9ecef;--hover-bg:#e9ecef;--active-bg:var(--accent-color);--active-text-color:#fff;--font-primary:"Dosis",cursive;--bubble-mine-bg:var(--accent-color);color:#333;--bubble-other-bg:#e9ecef;--text-shadow:none;--shadow:0 4px 6px rgba(0,0,0,.05)}
+        /* Hiệu ứng nền & loading */
         #loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:#0d0d0d;display:flex;justify-content:center;align-items:center;z-index:99999;transition:opacity .75s ease-out}#loading-overlay.hidden{opacity:0;pointer-events:none}@keyframes rgb-flow{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}#permanent-rgb-border{position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;pointer-events:none;opacity:.75}.rgb-border{position:absolute;background:linear-gradient(90deg,#ff0000,#ff7300,#fffb00,#48ff00,#00ffd5,#002bff,#7a00ff,#ff00c8,#ff0000);background-size:200% auto;animation:rgb-flow 3s linear infinite;filter:blur(15px)}.rgb-border.top{top:-10px;left:0;width:100%;height:30px}.rgb-border.right{top:0;right:-10px;width:30px;height:100%}.rgb-border.bottom{bottom:-10px;left:0;width:100%;height:30px}.rgb-border.left{top:0;left:-10px;width:30px;height:100%}@keyframes rotate-sphere{from{transform:rotateY(0deg) rotateX(20deg)}to{transform:rotateY(360deg) rotateX(20deg)}}.sphere-container{perspective:800px}.sphere{width:200px;height:200px;position:relative;transform-style:preserve-3d;animation:rotate-sphere 12s linear infinite}.ring{position:absolute;width:100%;height:100%;border-radius:50%;border:2px solid var(--accent-color);box-shadow:0 0 10px var(--accent-color),inset 0 0 10px var(--accent-color)}.ring:nth-child(1){transform:rotateY(0deg)}.ring:nth-child(2){transform:rotateY(30deg)}.ring:nth-child(3){transform:rotateY(60deg)}.ring:nth-child(4){transform:rotateY(90deg)}.ring:nth-child(5){transform:rotateY(120deg)}.ring:nth-child(6){transform:rotateY(150deg)}
+        /* CON TRỎ CHUỘT TÙY CHỈNH */
         body, a, button, input { cursor: none; }
         .cat-cursor{position:fixed;z-index:100000;pointer-events:none;transform:translate(-50%,-50%);width:50px;height:50px;background-image:url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIxLjUiIHNcm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+CjxwYXRoIGQ9Ik00IDExLjVDNCA3LjA0Mzk2IDcuNTgzNzkgMy41IDIgOC41IDMuNSA4IDMuNSAyMCAxNi41QzIxLjA0ODcgMy41IDI0LjUgMy41IDI0LjUgOC41QzI0LjUgMTIgMjEuMDQ4NyAxNi41IDE2LjUgMTYuNUMxMi44OTU0IDE2LjUgMTIuMjk3OCAxNS4wOTE1IDggMTUuMzkxNUgxNkM4IDE1LjM5MTUgOC4xMDQ1NyAxNi41IDQuNSAxNi41QzIuODcxMjYgMTYuNSAwIDE1LjQwNTIgMCAxMy4yNVYxMi41WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTkuNSAxMC41QzkuNSAxMC43NzYxIDkuMjU5MzkgMTEgOC45OTM5MiAxMUM4LjcyODQ2IDExIDguNSA5Ljc3NjE0IDguNSA5LjVDOC41IDkuMjIzODYgOC43Mjg0NiA5IDguOTkzOTIgOUM5LjI1OTM5IDkgOS41IDkuMjIzODYgOS45IDEwLjVaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMTUuNSAxMC41QzE1LjUgMTAuNzcZMSAxNS4yNTkzIDExIDE0Ljk5MzkgMTFDMTQuNzI4NSAxMSAxNC41IDkuNzc2MTQgMTQuNSA5LjVDMTQuNSA5LjMjMzg2IDE0LjcyODUgOSAxNC45OTM5IDlDMTUuMjU5MyA5IDE1LjUgOS4yMjM4NiAxNS41IDEwLjVaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMTAuOTk3MSAxMi45MDY2QzExLjU0OTUgMTMuMzA2MiAxMi40NDg4IDEzLjMwNjIgMTIuOTk0NyAxMi45MDY2Ii8+CjwvZz4KPC9zdmc+Cg==');background-size:contain;background-repeat:no-repeat;transition:transform .2s ease,background-image .2s ease,width .2s ease,height .2s ease}
         .cat-cursor.pointer-active{width:35px;height:35px;transform:translate(-40%,-40%);background-image:url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIxLjUiIHNcm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+CjxwYXRoIGQ9Ik05IDE4QzEwLjY1NjkgMTggMTIgMTYuNjU2OSAxMiAxNUMxMiAxMy4zNDMxIDEwLjY1NjkgMTIgOSAxMkw2IDEyQzQuMzQzMTUgMTIgMyAxMy4zNDMxIDMgMTVDMyAxNi42NTY5IDQuMzQzMTUgMTggNiAxOEg5WiIgZmlsbD0id2hpdGUiLz4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTggNCkiPgo8cGF0aCBkPSJNMSA1QzEuODI4NDMgNSA1IDEuODI4NDMgNSA2QzIuODczNjcgNi40NjU4NCAxLjUgNS41IDIgN0MzLjUgOS41IDIgOSA1IDEyQzguNSA5LjUgOC41IDUuNSA4LjUgNC41QzguNSA0IDggMS4yNDAyOCA0IDEuMjQwMjhDMSAxLjI0MDI4IDAgMy4yODQyNyAwIDVDMCA2LjY1Njg1IDEuMzQzMTUgOCAzIDhDNS41IDggNS41IDUgNS41IDQuNUM1LjUgMy41IDMuNSAxIDMgMVoiIGZpbGw9IndoaXRlIi8+CjwvZz4KPGNpcmNsZSBjeD0iNiIgb3BhY2l0eT0iMCIgY3k9IjQiIHI9IjIiIGZpbGw9ImJsYWNrIi8+CjxwYXRoIGQ9Ik0xOCAxMEMxOS4xMDQ2IDEwIDIwIDkuMTA0NTcgMjAgOEMyMCA2Ljg5NTQzIDE5LjEwNDYgNiAxOCA2QzE2Ljg5NTQgNiAxNiA2Ljg5NTQzIDE2IDhDMTYgOS4xMDQ1yAxNi44OTU0IDEwIDE4IDEwWiIgZmlsbD0id2hpdGUiLz4KPC9nPgo8L3N2Zz4K')}
@@ -36,8 +31,6 @@
         .item-list{flex-grow:1;overflow-y:auto;list-style:none;padding:10px; display: none;}.item-list.active{display:block;}
         .item-list li{display:flex;align-items:center;gap:10px;padding:10px;cursor:pointer;border-radius:4px;transition:background .2s}.item-list li.active,.item-list li:hover{background:var(--hover-bg)}.info{display:flex;flex-direction:column;flex-grow:1;overflow:hidden}.username{font-weight:700;font-family:var(--font-secondary)}.last-message{font-size:.8em;color:var(--secondary-text-color);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}.item-list li.unread .username{color:var(--accent-color)}.item-list li.unread .last-message{color:var(--text-color);font-weight:700}
         .chat-container{flex-grow:1;display:flex;flex-direction:column}#chat-header{padding:10px 15px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--primary-border-color);flex-shrink:0}
-        #chat-header-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-        #chat-header-actions .call-btn { background: none; border: 1px solid var(--secondary-text-color); border-radius: 50%; width: 36px; height: 36px; display: flex; justify-content: center; align-items: center; color: var(--secondary-text-color); } #chat-header-actions .call-btn:hover { background-color: var(--hover-bg); color: var(--accent-color); border-color: var(--accent-color); }
         #chat-header-info { flex-grow: 1; } .chat-header-menu { position: relative; } #chat-menu-btn { background: none; border: none; color: var(--text-color); padding: 5px; }
         #chat-menu { display: none; position: absolute; right: 0; top: 100%; background: var(--panel-bg); border: 1px solid var(--primary-border-color); border-radius: 5px; z-index: 10; list-style: none; padding: 5px 0; margin: 0;}
         #chat-menu li { padding: 8px 15px; cursor: pointer; } #chat-menu li:hover { background: var(--hover-bg); } .menu-item-danger { color: #c0392b; }
@@ -45,6 +38,7 @@
         .user-item{width:40px;height:40px;border-radius:50%;flex-shrink:0;object-fit:cover}.status-online{border:2px solid var(--accent-color)}.status-offline{border:2px solid var(--secondary-text-color)}
         .message-bubble{padding:8px 15px;border-radius:18px;max-width:70%;margin-bottom:2px;width:fit-content;animation:slideIn .3s ease-out;position:relative;transition:transform .1s ease}.message-bubble:hover{transform:scale(1.02)}.message-bubble img{max-width:250px;border-radius:10px;margin-top:5px;display:block}.message-bubble.mine{background-color:var(--active-bg);color:var(--active-text-color);align-self:flex-end}.message-bubble.other{background-color:var(--hover-bg);align-self:flex-start}.message-timestamp{font-size:.7em;color:var(--secondary-text-color);margin-top:5px;align-self:flex-end}.message-bubble.mine .message-timestamp{color:rgba(255,255,255,.7)}
         .message-sender-name { font-size: 0.8em; font-weight: bold; color: var(--accent-color); margin-bottom: 3px; }
+        /* Modal Styles */
         .modal { position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: var(--modal-bg); display: none; justify-content: center; align-items: center; }
         .modal-content { background-color: var(--panel-bg); padding: 20px; border: 1px solid var(--primary-border-color); width: 90%; max-width: 500px; border-radius: 8px; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--primary-border-color); padding-bottom: 10px; margin-bottom: 15px; }
@@ -52,17 +46,6 @@
         #modal-friends-list { max-height: 300px; overflow-y: auto; }
         #modal-friends-list .friend-item { display: flex; align-items: center; padding: 8px; } #modal-friends-list label { flex-grow: 1; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        #notification-permission-modal p { margin-bottom: 20px; } #dont-ask-again-label { font-size: 0.9em; display: flex; align-items: center; gap: 5px; }
-        #call-modal { z-index: 10001; flex-direction: column; background: #111; }
-        #call-modal.incoming-call { background: rgba(0,0,0,0.8); }
-        .incoming-call-ui { text-align: center; } .incoming-call-ui img { width: 100px; height: 100px; border-radius: 50%; margin-bottom: 20px; }
-        #call-container { width: 100%; height: 100%; display: flex; flex-direction: column; position: relative; }
-        #video-streams { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; flex-grow: 1; padding: 10px; }
-        .video-player { background: #000; border-radius: 8px; overflow: hidden; position: relative; } .video-player p { position: absolute; bottom: 10px; left: 10px; color: white; background: rgba(0,0,0,0.5); padding: 2px 5px; border-radius: 3px; } .video-player video { width: 100%; height: 100%; object-fit: cover; }
-        #local-player-wrapper { position: absolute; bottom: 80px; right: 20px; width: 150px; height: 200px; z-index: 10; border: 2px solid var(--accent-color); box-shadow: 0 0 15px rgba(0,0,0,0.5); transition: all 0.3s; }
-        #call-controls { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(18,18,18,.8); padding: 15px; display: flex; justify-content: center; gap: 20px; z-index: 5; }
-        .control-btn { background: rgba(255,255,255,0.1); border-radius: 50%; width: 50px; height: 50px; border: none; color: white; display: flex; justify-content: center; align-items: center; } .control-btn.active { background: var(--accent-color); color: var(--bg-color); } .control-btn.hang-up { background: #e74c3c; }
-        #chat-ball { position: fixed; right: 20px; bottom: 80px; width: 60px; height: 60px; background-color: var(--accent-color); color: var(--active-text-color); border-radius: 50%; display: none; justify-content: center; align-items: center; z-index: 9998; box-shadow: var(--shadow); cursor: move; } #chat-ball-count { position: absolute; top: -5px; right: -5px; background: #e74c3c; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.8em; }
         @media (max-width:768px){#left-panel{width: 100%; border-right: none;} #main-nav{position:fixed;bottom:0;left:0;right:0;width:100%;height:60px;flex-direction:row;justify-content:space-around;z-index:100;border-right:none;border-top:1px solid var(--primary-border-color)}.app-container{padding-bottom:60px;}.chat-container{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg-color);transform:translateX(100%);transition:transform .3s ease-in-out;z-index:200}.chat-container.active{transform:translateX(0)} #back-to-list-btn { display: block !important; }}
         .page-container{width:100%;height:100%;padding:30px;display:flex;flex-direction:column;align-items:center;overflow-y:auto;}.page-content{background:var(--panel-bg);padding:30px;border-radius:8px;width:100%;max-width:500px}.form-group{margin-bottom:15px}label{display:block;margin-bottom:5px;color:var(--secondary-text-color)}
         #login-view{justify-content:center;align-items:center;padding:15px}.auth-container{width:100%;max-width:400px}.auth-form{background:var(--panel-bg);border:1px solid var(--primary-border-color);padding:30px;border-radius:8px}.auth-form h2{color:var(--accent-color);text-align:center}
@@ -80,16 +63,12 @@
     <div id="loading-overlay"><div class="sphere-container"><div class="sphere"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div></div></div>
     
     <!-- MODALS -->
-    <div id="notification-permission-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Bật thông báo?</h2></div><p>Để nhận được thông báo tin nhắn mới ngay cả khi bạn đang không mở tab này.</p><label id="dont-ask-again-label"><input type="checkbox" id="dont-ask-again-checkbox"> Không hỏi lại trong phiên này</label><div class="modal-actions"><button id="decline-notification-btn">Để sau</button><button id="allow-notification-btn">Cho phép</button></div></div></div>
-    <div id="call-modal" class="modal"><div id="incoming-call-ui" style="display:none;"><h2 id="incoming-call-type">Cuộc gọi đến...</h2><img id="incoming-caller-avatar" src="https://i.imgur.com/sC0zt4c.png" alt="Caller"><h3 id="incoming-caller-name">...</h3><div class="modal-actions"><button id="reject-call-btn" class="btn-danger">Từ chối</button><button id="accept-call-btn">Nghe</button></div></div><div id="call-container" style="display:none;"><div id="video-streams"><div id="local-player-wrapper" class="video-player"></div></div><div id="call-controls"><button id="mute-audio-btn" class="control-btn" title="Tắt Mic">🎤</button><button id="mute-video-btn" class="control-btn" title="Tắt Video">📷</button><button id="pip-btn" class="control-btn" title="Hình trong Hình">🖼️</button><button id="end-call-btn" class="control-btn hang-up" title="Kết thúc">📞</button></div></div></div>
     <div id="create-group-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Tạo Nhóm Mới</h2><span class="close-modal-btn">&times;</span></div><div class="form-group"><label for="group-name-input">Tên nhóm</label><input id="group-name-input" type="text" placeholder="Nhập tên nhóm..."/></div><div class="form-group"><label>Thêm thành viên (bạn bè)</label><div id="modal-friends-list"></div></div><div class="modal-actions"><button id="create-group-confirm-btn">Tạo Nhóm</button></div></div></div>
     <div id="manage-group-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Quản lý nhóm</h2><span class="close-modal-btn">&times;</span></div><h4>Thành viên</h4><div id="group-members-list" class="item-list" style="display:block;"></div><div class="modal-actions"><button id="add-members-btn">Thêm thành viên</button><button id="delete-group-btn" class="btn-danger">Xóa Nhóm</button></div></div></div>
     <div id="add-members-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Thêm thành viên</h2><span class="close-modal-btn">&times;</span></div><div id="add-members-friends-list" class="item-list" style="display:block;"></div><div class="modal-actions"><button id="add-members-confirm-btn">Thêm</button></div></div></div>
     <div id="confirm-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Xác nhận</h2><span class="close-modal-btn">&times;</span></div><p id="confirm-modal-text"></p><div class="modal-actions"><button id="confirm-modal-cancel-btn">Hủy</button><button id="confirm-modal-confirm-btn" class="btn-danger">Xác nhận</button></div></div></div>
     <div id="delete-account-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Xóa tài khoản</h2><span class="close-modal-btn">&times;</span></div><p>Hành động này không thể hoàn tác. Tất cả dữ liệu của bạn sẽ bị xóa. Vui lòng nhập mật khẩu của bạn để xác nhận.</p><div class="form-group"><input type="password" id="delete-account-password" placeholder="Nhập mật khẩu của bạn"></div><div class="modal-actions"><button id="delete-account-cancel-btn">Hủy</button><button id="delete-account-confirm-btn" class="btn-danger">Xóa Tài Khoản</button></div></div></div>
     <!-- END MODALS -->
-    
-    <div id="chat-ball" style="display:none;"><span id="chat-ball-count">0</span></div>
 
     <div id="login-view" class="view"><div class="auth-container"><div class="auth-form"><h2>Đăng Nhập/Đăng Ký</h2><div class="form-group"><input type="text" id="reg-displayname" placeholder="Tên hiển thị"><input type="text" id="reg-username" placeholder="Tên đăng nhập (viết liền)"><input type="password" id="reg-password" placeholder="Mật khẩu"><button id="register-btn">Tạo Tài Khoản Mới</button></div><hr style="border:0;border-top:1px solid var(--primary-border-color)"><div class="form-group" style="margin-top:20px"><input type="text" id="login-username" placeholder="Tên đăng nhập"><input type="password" id="login-password" placeholder="Mật khẩu"><button id="login-btn">Đăng Nhập</button></div></div></div></div>
 
@@ -128,11 +107,6 @@
              <div id="chat-header">
                 <button id="back-to-list-btn" style="display:none">←</button>
                 <div id="chat-header-info"></div>
-                <!-- NÂNG CẤP: Thêm nút gọi -->
-                <div id="chat-header-actions" style="display: none;">
-                    <button id="start-voice-call-btn" class="call-btn" title="Gọi thoại"><svg viewBox="0 0 24 24" fill="currentColor" width="20px"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.02.74-.25 1.02l-2.2 2.2z"/></svg></button>
-                    <button id="start-video-call-btn" class="call-btn" title="Gọi video"><svg viewBox="0 0 24 24" fill="currentColor" width="20px"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg></button>
-                </div>
                 <div class="chat-header-menu">
                     <button id="chat-menu-btn" title="Tùy chọn">⋮</button>
                     <ul id="chat-menu"></ul>
@@ -146,38 +120,24 @@
     <script>
         // === BƯỚC 1: CẤU HÌNH ===
         const firebaseConfig = {
-          apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI", // <-- KEY CỦA BẠN
-          authDomain: "webai-7642b.firebaseapp.com", // <-- CỦA BẠN
-          databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app", // <-- CỦA BẠN
-          projectId: "webai-7642b", // <-- CỦA BẠN
-          storageBucket: "webai-7642b.firebasestorage.app", // <-- CỦA BẠN
-          messagingSenderId: "967881370128", // <-- CỦA BẠN
-          appId: "1:967881370128:web:e5c4b06e4f70f55a68b895", // <-- CỦA BẠN
-          measurementId: "G-61XJ390Q30" // <-- CỦA BẠN
+      apiKey: "AIzaSyCeYwTT7E8bi7bccIrc20MTe5S4r0e0wUI",
+      authDomain: "webai-7642b.firebaseapp.com",
+      databaseURL: "https://webai-7642b-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "webai-7642b",
+      storageBucket: "webai-7642b.firebasestorage.app",
+      messagingSenderId: "967881370128",
+      appId: "1:967881370128:web:e5c4b06e4f70f55a68b895",
+      measurementId: "G-61XJ390Q30"
         };
-        const CLOUDINARY_CLOUD_NAME = 'dgbux4wzo'; // <-- CLOUD NAME CỦA BẠN
-        const CLOUDINARY_UPLOAD_PRESET = 'okeqfdx4'; // <-- UPLOAD PRESET CỦA BẠN
-        const AGORA_APP_ID = 'a0b62867bee543fe828e23b4888eb3ae'; // <<< THAY APP ID CỦA BẠN VÀO ĐÂY
+        const CLOUDINARY_CLOUD_NAME = 'dgbux4wzo'; // Thay bằng cloud name Cloudinary
+        const CLOUDINARY_UPLOAD_PRESET = 'okeqfdx4'; // Thay bằng upload preset
         
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth(); const db = firebase.database();
         
-        // --- State Variables ---
         let currentUser = null, currentChat = null, messageListener = null;
 
         // --- CORE LOGIC & UI SETUP ---
-        // Toàn bộ code Javascript đã được nâng cấp và gộp lại ở đây.
-        // Chỉ cần sao chép và dán toàn bộ, không cần chỉnh sửa gì thêm trừ các key ở trên.
-    </script>
-    <script>
-        // NOTE: Split into a new script tag for clarity. In a real project, this would be a separate file.
-        // Copy the entire content below and replace the old <script> block
-        // ============================ START OF FULL SCRIPT ============================
-        
-        // === STATE VARIABLES (biến toàn cục) ===
-        let agoraClient = null, localAudioTrack = null, localVideoTrack = null, incomingCallListener = null, unreadCount = 0;
-
-        // === CORE LOGIC & UI SETUP ===
         document.addEventListener('DOMContentLoaded', () => {
             const loadingOverlay = document.getElementById('loading-overlay');
             loadingOverlay.classList.add('hidden'); setTimeout(() => loadingOverlay.style.display = 'none', 750);
@@ -185,15 +145,6 @@
             initCursor();
             document.getElementById('register-btn').addEventListener('click', registerUser);
             document.getElementById('login-btn').addEventListener('click', loginUser);
-
-            // PWA Registration
-            if ('serviceWorker' in navigator) {
-              window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js') // <<< THAY LINK Ở ĐÂY
-                  .then(reg => console.log('Service worker registered.', reg))
-                  .catch(err => console.log('Service worker registration failed: ', err));
-              });
-            }
         });
         
         function initializeApp() {
@@ -201,10 +152,6 @@
             showContentPage('friends-view');
             setupNavigation(); setupPresenceSystem();
             listenForFriends(); listenForFriendRequests(); listenForGroups();
-            initAgora();
-            listenForIncomingCalls();
-            requestNotificationPermission();
-            initChatBall();
 
             // Event listeners
             document.getElementById('message-input').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
@@ -214,32 +161,13 @@
             document.getElementById('save-displayname-btn').addEventListener('click', saveDisplayName);
             document.getElementById('change-password-btn').addEventListener('click', changePassword);
             document.querySelectorAll('.logout-btn').forEach(btn => btn.addEventListener('click', logoutUser));
-            document.getElementById('back-to-list-btn').addEventListener('click', () => { document.getElementById('chat-container').classList.remove('active'); currentChat = null; if (messageListener) messageListener.off(); document.getElementById('chat-header-actions').style.display = 'none'; });
+            document.getElementById('back-to-list-btn').addEventListener('click', () => { document.getElementById('chat-container').classList.remove('active'); currentChat = null; if (messageListener) messageListener.off() });
             document.getElementById('upload-avatar-btn').addEventListener('click', () => cloudinaryWidgetAvatar.open());
             document.getElementById('save-avatar-url-btn').addEventListener('click', saveAvatarUrl);
             document.getElementById('save-theme-btn').addEventListener('click', saveThemePreset);
             document.getElementById('chat-menu-btn').addEventListener('click', () => { const menu = document.getElementById('chat-menu'); menu.style.display = menu.style.display === 'block' ? 'none' : 'block'; });
             document.getElementById('show-delete-account-modal-btn').addEventListener('click', () => showModal('delete-account-modal'));
             
-            // Notification permission modal listeners
-            document.getElementById('allow-notification-btn').addEventListener('click', () => {
-                Notification.requestPermission().then(permission => {
-                    if (permission === 'granted') showToast('Đã bật thông báo!'); else showToast('Bạn đã không cho phép thông báo.', 'error');
-                });
-                hideModal('notification-permission-modal');
-            });
-            document.getElementById('decline-notification-btn').addEventListener('click', () => {
-                if (document.getElementById('dont-ask-again-checkbox').checked) sessionStorage.setItem('notification-permission-asked', 'true');
-                hideModal('notification-permission-modal');
-            });
-            
-            // Call buttons
-            document.getElementById('start-voice-call-btn').addEventListener('click', () => startCall(false));
-            document.getElementById('start-video-call-btn').addEventListener('click', () => startCall(true));
-            document.getElementById('end-call-btn').addEventListener('click', endCall);
-            document.getElementById('accept-call-btn').addEventListener('click', acceptCall);
-            document.getElementById('reject-call-btn').addEventListener('click', rejectCall);
-
             // Tab control
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -269,318 +197,365 @@
             updateClickableElements();
         }
 
-        // NEW: Notifications
-        function requestNotificationPermission() {
-            if ('Notification' in window && Notification.permission === 'default' && !sessionStorage.getItem('notification-permission-asked')) {
-                showModal('notification-permission-modal');
-            }
-        }
-        function showNotification(title, body) {
-            if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
-                new Notification(title, { body, icon: 'https://i.imgur.com/sC0zt4c.png' });
-            }
-        }
-        
         const views = document.querySelectorAll('.view'); function showView(e) { views.forEach(v => v.classList.remove('active')); document.getElementById(e).classList.add('active') }
         function setupNavigation() { const navButtons = document.querySelectorAll('.nav-btn'); navButtons.forEach(btn => { btn.addEventListener('click', () => { const pageId = btn.dataset.page; showContentPage(pageId); navButtons.forEach(b => b.classList.remove('active')); btn.classList.add('active') }) }) }
         function showContentPage(pageId) { document.querySelectorAll('.content-page').forEach(page => page.classList.remove('active')); document.getElementById(pageId).classList.add('active') }
         function setupPresenceSystem() { const e = db.ref(`/accounts/${currentUser.uid}`); db.ref(".info/connected").on("value", t => { if (!1 === t.val()) return; e.onDisconnect().update({ status: "offline", lastOnline: firebase.database.ServerValue.TIMESTAMP }).then(() => e.update({ status: "online" })) }) }
         
-        // --- Code for Auth, Friends, Groups, Chat is mostly unchanged ---
-        // I will copy them here for completeness.
-
         // === AUTHENTICATION & ACCOUNT ===
         function registerUser() { const d = document.getElementById("reg-displayname").value.trim(), e = document.getElementById("reg-username").value.trim().toLowerCase(), t = document.getElementById("reg-password").value; if (!d || !e || !t) return showToast("Vui lòng điền đủ thông tin.", "error"); if (!/^[a-z0-9_]+$/.test(e)) return showToast("Tên đăng nhập chỉ hợp lệ với chữ thường, số, và gạch dưới.", "error"); const o = `${e}@yourapp.com`; db.ref("accounts").orderByChild("username").equalTo(e).once("value", r => { if (r.exists()) return showToast("Tên đăng nhập đã tồn tại!", "error"); auth.createUserWithEmailAndPassword(o, t).then(t => { db.ref(`accounts/${t.user.uid}`).set({ username: e, displayName: d, email: o, profilePicture: "https://i.imgur.com/sC0zt4c.png", status: "offline", lastOnline: firebase.database.ServerValue.TIMESTAMP }).then(() => showToast("Đăng ký thành công! Vui lòng đăng nhập.")) }).catch(e => showToast(e.message, "error")) }) }
         function loginUser() { const e = document.getElementById("login-username").value.trim().toLowerCase(), t = document.getElementById("login-password").value; if (!e || !t) return; db.ref("accounts").orderByChild("username").equalTo(e).once("value", a => { if (!a.exists()) return showToast("Tên đăng nhập không tồn tại!", "error"); const o = Object.values(a.val())[0]; auth.signInWithEmailAndPassword(o.email, t).catch(a => { showToast("Sai mật khẩu!", "error") }) }) }
         function logoutUser() { db.ref(`accounts/${currentUser.uid}`).update({ status: "offline", lastOnline: firebase.database.ServerValue.TIMESTAMP }).then(() => auth.signOut()) }
         function changePassword() { const e = document.getElementById("current-password").value, t = document.getElementById("new-password").value; if (!e || !t) return showToast("Vui lòng nhập đủ thông tin.", "error"); if (t.length < 6) return showToast("Mật khẩu mới phải có ít nhất 6 ký tự.", "error"); const a = auth.currentUser, o = firebase.auth.EmailAuthProvider.credential(a.email, e); a.reauthenticateWithCredential(o).then(() => (a.updatePassword(t))).then(() => { showToast('Đổi mật khẩu thành công!'); document.getElementById('current-password').value = ''; document.getElementById('new-password').value = '' }).catch(e => { showToast('Lỗi: ' + e.message, "error") }) }
         function saveDisplayName() { const newName = document.getElementById('settings-displayname').value.trim(); if (newName) db.ref(`accounts/${currentUser.uid}/displayName`).set(newName).then(() => { showToast('Đã lưu tên hiển thị!'); currentUser.displayName = newName; }); }
+        
         document.getElementById('delete-account-confirm-btn').addEventListener('click', () => {
-            const password = document.getElementById('delete-account-password').value; if (!password) return showToast("Vui lòng nhập mật khẩu", "error");
-            const user = auth.currentUser; const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+            const password = document.getElementById('delete-account-password').value;
+            if (!password) return showToast("Vui lòng nhập mật khẩu", "error");
+            
+            const user = auth.currentUser;
+            const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+
             user.reauthenticateWithCredential(credential).then(() => {
-                const updates = {}; updates[`accounts/${user.uid}`] = null; db.ref().update(updates).then(() => {
-                    user.delete().then(() => showToast("Tài khoản đã được xóa.")).catch(error => showToast(`Lỗi xóa authentication: ${error.message}`, 'error'));
+                // IMPORTANT: In a real-world app, you'd use a Cloud Function triggered by auth user deletion
+                // to clean up database records. A client-side cleanup is a best-effort approach.
+                const updates = {};
+                updates[`accounts/${user.uid}`] = null; // Delete user's own profile
+                db.ref().update(updates).then(() => {
+                    user.delete().then(() => {
+                        showToast("Tài khoản đã được xóa.");
+                        // The onAuthStateChanged listener will handle redirecting to login.
+                    }).catch(error => showToast(`Lỗi xóa authentication: ${error.message}`, 'error'));
                 });
-            }).catch(error => showToast("Mật khẩu không chính xác.", 'error'));
+            }).catch(error => {
+                showToast("Mật khẩu không chính xác.", 'error');
+            });
         });
 
         // === FRIENDS & SOCIAL ===
         function listenForFriendRequests() { const e = document.getElementById('friend-requests-list'); db.ref(`friend_requests/${currentUser.uid}`).on('value', t => { e.innerHTML = ''; if (!t.exists()) { e.innerHTML = "<li>Không có lời mời nào.</li>"; return; } t.forEach(c => { db.ref(`accounts/${c.key}`).once('value', u => { const a = u.val(); e.innerHTML += `<li class="item-list-entry"><img src="${a.profilePicture}" class="user-item"><div class="info"><span class="username">${a.displayName}</span><small>@${a.username}</small></div> <button onclick="acceptFriendRequest('${c.key}')">✔</button><button onclick="declineFriendRequest('${c.key}')">✖</button></li>` }); updateClickableElements(); }) }) }
         function acceptFriendRequest(e) { const t = {}; t[`friends/${currentUser.uid}/${e}`] = { timestamp: firebase.database.ServerValue.TIMESTAMP, read: true }; t[`friends/${e}/${currentUser.uid}`] = { timestamp: firebase.database.ServerValue.TIMESTAMP, read: false }; t[`friend_requests/${currentUser.uid}/${e}`] = null, db.ref().update(t); showToast("Đã chấp nhận kết bạn!") }
         function declineFriendRequest(e) { db.ref(`friend_requests/${currentUser.uid}/${e}`).remove(); showToast("Đã từ chối kết bạn.") }
-        function unfriendUser(friendId) { showConfirmModal("Bạn có chắc muốn hủy kết bạn?", () => { const u = {}; u[`friends/${currentUser.uid}/${friendId}`] = null; u[`friends/${friendId}/${currentUser.uid}`] = null; db.ref().update(u).then(() => { showToast("Đã hủy kết bạn."); if(currentChat && currentChat.type === 'private' && currentChat.uid === friendId) { document.getElementById('chat-container').classList.remove('active'); currentChat = null; } }); }); }
-        function listenForFriends(){const e=document.getElementById("friends-list");db.ref(`friends/${currentUser.uid}`).orderByChild("timestamp").on("value",t=>{const a=[];t.forEach(c=>{a.push({uid:c.key,...c.val()})});e.innerHTML="";a.reverse().forEach(o=>{db.ref(`accounts/${o.uid}`).on("value",u=>{const t=u.val(),n=e.querySelector(`#friend-${o.uid}`);n&&n.remove();const s=document.createElement("li");s.id=`friend-${o.uid}`;if(!1===o.read){s.classList.add("unread");}if(currentChat&&'private'===currentChat.type&&currentChat.uid===o.uid)s.classList.add('active');let i=o.lastMessage||"";"[Hình ảnh]"===i?i=i:i.startsWith("SYS:")?i=`<i>${i.substring(4)}</i>`:i.includes(':')&&(i=i.substring(i.indexOf(":")+1).trim());s.innerHTML=`<img src="${t.profilePicture}" class="user-item ${"online"===t.status?"status-online":"status-offline"}"> <div class="info"> <span class="username">${t.displayName}</span> <span class="last-message">${i}</span> </div>`;s.onclick=()=>startPrivateChat(o.uid,t);e.appendChild(s)})});updateClickableElements()})}
+        function unfriendUser(friendId) {
+            showConfirmModal("Bạn có chắc muốn hủy kết bạn với người này?", () => {
+                const updates = {};
+                updates[`friends/${currentUser.uid}/${friendId}`] = null;
+                updates[`friends/${friendId}/${currentUser.uid}`] = null;
+                db.ref().update(updates).then(() => {
+                    showToast("Đã hủy kết bạn.");
+                    if(currentChat && currentChat.type === 'private' && currentChat.uid === friendId) {
+                        document.getElementById('chat-container').classList.remove('active');
+                        currentChat = null;
+                    }
+                });
+            });
+        }
+        function listenForFriends(){const e=document.getElementById("friends-list");db.ref(`friends/${currentUser.uid}`).orderByChild("timestamp").on("value",t=>{const a=[];t.forEach(c=>{a.push({uid:c.key,...c.val()})});e.innerHTML="";a.reverse().forEach(o=>{db.ref(`accounts/${o.uid}`).on("value",u=>{const t=u.val(),n=e.querySelector(`#friend-${o.uid}`);n&&n.remove();const s=document.createElement("li");s.id=`friend-${o.uid}`;!1===o.read&&s.classList.add("unread");if(currentChat&&'private'===currentChat.type&&currentChat.uid===o.uid)s.classList.add('active');let i=o.lastMessage||"";"[Hình ảnh]"===i?i=i:i.startsWith("SYS:")?i=`<i>${i.substring(4)}</i>`:i.includes(':')&&(i=i.substring(i.indexOf(":")+1).trim());s.innerHTML=`<img src="${t.profilePicture}" class="user-item ${"online"===t.status?"status-online":"status-offline"}"> <div class="info"> <span class="username">${t.displayName}</span> <span class="last-message">${i}</span> </div>`;s.onclick=()=>startPrivateChat(o.uid,t);e.appendChild(s)})});updateClickableElements()})}
         function performSearch(e){const searchResultsUI=document.getElementById("search-results-list");searchResultsUI.innerHTML="";if(!e)return;db.ref("accounts").orderByChild("username").startAt(e).endAt(e+'\uf8ff').once("value",t=>{searchResultsUI.innerHTML='';if(!t.exists()){searchResultsUI.innerHTML="<li>Không tìm thấy ai.</li>";return}t.forEach(c=>{if(c.key===currentUser.uid)return;const a=c.val();searchResultsUI.innerHTML+=`<li class="item-list-entry"><img src="${a.profilePicture}" class="user-item"><div class="info"><span class="username">${a.displayName}</span><small>@${a.username}</small></div> <button onclick="sendFriendRequest('${c.key}')">Kết bạn</button></li>`});updateClickableElements()})}
-        function sendFriendRequest(e){db.ref(`friends/${currentUser.uid}/${e}`).once("value",s=>{if(s.exists()){showToast("Bạn đã là bạn bè!","error");return}db.ref(`friend_requests/${e}/${currentUser.uid}`).set({senderName:currentUser.displayName,timestamp:firebase.database.ServerValue.TIMESTAMP}).then(()=>showToast("Đã gửi yêu cầu!"))})}
+        function sendFriendRequest(e){db.ref(`friends/${currentUser.uid}/${e}`).once("value",snapshot=>{if(snapshot.exists()){showToast("Bạn đã là bạn bè!","error");return}db.ref(`friend_requests/${e}/${currentUser.uid}`).set({senderName:currentUser.displayName,timestamp:firebase.database.ServerValue.TIMESTAMP}).then(()=>showToast("Đã gửi yêu cầu!"))})}
         
         // === GROUP CHAT ===
-        function listenForGroups() { const listUI=document.getElementById('groups-list'); db.ref(`user_groups/${currentUser.uid}`).orderByChild("timestamp").on('value', snapshot => { listUI.innerHTML=''; if(!snapshot.exists()) return; const groups=[]; snapshot.forEach(child => groups.push({ id: child.key, ...child.val() })); groups.reverse().forEach(group => { db.ref(`groups/${group.id}`).once('value', groupSnap => { const groupData=groupSnap.val(); if(!groupData) return; const li=document.createElement('li'); li.id=`group-${group.id}`; if(!group.read) li.classList.add('unread'); if(currentChat && currentChat.type==='group' && currentChat.id===group.id) li.classList.add('active'); let lastMsg = group.lastMessage || 'Bắt đầu cuộc trò chuyện.'; if(lastMsg.startsWith("[Hình ảnh]") || lastMsg.startsWith("SYS:")) {} else if(lastMsg.includes(':')) { lastMsg=lastMsg.substring(lastMsg.indexOf(":")+1).trim(); } li.innerHTML=`<img src="${groupData.groupIcon || 'https://i.imgur.com/sC0zt4c.png'}" class="user-item"><div class="info"><span class="username">${groupData.groupName}</span><span class="last-message">${lastMsg}</span></div>`; li.onclick=() => startGroupChat(group.id, groupData); listUI.appendChild(li); }); }); }); }
-        async function openCreateGroupModal() { const listUI=document.getElementById('modal-friends-list'); listUI.innerHTML='Đang tải bạn bè...'; showModal('create-group-modal'); const friendsSnapshot=await db.ref(`friends/${currentUser.uid}`).once('value'); if(!friendsSnapshot.exists()) { listUI.innerHTML='Bạn chưa có bạn bè.'; return; } listUI.innerHTML=''; for(const friend of Object.keys(friendsSnapshot.val())) { const userSnap=await db.ref(`accounts/${friend}`).once('value'); const userData=userSnap.val(); listUI.innerHTML+=`<div class="friend-item"><input type="checkbox" id="friend-check-${friend}" value="${friend}"><label for="friend-check-${friend}"><img src="${userData.profilePicture}" class="user-item" style="width:30px;height:30px;margin-right:10px;"><span>${userData.displayName} (@${userData.username})</span></label></div>`; } }
-        function createGroup() { const groupName=document.getElementById('group-name-input').value.trim(); if(!groupName) return showToast('Vui lòng nhập tên nhóm','error'); const selectedFriends=Array.from(document.querySelectorAll('#modal-friends-list input:checked')).map(el => el.value); const newGroupRef=db.ref('groups').push(); const groupId=newGroupRef.key; const members={}; members[currentUser.uid]={ role:'admin' }; selectedFriends.forEach(id => { members[id]={ role:'member' }; }); const timestamp=firebase.database.ServerValue.TIMESTAMP; const groupData={ groupName:groupName, createdBy:currentUser.uid, createdAt:timestamp, groupIcon:'https://i.imgur.com/N6sY0f4.png' }; const updates={}; updates[`groups/${groupId}`]=groupData; updates[`group_members/${groupId}`]=members; Object.keys(members).forEach(memberId => { updates[`user_groups/${memberId}/${groupId}`]={ timestamp:timestamp, read:true }; }); db.ref().update(updates).then(() => { showToast('Tạo nhóm thành công!'); hideModal('create-group-modal'); document.getElementById('group-name-input').value=''; startGroupChat(groupId, groupData); }); }
-        
-        // === CHAT CORE ===
-        function startPrivateChat(partnerUid, partnerData) { document.getElementById('chat-container').classList.add('active'); document.getElementById('chat-header-actions').style.display = 'flex'; currentChat={ type:'private', uid:partnerUid, data:partnerData }; document.querySelector('#chat-header-info').innerHTML=`<img src="${partnerData.profilePicture}" class="user-item ${partnerData.status==="online"?"status-online":"status-offline"}"> <div><strong class="username">${partnerData.displayName}</strong><br><small>@${partnerData.username}</small></div>`; const chatRoomId=currentUser.uid<partnerUid?`${currentUser.uid}_${partnerUid}`:`${partnerUid}_${currentUser.uid}`; setupChatListeners(`private_chats/${chatRoomId}`); db.ref(`friends/${currentUser.uid}/${partnerUid}/read`).set(true); document.getElementById('chat-menu').innerHTML=`<li onclick="unfriendUser('${partnerUid}')" class="menu-item-danger">Hủy kết bạn</li>`; document.querySelectorAll('#friends-list li, #groups-list li').forEach(li => li.classList.remove('active')); document.getElementById(`friend-${partnerUid}`)?.classList.add('active'); }
-        function startGroupChat(groupId, groupData) { document.getElementById('chat-container').classList.add('active'); document.getElementById('chat-header-actions').style.display = 'flex'; currentChat={ type:'group', id:groupId, data:groupData }; document.querySelector('#chat-header-info').innerHTML=`<img src="${groupData.groupIcon || 'https://i.imgur.com/sC0zt4c.png'}" class="user-item"><div><strong>${groupData.groupName}</strong></div>`; setupChatListeners(`group_chats/${groupId}`); db.ref(`user_groups/${currentUser.uid}/${groupId}/read`).set(true); const menu=document.getElementById('chat-menu'); if(groupData.createdBy===currentUser.uid) { menu.innerHTML=`<li onclick="openManageGroupModal()">Quản lý thành viên</li>`; } else { menu.innerHTML=`<li>Bạn là thành viên</li>`; } document.querySelectorAll('#friends-list li, #groups-list li').forEach(li => li.classList.remove('active')); document.getElementById(`group-${groupId}`)?.classList.add('active'); }
-        
-        async function openManageGroupModal() { if(!currentChat || currentChat.type !=='group' || currentChat.data.createdBy !==currentUser.uid) return; showModal('manage-group-modal'); const listUI=document.getElementById('group-members-list'); listUI.innerHTML=''; const membersSnapshot=await db.ref(`group_members/${currentChat.id}`).once('value'); const members=membersSnapshot.val(); for(const memberId in members) { const userSnap=await db.ref(`accounts/${memberId}`).once('value'); const userData=userSnap.val(); let actions=''; if(memberId !==currentUser.uid) { actions=`<button onclick="removeMemberFromGroup('${memberId}')" class="btn-danger">Xóa</button>`; } listUI.innerHTML+=`<li class="item-list-entry"><img src="${userData.profilePicture}" class="user-item"><div class="info"><span class="username">${userData.displayName}</span></div> ${actions}</li>`; } document.getElementById('delete-group-btn').onclick=() => deleteGroup(); updateClickableElements(); }
-        function deleteGroup() { showConfirmModal("Bạn có chắc muốn xóa nhóm này?", async () => { if(!currentChat || currentChat.type !=='group' || currentChat.data.createdBy !==currentUser.uid) return; const groupId=currentChat.id; const membersSnapshot=await db.ref(`group_members/${groupId}`).once('value'); const updates={}; updates[`groups/${groupId}`]=null; updates[`group_chats/${groupId}`]=null; updates[`group_members/${groupId}`]=null; Object.keys(membersSnapshot.val()).forEach(memberId => { updates[`user_groups/${memberId}/${groupId}`]=null; }); db.ref().update(updates).then(() => { showToast("Đã xóa nhóm."); hideModal('manage-group-modal'); document.getElementById('chat-container').classList.remove('active'); currentChat=null; }); }); }
-        function removeMemberFromGroup(memberId) { showConfirmModal(`Bạn có chắc muốn xóa người này?`, async () => { const updates={}; updates[`group_members/${currentChat.id}/${memberId}`]=null; updates[`user_groups/${memberId}/${currentChat.id}`]=null; db.ref().update(updates).then(() => { showToast("Đã xóa thành viên."); openManageGroupModal(); }); }); }
+        function listenForGroups() {
+            const listUI = document.getElementById('groups-list');
+            db.ref(`user_groups/${currentUser.uid}`).orderByChild("timestamp").on('value', snapshot => {
+                listUI.innerHTML = '';
+                if(!snapshot.exists()) return;
+                
+                const groups = [];
+                snapshot.forEach(child => groups.push({ id: child.key, ...child.val() }));
+                
+                groups.reverse().forEach(group => {
+                    db.ref(`groups/${group.id}`).once('value', groupSnap => {
+                        const groupData = groupSnap.val();
+                        if(!groupData) return;
+                        const li = document.createElement('li');
+                        li.id = `group-${group.id}`;
+                        if (!group.read) li.classList.add('unread');
+                        if (currentChat && currentChat.type === 'group' && currentChat.id === group.id) li.classList.add('active');
+                        
+                        let lastMsg = group.lastMessage || 'Bắt đầu cuộc trò chuyện.';
+                        if (lastMsg.startsWith("[Hình ảnh]") || lastMsg.startsWith("SYS:")) {}
+                        else if(lastMsg.includes(':')) { lastMsg = lastMsg.substring(lastMsg.indexOf(":") + 1).trim(); }
 
-        function setupChatListeners(chatPath) {
-            const messagesUI=document.getElementById('chat-messages'); messagesUI.innerHTML=''; if(messageListener) messageListener.off(); const chatRef=db.ref(chatPath);
-            let initialLoad = true;
-            messageListener = chatRef.orderByKey().limitToLast(20);
-            messageListener.on('child_added', snapshot => { 
-                const msg = { key: snapshot.key, ...snapshot.val() };
-                if (!document.getElementById(`msg-${msg.key}`)) {
-                    appendMessage(msg, initialLoad);
-                    if (!initialLoad && msg.senderId !== currentUser.uid) {
-                        showNotification(msg.senderName || 'Tin nhắn mới', msg.text || 'Đã gửi một hình ảnh');
-                    }
-                }
+                        li.innerHTML = `<img src="${groupData.groupIcon || 'https://i.imgur.com/sC0zt4c.png'}" class="user-item"><div class="info"><span class="username">${groupData.groupName}</span><span class="last-message">${lastMsg}</span></div>`;
+                        li.onclick = () => startGroupChat(group.id, groupData);
+                        listUI.appendChild(li);
+                    });
+                });
             });
-            setTimeout(() => initialLoad = false, 2000);
         }
-        
-        async function createMessageBubble(msg) {
-            const bubble=document.createElement('div'); bubble.id=`msg-${msg.key}`; bubble.className=`message-bubble ${msg.senderId===currentUser.uid?'mine':'other'}`;
-            let content=msg.text?msg.text.replace(/</g,"&lt;").replace(/>/g,"&gt;"):msg.imageUrl?`<a href="${msg.imageUrl}" target="_blank"><img src="${msg.imageUrl}" alt="Hình ảnh"></a>`:''; let senderName='';
-            if(currentChat.type==='group' && msg.senderId !==currentUser.uid) { const senderSnapshot=await db.ref(`accounts/${msg.senderId}/displayName`).once('value'); senderName=`<div class="message-sender-name">${senderSnapshot.val() || '...'}</div>`; }
-            bubble.innerHTML=`${senderName}${content}<span class="message-timestamp">${new Date(msg.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>`; return bubble;
-        }
-        
-        async function appendMessage(msg, isInitialLoad = false) { 
-            const bubble = await createMessageBubble(msg);
-            const messagesContainer = document.getElementById('chat-messages');
-            if (isInitialLoad) {
-                messagesContainer.appendChild(bubble); // Thêm vào cuối khi load ban đầu
-            } else {
-                messagesContainer.insertBefore(bubble, messagesContainer.firstChild); // Thêm vào đầu cho tin nhắn mới
+
+        async function openCreateGroupModal() {
+            const listUI = document.getElementById('modal-friends-list');
+            listUI.innerHTML = 'Đang tải bạn bè...';
+            showModal('create-group-modal');
+            
+            const friendsSnapshot = await db.ref(`friends/${currentUser.uid}`).once('value');
+            if (!friendsSnapshot.exists()) {
+                listUI.innerHTML = 'Bạn chưa có bạn bè nào để thêm vào nhóm.';
+                return;
             }
+
+            listUI.innerHTML = '';
+            for (const friend of Object.keys(friendsSnapshot.val())) {
+                const userSnap = await db.ref(`accounts/${friend}`).once('value');
+                const userData = userSnap.val();
+                listUI.innerHTML += `<div class="friend-item">
+                    <input type="checkbox" id="friend-check-${friend}" value="${friend}">
+                    <label for="friend-check-${friend}">
+                        <img src="${userData.profilePicture}" class="user-item" style="width:30px;height:30px;margin-right:10px;">
+                        <span>${userData.displayName} (@${userData.username})</span>
+                    </label>
+                </div>`;
+            }
+        }
+        
+        function createGroup() {
+            const groupName = document.getElementById('group-name-input').value.trim();
+            if (!groupName) return showToast('Vui lòng nhập tên nhóm', 'error');
+
+            const selectedFriends = Array.from(document.querySelectorAll('#modal-friends-list input:checked')).map(el => el.value);
+            
+            const newGroupRef = db.ref('groups').push();
+            const groupId = newGroupRef.key;
+            
+            const members = {};
+            members[currentUser.uid] = { role: 'admin' };
+            selectedFriends.forEach(id => { members[id] = { role: 'member' }; });
+            
+            const timestamp = firebase.database.ServerValue.TIMESTAMP;
+            const groupData = { groupName: groupName, createdBy: currentUser.uid, createdAt: timestamp, groupIcon: 'https://i.imgur.com/N6sY0f4.png' };
+            
+            const updates = {};
+            updates[`groups/${groupId}`] = groupData;
+            updates[`group_members/${groupId}`] = members;
+            Object.keys(members).forEach(memberId => {
+                updates[`user_groups/${memberId}/${groupId}`] = { timestamp: timestamp, read: true };
+            });
+
+            db.ref().update(updates).then(() => {
+                showToast('Tạo nhóm thành công!');
+                hideModal('create-group-modal');
+                document.getElementById('group-name-input').value = '';
+                startGroupChat(groupId, groupData);
+            });
+        }
+
+
+        // === CHAT CORE ===
+        function startPrivateChat(partnerUid, partnerData) {
+            document.getElementById('chat-container').classList.add('active');
+            currentChat = { type: 'private', uid: partnerUid, data: partnerData };
+            document.querySelector('#chat-header-info').innerHTML = `<img src="${partnerData.profilePicture}" class="user-item ${partnerData.status === "online" ? "status-online" : "status-offline"}"> <div><strong class="username">${partnerData.displayName}</strong><br><small>@${partnerData.username}</small></div>`; 
+            
+            const chatRoomId = currentUser.uid < partnerUid ? `${currentUser.uid}_${partnerUid}` : `${partnerUid}_${currentUser.uid}`;
+            setupChatListeners(`private_chats/${chatRoomId}`);
+            
+            db.ref(`friends/${currentUser.uid}/${partnerUid}/read`).set(true);
+
+            // Setup menu
+            document.getElementById('chat-menu').innerHTML = `<li onclick="unfriendUser('${partnerUid}')" class="menu-item-danger">Hủy kết bạn</li>`;
+
+            document.querySelectorAll('#friends-list li, #groups-list li').forEach(li => li.classList.remove('active'));
+            document.getElementById(`friend-${partnerUid}`)?.classList.add('active');
+        }
+
+        function startGroupChat(groupId, groupData) {
+            document.getElementById('chat-container').classList.add('active');
+            currentChat = { type: 'group', id: groupId, data: groupData };
+            document.querySelector('#chat-header-info').innerHTML = `<img src="${groupData.groupIcon || 'https://i.imgur.com/sC0zt4c.png'}" class="user-item"><div><strong>${groupData.groupName}</strong></div>`;
+            
+            setupChatListeners(`group_chats/${groupId}`);
+
+            db.ref(`user_groups/${currentUser.uid}/${groupId}/read`).set(true);
+            
+            // Setup menu
+            const menu = document.getElementById('chat-menu');
+            if (groupData.createdBy === currentUser.uid) {
+                menu.innerHTML = `<li onclick="openManageGroupModal()">Quản lý thành viên</li>`;
+            } else {
+                 menu.innerHTML = `<li>Bạn là thành viên</li>`;
+            }
+
+            document.querySelectorAll('#friends-list li, #groups-list li').forEach(li => li.classList.remove('active'));
+            document.getElementById(`group-${groupId}`)?.classList.add('active');
+        }
+
+        async function openManageGroupModal() {
+            if (!currentChat || currentChat.type !== 'group' || currentChat.data.createdBy !== currentUser.uid) return;
+            showModal('manage-group-modal');
+            
+            const listUI = document.getElementById('group-members-list');
+            listUI.innerHTML = '';
+            
+            const membersSnapshot = await db.ref(`group_members/${currentChat.id}`).once('value');
+            const members = membersSnapshot.val();
+
+            for (const memberId in members) {
+                const userSnap = await db.ref(`accounts/${memberId}`).once('value');
+                const userData = userSnap.val();
+                let actions = '';
+                if (memberId !== currentUser.uid) {
+                    actions = `<button onclick="removeMemberFromGroup('${memberId}')" class="btn-danger">Xóa</button>`;
+                }
+                listUI.innerHTML += `<li class="item-list-entry"><img src="${userData.profilePicture}" class="user-item"><div class="info"><span class="username">${userData.displayName}</span></div> ${actions}</li>`;
+            }
+
+            document.getElementById('delete-group-btn').onclick = () => deleteGroup();
             updateClickableElements();
         }
 
-        function sendMessage() { const text = document.getElementById('message-input').value.trim(); if (!text || !currentChat) return; sendChatMessage({ text: text }); document.getElementById('message-input').value = ''; }
-        function sendImageMessage(imageUrl) { if (!imageUrl || !currentChat) return; sendChatMessage({ imageUrl: imageUrl }); }
-        function sendChatMessage(content) { const messageData={ ...content, senderId:currentUser.uid, timestamp:firebase.database.ServerValue.TIMESTAMP }; const updates={}; let lastMessagePreview=content.text?`${currentUser.displayName}: ${content.text}`:"[Hình ảnh]"; if (currentChat.type==='private') { const partnerUid=currentChat.uid; const chatRoomId=currentUser.uid<partnerUid?`${currentUser.uid}_${partnerUid}`:`${partnerUid}_${currentUser.uid}`; const newMessageKey=db.ref(`private_chats/${chatRoomId}`).push().key; updates[`private_chats/${chatRoomId}/${newMessageKey}`]=messageData; updates[`friends/${currentUser.uid}/${partnerUid}`]={ lastMessage:lastMessagePreview, timestamp:messageData.timestamp, read:true }; updates[`friends/${partnerUid}/${currentUser.uid}`]={ lastMessage:lastMessagePreview, timestamp:messageData.timestamp, read:false }; db.ref().update(updates); } else if (currentChat.type==='group') { const groupId=currentChat.id; const newMessageKey=db.ref(`group_chats/${groupId}`).push().key; updates[`group_chats/${groupId}/${newMessageKey}`]=messageData; db.ref(`group_members/${groupId}`).once('value', snapshot => { snapshot.forEach(member => { updates[`user_groups/${member.key}/${groupId}`]={ lastMessage:lastMessagePreview, timestamp:messageData.timestamp, read:member.key===currentUser.uid }; }); db.ref().update(updates); }); return; } }
+        function deleteGroup() {
+            showConfirmModal("Bạn có chắc muốn xóa nhóm này? Hành động này không thể hoàn tác.", async () => {
+                 if (!currentChat || currentChat.type !== 'group' || currentChat.data.createdBy !== currentUser.uid) return;
+                 const groupId = currentChat.id;
+                 const membersSnapshot = await db.ref(`group_members/${groupId}`).once('value');
+                 const updates = {};
+                 updates[`groups/${groupId}`] = null;
+                 updates[`group_chats/${groupId}`] = null;
+                 updates[`group_members/${groupId}`] = null;
+                 Object.keys(membersSnapshot.val()).forEach(memberId => {
+                    updates[`user_groups/${memberId}/${groupId}`] = null;
+                 });
+
+                 db.ref().update(updates).then(() => {
+                    showToast("Đã xóa nhóm.");
+                    hideModal('manage-group-modal');
+                    document.getElementById('chat-container').classList.remove('active');
+                    currentChat = null;
+                 });
+            });
+        }
+
+        function removeMemberFromGroup(memberId) {
+             showConfirmModal(`Bạn có chắc muốn xóa người này khỏi nhóm?`, async () => {
+                 const updates = {};
+                 updates[`group_members/${currentChat.id}/${memberId}`] = null;
+                 updates[`user_groups/${memberId}/${currentChat.id}`] = null;
+                 
+                 db.ref().update(updates).then(() => {
+                    showToast("Đã xóa thành viên.");
+                    openManageGroupModal(); // Refresh the list
+                 });
+            });
+        }
+
+        function setupChatListeners(chatPath) {
+            const messagesUI = document.getElementById('chat-messages'); 
+            messagesUI.innerHTML = '';
+            oldestMessageKey = null; 
+            if (messageListener) messageListener.off();
+
+            const chatRef = db.ref(chatPath);
+            chatRef.orderByKey().limitToLast(20).once('value', snapshot => { 
+                if (snapshot.exists()) { 
+                    const messages = []; 
+                    snapshot.forEach(child => messages.push({ key: child.key, ...child.val() }));
+                    if (messages.length > 0) oldestMessageKey = messages[0].key; 
+                    messages.reverse().forEach(msg => appendMessage(msg)) 
+                }
+            }); 
+            messageListener = chatRef.orderByKey().startAt(oldestMessageKey || ' '); 
+            messageListener.on('child_added', snapshot => { 
+                if (!document.getElementById(`msg-${snapshot.key}`)) appendMessage({ key: snapshot.key, ...snapshot.val() })
+            });
+        }
+        
+        async function createMessageBubble(msg) {
+            const bubble = document.createElement('div');
+            bubble.id = `msg-${msg.key}`;
+            bubble.className = `message-bubble ${msg.senderId === currentUser.uid ? 'mine' : 'other'}`;
+            let content = '';
+            if (msg.text) content = msg.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            else if (msg.imageUrl) content = `<a href="${msg.imageUrl}" target="_blank"><img src="${msg.imageUrl}" alt="Hình ảnh đã gửi"></a>`;
+            
+            let senderName = '';
+            if (currentChat.type === 'group' && msg.senderId !== currentUser.uid) {
+                const senderSnapshot = await db.ref(`accounts/${msg.senderId}/displayName`).once('value');
+                senderName = `<div class="message-sender-name">${senderSnapshot.val() || '...'}</div>`;
+            }
+            
+            bubble.innerHTML = `${senderName}${content}<span class="message-timestamp">${new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
+            return bubble;
+        }
+        
+        async function appendMessage(msg) { 
+            const bubble = await createMessageBubble(msg);
+            document.getElementById('chat-messages').insertBefore(bubble, null);
+            updateClickableElements();
+        }
+
+        function sendMessage() { 
+            const text = document.getElementById('message-input').value.trim();
+            if (!text || !currentChat) return; 
+            sendChatMessage({ text: text });
+            document.getElementById('message-input').value = '';
+        }
+
+        function sendImageMessage(imageUrl) {
+            if (!imageUrl || !currentChat) return;
+            sendChatMessage({ imageUrl: imageUrl });
+        }
+        
+        function sendChatMessage(content) {
+            const messageData = { ...content, senderId: currentUser.uid, timestamp: firebase.database.ServerValue.TIMESTAMP };
+            const updates = {};
+            let lastMessagePreview = content.text ? `${currentUser.displayName}: ${content.text}` : "[Hình ảnh]";
+            
+            if (currentChat.type === 'private') {
+                const partnerUid = currentChat.uid;
+                const chatRoomId = currentUser.uid < partnerUid ? `${currentUser.uid}_${partnerUid}` : `${partnerUid}_${currentUser.uid}`;
+                const newMessageKey = db.ref(`private_chats/${chatRoomId}`).push().key;
+
+                updates[`private_chats/${chatRoomId}/${newMessageKey}`] = messageData;
+                updates[`friends/${currentUser.uid}/${partnerUid}`] = { lastMessage: lastMessagePreview, timestamp: messageData.timestamp, read: true };
+                updates[`friends/${partnerUid}/${currentUser.uid}`] = { lastMessage: lastMessagePreview, timestamp: messageData.timestamp, read: false };
+            } else if (currentChat.type === 'group') {
+                const groupId = currentChat.id;
+                const newMessageKey = db.ref(`group_chats/${groupId}`).push().key;
+
+                updates[`group_chats/${groupId}/${newMessageKey}`] = messageData;
+                db.ref(`group_members/${groupId}`).once('value', snapshot => {
+                    snapshot.forEach(member => {
+                        updates[`user_groups/${member.key}/${groupId}`] = { lastMessage: lastMessagePreview, timestamp: messageData.timestamp, read: member.key === currentUser.uid };
+                    });
+                    db.ref().update(updates);
+                });
+                return; // Early return to avoid double update
+            }
+            db.ref().update(updates);
+        }
 
         // === WIDGETS & HELPERS ===
-        const cloudinaryWidgetChat=cloudinary.createUploadWidget({cloudName:CLOUDINARY_CLOUD_NAME,uploadPreset:CLOUDINARY_UPLOAD_PRESET,sources:["local","url","camera"],multiple:!1},(err,res)=>{if(!err&&res&&"success"===res.event){sendImageMessage(res.info.secure_url)}});
-        const cloudinaryWidgetAvatar=cloudinary.createUploadWidget({cloudName:CLOUDINARY_CLOUD_NAME,uploadPreset:CLOUDINARY_UPLOAD_PRESET,sources:["local","url","camera"],multiple:!1,cropping:!0,showAdvancedOptions:!1},(err,res)=>{if(!err&&res&&"success"===res.event){db.ref(`accounts/${currentUser.uid}/profilePicture`).set(res.info.secure_url).then(()=>showToast("Đã cập nhật ảnh đại diện!"))}});
+        const cloudinaryWidgetChat = cloudinary.createUploadWidget({ cloudName: CLOUDINARY_CLOUD_NAME, uploadPreset: CLOUDINARY_UPLOAD_PRESET, sources: ["local", "url", "camera"], multiple: !1 }, (err, res) => { if (!err && res && "success" === res.event) { sendImageMessage(res.info.secure_url) } });
+        const cloudinaryWidgetAvatar = cloudinary.createUploadWidget({ cloudName: CLOUDINARY_CLOUD_NAME, uploadPreset: CLOUDINARY_UPLOAD_PRESET, sources: ["local", "url", "camera"], multiple: !1, cropping: !0, showAdvancedOptions: !1 }, (err, res) => { if (!err && res && "success" === res.event) { db.ref(`accounts/${currentUser.uid}/profilePicture`).set(res.info.secure_url).then(() => showToast("Đã cập nhật ảnh đại diện!")) } });
         function saveAvatarUrl() { const url = document.getElementById('avatar-url-input').value.trim(); if (url && url.startsWith('http')) { db.ref(`accounts/${currentUser.uid}/profilePicture`).set(url).then(() => showToast("Đã cập nhật ảnh đại diện!")) } else { showToast("URL không hợp lệ.", "error") } }
-        function saveThemePreset() { const color=document.getElementById('theme-color-picker').value; const themePreset={ accentColor:color }; db.ref(`accounts/${currentUser.uid}/themePreset`).set(themePreset).then(() => { applyThemePreset(themePreset); showToast("Đã lưu giao diện!"); }); }
+        
+        function saveThemePreset() { const color = document.getElementById('theme-color-picker').value; const themePreset = { accentColor: color }; db.ref(`accounts/${currentUser.uid}/themePreset`).set(themePreset).then(() => { applyThemePreset(themePreset); showToast("Đã lưu giao diện!"); }); }
         function applyThemePreset(preset) { if (preset && preset.accentColor) { document.documentElement.style.setProperty('--accent-color', preset.accentColor); } }
+
         function initCursor() { const e = document.querySelector(".cat-cursor"); document.addEventListener("mousemove", t => { e.style.left = t.clientX + "px", e.style.top = t.clientY + "px" }); updateClickableElements() }
-        function updateClickableElements() { const e = document.querySelector(".cat-cursor"); document.querySelectorAll("a, button, input, li, .clickable, .reaction-btn, label, .control-btn").forEach(t => { t.addEventListener("mouseenter", () => e.classList.add("pointer-active")); t.addEventListener("mouseleave", () => e.classList.remove("pointer-active")) }) }
+        function updateClickableElements() { const e = document.querySelector(".cat-cursor"); document.querySelectorAll("a, button, input, li, .clickable, .reaction-btn").forEach(t => { t.addEventListener("mouseenter", () => { e.classList.add("pointer-active") }); t.addEventListener("mouseleave", () => { e.classList.remove("pointer-active") }) }) }
         function showToast(message, type = 'success') { const container = document.getElementById('toast-container'); const toast = document.createElement('div'); toast.className = 'toast'; toast.textContent = message; toast.style.borderLeftColor = type === 'error' ? '#c0392b' : 'var(--accent-color)'; container.appendChild(toast); setTimeout(() => { toast.classList.add('hide'); toast.addEventListener('animationend', () => toast.remove()) }, 3000) }
         function showModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
         function hideModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
         function showConfirmModal(text, onConfirm) {
-            const modal=document.getElementById('confirm-modal'); document.getElementById('confirm-modal-text').textContent=text; showModal('confirm-modal');
-            const confirmBtn=document.getElementById('confirm-modal-confirm-btn'); const newConfirmBtn=confirmBtn.cloneNode(true); confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-            newConfirmBtn.onclick=() => { onConfirm(); hideModal('confirm-modal'); };
-            document.getElementById('confirm-modal-cancel-btn').onclick=() => hideModal('confirm-modal');
-        }
-
-        // ==========================================================
-        // === NEW: AGORA, CALLS, PiP & CHAT BALL FUNCTIONS ===
-        // ==========================================================
-        
-        // --- Agora Setup ---
-        function initAgora() {
-            agoraClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
-            agoraClient.on("user-published", handleUserPublished);
-            agoraClient.on("user-unpublished", handleUserUnpublished);
-        }
-
-        async function startCall(isVideo) {
-            if (!currentChat) return showToast('Vui lòng chọn cuộc trò chuyện.', 'error');
-            const channelName = currentChat.type === 'private' ? (currentUser.uid < currentChat.uid ? `${currentUser.uid}_${currentChat.uid}` : `${currentChat.uid}_${currentUser.uid}`) : currentChat.id;
+            const modal = document.getElementById('confirm-modal');
+            document.getElementById('confirm-modal-text').textContent = text;
+            showModal('confirm-modal');
+            const confirmBtn = document.getElementById('confirm-modal-confirm-btn');
             
-            // Send call signal via Firebase
-            const callData = {
-                callerId: currentUser.uid,
-                callerName: currentUser.displayName,
-                callerAvatar: currentUser.profilePicture,
-                channel: channelName,
-                isVideo,
-                status: 'calling'
+            // Clone and replace the button to remove old event listeners
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+            newConfirmBtn.onclick = () => {
+                onConfirm();
+                hideModal('confirm-modal');
             };
-            db.ref(`calls/${channelName}`).set(callData);
-
-            await joinCallChannel(channelName, isVideo);
+            document.getElementById('confirm-modal-cancel-btn').onclick = () => hideModal('confirm-modal');
         }
 
-        async function joinCallChannel(channelName, isVideo) {
-            localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-            const tracksToPublish = [localAudioTrack];
-
-            if (isVideo) {
-                localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-                tracksToPublish.push(localVideoTrack);
-            }
-            
-            await agoraClient.join(AGORA_APP_ID, channelName, null, currentUser.uid);
-            await agoraClient.publish(tracksToPublish);
-
-            // Show call UI
-            showCallUI(true);
-            const localPlayerContainer = document.getElementById("local-player-wrapper");
-            localPlayerContainer.innerHTML = ''; // Clear previous
-            if (localVideoTrack) {
-                const player = document.createElement("div");
-                player.id = `player-${currentUser.uid}`;
-                player.className = 'video-player';
-                localPlayerContainer.append(player);
-                localVideoTrack.play(player.id);
-            }
-        }
-        
-        async function endCall() {
-            if (localAudioTrack) { localAudioTrack.close(); localAudioTrack = null; }
-            if (localVideoTrack) { localVideoTrack.close(); localVideoTrack = null; }
-
-            await agoraClient.leave();
-
-            showCallUI(false);
-            
-            // Clean up call signal
-            const channelName = currentChat.type === 'private' ? (currentUser.uid < currentChat.uid ? `${currentUser.uid}_${currentChat.uid}` : `${currentChat.uid}_${currentUser.uid}`) : currentChat.id;
-            db.ref(`calls/${channelName}`).remove();
-        }
-
-        function handleUserPublished(user, mediaType) {
-            agoraClient.subscribe(user, mediaType).then(() => {
-                if (mediaType === 'video') {
-                    const remotePlayerContainer = document.getElementById("video-streams");
-                    let player = document.getElementById(`player-${user.uid}`);
-                    if (!player) {
-                         player = document.createElement("div");
-                         player.id = `player-${user.uid}`;
-                         player.className = 'video-player';
-                         remotePlayerContainer.append(player);
-                    }
-                    user.videoTrack.play(player.id);
-                }
-                if (mediaType === 'audio') {
-                    user.audioTrack.play();
-                }
-            });
-        }
-        
-        function handleUserUnpublished(user) {
-            const player = document.getElementById(`player-${user.uid}`);
-            if (player) player.remove();
-        }
-
-        function listenForIncomingCalls() {
-            // This is tricky as we need a path that the user is always listening to.
-            // A better way would be via cloud functions and push notifications, but for a client-only solution:
-            // Let's assume the call signal is on the channel itself. We need to attach listeners when chats are listed.
-            // For now, let's create a central 'call_invites' node for simplicity.
-            db.ref(`accounts/${currentUser.uid}/incoming_call`).on('value', async snapshot => {
-                if (snapshot.exists()) {
-                    const callData = snapshot.val();
-                    document.getElementById('incoming-caller-avatar').src = callData.callerAvatar;
-                    document.getElementById('incoming-caller-name').textContent = callData.callerName;
-                    document.getElementById('incoming-call-type').textContent = callData.isVideo ? 'Cuộc gọi Video đến' : 'Cuộc gọi thoại đến';
-                    showModal('call-modal');
-                    document.getElementById('incoming-call-ui').style.display = 'block';
-                    document.getElementById('call-container').style.display = 'none';
-                    
-                    // Attach call data for accept/reject
-                    window.currentIncomingCall = callData;
-                } else {
-                    hideModal('call-modal');
-                    window.currentIncomingCall = null;
-                }
-            });
-        }
-
-        async function acceptCall() {
-             const callData = window.currentIncomingCall;
-             if (!callData) return;
-             await joinCallChannel(callData.channel, callData.isVideo);
-             db.ref(`accounts/${currentUser.uid}/incoming_call`).remove();
-        }
-        
-        function rejectCall() {
-            const callData = window.currentIncomingCall;
-            if (!callData) return;
-            // Signal back that call is rejected. A full implementation would handle this.
-            db.ref(`accounts/${currentUser.uid}/incoming_call`).remove();
-            hideModal('call-modal');
-        }
-
-        function showCallUI(show, isIncoming = false) {
-            const callModal = document.getElementById('call-modal');
-            const incomingUI = document.getElementById('incoming-call-ui');
-            const callContainer = document.getElementById('call-container');
-
-            if (show) {
-                showModal('call-modal');
-                if (isIncoming) {
-                    incomingUI.style.display = 'block';
-                    callContainer.style.display = 'none';
-                } else {
-                    incomingUI.style.display = 'none';
-                    callContainer.style.display = 'flex';
-                }
-            } else {
-                hideModal('call-modal');
-                document.getElementById("video-streams").innerHTML = '<div id="local-player-wrapper" class="video-player"></div>';
-            }
-        }
-        
-        // --- Picture-in-Picture & Chat Ball ---
-        document.getElementById('pip-btn').addEventListener('click', async () => {
-             const localPlayer = document.querySelector("#local-player-wrapper video");
-             if(document.pictureInPictureElement) {
-                 await document.exitPictureInPicture();
-             } else if (localPlayer && document.pictureInPictureEnabled) {
-                 await localPlayer.requestPictureInPicture();
-             }
-        });
-
-        function initChatBall() {
-            const chatBall = document.getElementById('chat-ball');
-            let isDragging = false, offsetX, offsetY;
-
-            chatBall.onmousedown = (e) => {
-                isDragging = true;
-                offsetX = e.clientX - chatBall.getBoundingClientRect().left;
-                offsetY = e.clientY - chatBall.getBoundingClientRect().top;
-                chatBall.style.cursor = 'grabbing';
-            };
-
-            document.onmousemove = (e) => {
-                if (!isDragging) return;
-                let newX = e.clientX - offsetX;
-                let newY = e.clientY - offsetY;
-                chatBall.style.left = `${newX}px`;
-                chatBall.style.top = `${newY}px`;
-            };
-
-            document.onmouseup = () => {
-                isDragging = false;
-                chatBall.style.cursor = 'move';
-            };
-        }
-
-        // Dummy function to update Chat Ball count - integrate with unread logic later
-        function updateChatBallCount(count) {
-             const chatBall = document.getElementById('chat-ball');
-             const countEl = document.getElementById('chat-ball-count');
-             if(count > 0) {
-                 chatBall.style.display = 'flex';
-                 countEl.textContent = count;
-             } else {
-                 chatBall.style.display = 'none';
-             }
-        }
-        
-        // ============================ END OF FULL SCRIPT ============================
     </script>
 </body>
 </html>
