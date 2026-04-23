@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ghi Danh - Lưu Bút Thanh Xuân</title>
-    <link href="https://fonts.googleapis.com/css2?family=Pattaya&family=Quicksand:wght@300;500;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <title>Ghi Danh Kỷ Yếu - Lưu Bút Thanh Xuân</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -12,59 +11,78 @@
     <div id="sakura-container"></div>
     <div class="film-grain"></div>
 
-    <main class="hero-soft" style="min-height: 100vh;">
-        <!-- Login Section -->
-        <div id="auth-portal" class="hero-content">
-            <h1 class="title-modern">Lời Chào <br><span style="opacity: 0.6;">Ngày Gặp Lại</span></h1>
-            <p class="subtitle-modern">Cậu đăng nhập bằng Google để chúng mình cùng viết lưu bút nhé!</p>
-            <button id="login-btn" class="google-btn soft-card">
-                <i data-lucide="log-in"></i>
-                <span style="margin-left: 15px;">Kết nối với bạn bè</span>
+    <main style="min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px;">
+        
+        <!-- CỔNG ĐĂNG NHẬP KIỂU SỔ TAY -->
+        <div id="auth-portal" class="login-card">
+            <h1 class="handwritten-title" style="font-size: 4.5rem; margin-bottom: 20px;">Lưu Bút <br> Thanh Xuân</h1>
+            <p class="doodle-text" style="font-size: 1.2rem; margin-bottom: 40px;">
+                Cậu ký tên vào đây để chúng mình <br> mãi nhớ về nhau nhé! ✨
+            </p>
+            
+            <button id="login-btn" class="google-btn-custom">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" width="18">
+                <span>Vào ký tên bằng Google</span>
             </button>
+            
+            <div style="margin-top: 50px; opacity: 0.4;" class="handwritten">Hẹn gặp lại cậu ở bên trong!</div>
         </div>
 
-        <!-- Registration/Edit Form -->
-        <div id="reg-section" style="display: none; width: 100%; max-width: 800px; padding: 20px;">
-            <div class="soft-card" style="padding: 40px; border-radius: 40px;">
-                <h2 class="title-modern" style="font-size: 2.5rem; margin-bottom: 10px;">Một Chút Về Tớ</h2>
-                <p class="handwritten" style="font-size: 1.2rem; color: var(--sakura-deep); margin-bottom: 30px;">Cậu có thể thay đổi những dòng này bất cứ lúc nào tâm đắc hơn...</p>
+        <!-- TRANG GHI DANH TỰ NHIÊN -->
+        <div id="reg-section" style="display: none; width: 100%; max-width: 900px;">
+            <div class="login-card" style="max-width: 900px; padding: 60px; text-align: left;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 50px;">
+                    <h2 class="handwritten-title" style="font-size: 3.5rem;">Hồ Sơ Của Tớ</h2>
+                    <button id="logout-btn" class="doodle-text" style="background: none; border: 1px solid #ddd; padding: 8px 20px; border-radius: 20px; cursor: pointer;">Đăng xuất</button>
+                </div>
                 
                 <form id="reg-form" class="soft-form">
-                    <div class="image-upload-wrapper">
-                        <label for="avatar-input" class="avatar-label">
-                            <div id="avatar-preview">📸 Chọn tấm ảnh xinh nhất</div>
-                        </label>
-                        <input type="file" id="avatar-input" hidden accept="image/*">
+                    <div style="display: flex; gap: 50px; flex-wrap: wrap;">
+                        <div style="flex: 1; text-align: center;">
+                            <label for="avatar-input">
+                                <div id="avatar-preview" style="width: 250px; height: 320px; border-radius: 10px; border: 2px dashed #ccc; background: #fff; margin: 0 auto; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 5px 5px 15px rgba(0,0,0,0.05);">
+                                    <div class="doodle-text" style="text-align: center;">
+                                        <i data-lucide="image" style="width: 40px; margin-bottom: 10px;"></i><br>
+                                        CHỌN ẢNH XINH NHẤT
+                                    </div>
+                                </div>
+                            </label>
+                            <input type="file" id="avatar-input" hidden accept="image/*">
+                        </div>
+
+                        <div style="flex: 1.5; display: flex; flex-direction: column; gap: 20px;">
+                            <div class="form-group">
+                                <label class="doodle-text">Tên thân mật</label>
+                                <input type="text" id="reg-name" placeholder="Ví dụ: Alex hay cười..." required>
+                            </div>
+                            <div class="form-group">
+                                <label class="doodle-text">Tính cách nổi bật</label>
+                                <input type="text" id="reg-personality" placeholder="Hay quên, năng nổ, trầm mặc..." required>
+                            </div>
+                            <div class="form-group">
+                                <label class="doodle-text">Thành tựu tự hào nhất</label>
+                                <textarea id="reg-achievements" placeholder="Tớ đã tốt nghiệp rồi nè!..." required style="height: 100px;"></textarea>
+                            </div>
+                        </div>
                     </div>
-                    <div class="input-grid">
+
+                    <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 20px;">
                         <div class="form-group">
-                            <label class="handwritten" style="font-size: 1.1rem;">Tên thân mật của cậu</label>
-                            <input type="text" id="reg-name" placeholder="Ví dụ: Alex hay cười" required>
+                            <label class="doodle-text">Lời nhắn cho cả lớp</label>
+                            <input type="text" id="reg-quote" placeholder="Thanh xuân này thật tuyệt vì có các cậu..." required>
                         </div>
                         <div class="form-group">
-                            <label class="handwritten" style="font-size: 1.1rem;">Tính cách nổi bật</label>
-                            <input type="text" id="reg-personality" placeholder="Vui tính, trầm mặc, hay quên..." required>
+                            <label class="doodle-text">Kỷ niệm thầm kín</label>
+                            <textarea id="reg-secret" placeholder="Lần đó tớ lén ngủ gật trong giờ lịch sử..." required style="height: 100px;"></textarea>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="handwritten" style="font-size: 1.1rem;">Những điều cậu đã làm được (tự hào nhất)</label>
-                        <textarea id="reg-achievements" placeholder="Tốt nghiệp loại giỏi, đi phượt xuyên Việt..." required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="handwritten" style="font-size: 1.1rem;">Lời nhắn gửi đến cả lớp mình</label>
-                        <input type="text" id="reg-quote" placeholder="Thanh xuân này thật đẹp vì có các cậu..." required>
-                    </div>
-                    <div class="form-group">
-                        <label class="handwritten" style="font-size: 1.1rem;">Kỷ niệm thầm kín (chỉ cậu mới biết)</label>
-                        <textarea id="reg-secret" placeholder="Lần đó tớ lén ngủ gật trong giờ lịch sử..." required></textarea>
-                    </div>
-                    <div style="display: flex; gap: 20px;">
-                        <button type="submit" id="reg-submit" class="submit-btn" style="flex: 1;">LƯU LẠI KỶ NIỆM</button>
-                        <a href="myclass.html" id="view-class-btn" class="submit-btn" style="flex: 1; background: var(--sakura-deep); text-decoration: none; text-align: center; display: none;">XEM TRANG LỚP MÌNH</a>
+
+                    <div style="display: flex; gap: 20px; margin-top: 40px;">
+                        <button type="submit" id="reg-submit" class="submit-btn" style="flex: 1.5;">LƯU LẠI KỶ NIỆM</button>
+                        <a href="myclass.html" id="view-class-btn" class="submit-btn" style="flex: 1; background: var(--ink-blue); text-decoration: none; text-align: center; display: none;">XEM TRANG LỚP</a>
                     </div>
                 </form>
             </div>
-            <button id="logout-btn" class="handwritten" style="margin-top: 20px; background: none; border: none; cursor: pointer; opacity: 0.5; font-size: 1.1rem;">Tạm biệt một lát (Đăng xuất)</button>
         </div>
     </main>
 
