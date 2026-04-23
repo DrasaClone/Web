@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lưu Bút Thanh Xuân 2026</title>
-    <link href="https://fonts.googleapis.com/css2?family=Pattaya&family=Quicksand:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>Ký Ức Trong Veo 2026</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body>
+<body style="background-color: var(--base-dark);">
     <div id="sakura-container"></div>
-    <div class="film-grain"></div>
+    <div class="sun-flare"></div>
+    <div class="aura-orb" style="top: 20%; left: 10%; background: radial-gradient(circle, rgba(255,143,171,0.2) 0%, transparent 70%);"></div>
 
-    <main class="hero-soft" style="min-height: 100vh; text-align: center;">
-        <div class="hero-content">
-            <div class="handwritten" style="font-size: 1.5rem; opacity: 0.6; margin-bottom: 20px;">Thương gửi niên khóa 2022 - 2026</div>
-            <h1 class="title-modern">Ký Ức <br><span style="color: var(--sakura-deep);">Trong Veo</span></h1>
-            <p class="subtitle-modern" style="max-width: 600px; margin: 20px auto 40px;">Nơi những đóa hoa rực rỡ nhất của tuổi trẻ vẫn luôn tỏa sáng trong lòng chúng mình.</p>
+    <main class="hero-presentation">
+        <div style="z-index: 10; text-align: center;">
+            <div class="label-cap" style="opacity: 0.6; margin-bottom: 30px; color: white;">A_VISUAL_JOURNEY_BY_CLASS_2026</div>
+            <h1 class="title-presentation">Ký Ức <br> <span style="color: var(--sakura-vibrant);">Trong Veo</span></h1>
+            <p class="subtitle-presentation">Nơi những đóa hoa rực rỡ nhất không bao giờ tàn.</p>
             
-            <a href="sign.html" class="google-btn soft-card" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
-                <i data-lucide="sparkles" style="color: var(--sakura-primary);"></i>
-                <span style="margin-left: 15px; font-weight: 700; color: var(--text-main);">MỞ CUỐN LƯU BÚT</span>
+            <a href="sign.html" class="google-btn-premium" style="text-decoration: none;">
+                <i data-lucide="sparkles"></i>
+                <span>BƯỚC VÀO KHÔNG GIAN KỶ NIỆM</span>
             </a>
 
-            <div class="handwritten" style="margin-top: 60px; opacity: 0.4; font-size: 1.2rem;">
-                Dù mai đây có đi đâu, chúng mình vẫn mãi là một gia đình...
+            <div style="margin-top: 80px; opacity: 0.3;" class="label-cap">
+                SCROLL_TO_DISCOVER_MORE
             </div>
         </div>
     </main>
@@ -32,17 +32,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script>
         lucide.createIcons();
+        // Hiệu ứng Sakura Cinematic
         const container = document.getElementById('sakura-container');
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 20; i++) {
             const p = document.createElement('div');
             p.innerHTML = '🌸';
-            p.className = 'floating-petal';
-            p.style.left = Math.random() * 100 + 'vw';
-            p.style.top = '-50px';
-            p.style.position = 'fixed';
+            p.style.cssText = `position:fixed; top:-50px; left:${Math.random()*100}vw; font-size:${Math.random()*20+15}px; opacity:${Math.random()*0.8}; pointer-events:none; z-index:100;`;
             container.appendChild(p);
-            gsap.to(p, { y: '110vh', x: '+=100', rotation: 360, duration: 5 + Math.random() * 5, repeat: -1, delay: Math.random() * 5, ease: 'none' });
+            gsap.to(p, { y: '110vh', x: '+=150', rotation: 720, duration: 7 + Math.random() * 5, repeat: -1, delay: Math.random() * 5, ease: 'none' });
         }
+        // Animation cho tiêu đề
+        gsap.from(".title-presentation", { y: 100, opacity: 0, duration: 1.5, ease: "power4.out", delay: 0.5 });
+        gsap.from(".subtitle-presentation", { x: -50, opacity: 0, duration: 1.2, ease: "power3.out", delay: 1 });
     </script>
 </body>
 </html>
