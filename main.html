@@ -7,43 +7,37 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body style="background-color: var(--base-dark);">
+<body>
     <div id="sakura-container"></div>
     <div class="sun-flare"></div>
-    <div class="aura-orb" style="top: 20%; left: 10%; background: radial-gradient(circle, rgba(255,143,171,0.2) 0%, transparent 70%);"></div>
 
-    <main class="hero-presentation">
-        <div style="z-index: 10; text-align: center;">
-            <div class="label-cap" style="opacity: 0.6; margin-bottom: 30px; color: white;">A_VISUAL_JOURNEY_BY_CLASS_2026</div>
+    <main class="vault-container">
+        <div class="main-content-stack">
+            <div class="label-cap" style="opacity: 0.5; margin-bottom: 25px; color: white;">A_VISUAL_JOURNEY_BY_CLASS_2026</div>
             <h1 class="title-presentation">Ký Ức <br> <span style="color: var(--sakura-vibrant);">Trong Veo</span></h1>
             <p class="subtitle-presentation">Nơi những đóa hoa rực rỡ nhất không bao giờ tàn.</p>
             
             <a href="sign.html" class="google-btn-premium" style="text-decoration: none;">
-                <i data-lucide="sparkles"></i>
-                <span>BƯỚC VÀO KHÔNG GIAN KỶ NIỆM</span>
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" alt="Google">
+                <span>KHÁM PHÁ KỶ NIỆM</span>
             </a>
 
-            <div style="margin-top: 80px; opacity: 0.3;" class="label-cap">
-                SCROLL_TO_DISCOVER_MORE
-            </div>
+            <div style="margin-top: 80px; opacity: 0.2;" class="label-cap">SCROLL_TO_DISCOVER_MORE</div>
         </div>
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script>
         lucide.createIcons();
-        // Hiệu ứng Sakura Cinematic
         const container = document.getElementById('sakura-container');
         for (let i = 0; i < 20; i++) {
             const p = document.createElement('div');
             p.innerHTML = '🌸';
-            p.style.cssText = `position:fixed; top:-50px; left:${Math.random()*100}vw; font-size:${Math.random()*20+15}px; opacity:${Math.random()*0.8}; pointer-events:none; z-index:100;`;
+            p.style.cssText = `position:fixed; top:-50px; left:${Math.random()*100}vw; font-size:${Math.random()*20+15}px; opacity:${Math.random()*0.5}; pointer-events:none; z-index:1;`;
             container.appendChild(p);
             gsap.to(p, { y: '110vh', x: '+=150', rotation: 720, duration: 7 + Math.random() * 5, repeat: -1, delay: Math.random() * 5, ease: 'none' });
         }
-        // Animation cho tiêu đề
-        gsap.from(".title-presentation", { y: 100, opacity: 0, duration: 1.5, ease: "power4.out", delay: 0.5 });
-        gsap.from(".subtitle-presentation", { x: -50, opacity: 0, duration: 1.2, ease: "power3.out", delay: 1 });
+        gsap.from(".main-content-stack > *", { opacity: 0, y: 30, duration: 1.5, stagger: 0.2, ease: "power3.out" });
     </script>
 </body>
 </html>
