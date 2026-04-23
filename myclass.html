@@ -3,63 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lớp Chúng Mình - Lưu Bút Thanh Xuân</title>
-    <link href="https://fonts.googleapis.com/css2?family=Pattaya&family=Quicksand:wght@300;500;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <title>Gương Mặt Lớp Mình - Lưu Bút Thanh Xuân</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body>
+<body style="background-color: var(--base-dark);">
     <div id="sakura-container"></div>
-    <div class="aura-orb aura-1"></div>
-    <div class="aura-orb aura-2"></div>
-    <div class="film-grain"></div>
+    <div class="sun-flare"></div>
+    <div class="aura-orb" style="top: 10%; left: 5%; background: radial-gradient(circle, rgba(255,143,171,0.2) 0%, transparent 70%);"></div>
 
-    <div id="music-player" class="soft-card">
-        <div class="music-icon-wrapper"><i data-lucide="music"></i></div>
-        <div class="music-info">
-            <div class="music-name">Những Ngày Năm Ấy</div>
-            <div class="music-status">Nhấn để nghe nhạc...</div>
+    <!-- MUSIC PLAYER PREMIUM -->
+    <div id="music-player" class="glass-card" style="position: fixed; bottom: 30px; left: 30px; padding: 12px 25px; display: flex; align-items: center; gap: 15px; z-index: 1000; border-radius: 100px;">
+        <i data-lucide="music" style="color: var(--sakura-vibrant);"></i>
+        <div style="line-height: 1.2;">
+            <div style="font-size: 0.8rem; font-weight: 700;">Giai Điệu Năm Ấy</div>
+            <div style="font-size: 0.6rem; opacity: 0.5;">Lofi Instrumental</div>
         </div>
-        <button id="toggle-music" class="music-btn"><i data-lucide="play-circle"></i></button>
+        <button id="toggle-music" style="background: none; border: none; cursor: pointer; color: white;">
+            <i data-lucide="play-circle"></i>
+        </button>
         <audio id="bg-audio" loop>
             <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
         </audio>
     </div>
 
-    <header class="hero-soft" style="min-height: 80vh;">
-        <a href="sign.html" style="position: fixed; top: 30px; left: 30px; z-index: 100; text-decoration: none;" class="soft-card user-pill">
-            <i data-lucide="user-round-cog" style="margin-right: 10px; color: var(--sakura-primary);"></i>
-            <span class="handwritten" style="font-size: 1.2rem; font-weight: 700;">Hồ sơ của tớ</span>
+    <!-- HEADER CINEMATIC -->
+    <header class="hero-presentation">
+        <a href="sign.html" style="position: fixed; top: 30px; left: 30px; z-index: 100; text-decoration: none;" class="glass-card">
+            <div style="display: flex; align-items: center; gap: 10px; padding: 5px 10px;">
+                <i data-lucide="user-round-cog" style="color: var(--sakura-vibrant);"></i>
+                <span class="label-cap" style="font-size: 0.6rem; margin: 0;">SỬA_HỒ_SƠ</span>
+            </div>
         </a>
-        <h1 class="title-modern">Chúng Ta <br><span style="opacity: 0.6;">Của Năm Ấy</span></h1>
-        <p class="subtitle-modern">Nơi hội tụ những đóa hoa rực rỡ nhất niên khóa 2026.</p>
-        <div class="handwritten" style="margin-top: 40px; opacity: 0.4; font-size: 1.5rem;">Cùng tớ ôn lại từng mảnh ký ức nhé... ↓</div>
+        
+        <div style="text-align: center; z-index: 10;">
+            <div class="label-cap" style="opacity: 0.5; margin-bottom: 20px;">02_GALLERY_OF_YOUTH</div>
+            <h1 class="title-presentation" style="font-size: 7rem;">Gương Mặt <br><span style="color: var(--sakura-vibrant);">Lớp Mình</span></h1>
+            <p class="subtitle-presentation">Mỗi cá nhân là một mảnh ghép của sự hoàn hảo.</p>
+        </div>
     </header>
 
-    <div id="members-grid" class="grid-container"></div>
+    <!-- SYSTEMATIC GRID -->
+    <div id="members-grid" class="grid-container">
+        <!-- Dữ liệu thực từ Firebase nạp tại đây -->
+    </div>
 
-    <section class="wish-section">
-        <div class="wish-content">
-            <h2 class="title-modern" style="font-size: 3.5rem;">Lời Chúc <br> Gửi Tương Lai</h2>
-            <div id="wishes-container" class="wishes-flow"></div>
-            <div class="wish-form-box soft-card">
-                <input type="text" id="wish-input" placeholder="Gửi một lời chúc đến mọi người...">
-                <button id="send-wish"><i data-lucide="send"></i></button>
+    <!-- WISH STARFIELD -->
+    <section class="hero-presentation" style="background: rgba(255,255,255,0.02); margin-top: 100px; border-radius: 80px 80px 0 0;">
+        <div style="text-align: center;">
+            <h2 class="title-presentation" style="font-size: 4.5rem;">Vì Sao <br> Nguyện Ước</h2>
+            <p class="subtitle-presentation" style="font-size: 1.5rem; opacity: 0.6;">Để lại một lời chúc bay vào tương lai nhé...</p>
+            
+            <div id="wishes-container" style="height: 500px; position: relative; width: 100vw; overflow: hidden; margin: 40px 0;"></div>
+            
+            <div class="glass-card" style="display: flex; gap: 15px; padding: 10px 10px 10px 30px; max-width: 600px; margin: 0 auto; border-radius: 100px;">
+                <input type="text" id="wish-input" placeholder="Viết một lời nhắn nhỏ..." style="background: none; border: none; color: white; flex: 1; outline: none; font-family: inherit;">
+                <button id="send-wish" style="width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--sakura-vibrant); color: white; cursor: pointer;">
+                    <i data-lucide="send"></i>
+                </button>
             </div>
         </div>
     </section>
 
-    <div id="final-moment" class="hero-soft" style="min-height: 120vh;">
-        <div class="group-photo-container" style="max-width: 1000px;">
-            <img src="https://images.unsplash.com/photo-1523050853063-bd8012fbb230?q=80&w=2070" alt="Group Photo">
-            <div class="handwritten" style="font-size: 2.5rem; margin-top: 25px; color: #1e40af; text-align: center;">Mãi mãi là một gia đình, cậu nhé!</div>
+    <!-- GROUP PHOTO PRESTIGE -->
+    <section class="hero-presentation" style="min-height: 120vh;">
+        <div style="text-align: center; width: 100%; max-width: 1100px;">
+            <div class="label-cap" style="opacity: 0.5; margin-bottom: 20px;">03_THE_FINAL_MOMENT</div>
+            <h2 class="title-presentation" style="font-size: 5rem;">Tập Thể <br> Vững Mạnh</h2>
+            
+            <div class="glass-card" style="margin-top: 50px; padding: 30px; border-radius: 40px;">
+                <img src="https://images.unsplash.com/photo-1523050853063-bd8012fbb230?q=80&w=2070" style="width: 100%; border-radius: 20px; display: block; filter: contrast(1.1);">
+                <div class="subtitle-presentation" style="margin-top: 30px; font-size: 2rem;">Mãi mãi là một gia đình, niên khóa 2026!</div>
+            </div>
         </div>
     </section>
 
+    <!-- DETAIL MODAL (PRESENTATION STYLE) -->
     <div id="detail-modal" class="modern-overlay" style="display: none;">
-        <div class="modern-modal" style="border-radius: 40px;">
-            <button class="close-modal"><i data-lucide="x"></i></button>
-            <div id="detail-content-target"></div>
+        <div class="presentation-modal">
+            <button class="close-modal" style="position: absolute; top: 30px; right: 30px; background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; z-index: 100; color: white;">
+                <i data-lucide="x"></i>
+            </button>
+            <div id="detail-content-target" style="display: flex; width: 100%; height: 100%;">
+                <!-- Dữ liệu nạp từ app-class.js -->
+            </div>
         </div>
     </div>
 
