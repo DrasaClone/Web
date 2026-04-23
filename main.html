@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lưu Bút Thanh Xuân 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pattaya&family=Quicksand:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div id="sakura-container"></div>
+    <div class="film-grain"></div>
+
+    <main class="hero-soft" style="min-height: 100vh; text-align: center;">
+        <div class="hero-content">
+            <div class="mono" style="letter-spacing: 8px; opacity: 0.5; margin-bottom: 20px;">WELCOME_TO_MEMORY_OS</div>
+            <h1 class="title-modern">Ký Ức <br><span style="color: var(--sakura-deep);">Trong Veo</span></h1>
+            <p class="subtitle-modern" style="max-width: 600px; margin: 20px auto 40px;">Hành trình lưu giữ những đóa hoa rực rỡ nhất của niên khóa 2026.</p>
+            
+            <a href="sign.html" class="google-btn soft-card" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                <i data-lucide="sparkles" style="color: var(--sakura-primary);"></i>
+                <span style="margin-left: 15px; font-weight: 700; color: var(--text-main);">KHÁM PHÁ NGAY</span>
+            </a>
+
+            <div class="mono" style="margin-top: 60px; opacity: 0.3; font-size: 0.7rem;">
+                UNIVERSITY_GRADUATION // PROJECT_FINALE
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="assets/js/app-index.js"></script>
+    <script>
+        lucide.createIcons();
+        // Hiệu ứng Sakura đơn giản cho trang chủ
+        const container = document.getElementById('sakura-container');
+        for (let i = 0; i < 15; i++) {
+            const p = document.createElement('div');
+            p.innerHTML = '🌸';
+            p.className = 'floating-petal';
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.top = '-50px';
+            p.style.position = 'fixed';
+            container.appendChild(p);
+            gsap.to(p, { y: '110vh', x: '+=100', rotation: 360, duration: 5 + Math.random() * 5, repeat: -1, delay: Math.random() * 5, ease: 'none' });
+        }
+    </script>
+</body>
+</html>

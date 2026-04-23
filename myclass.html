@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lớp Chúng Mình - Lưu Bút Thanh Xuân</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pattaya&family=Quicksand:wght@300;500;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div id="sakura-container"></div>
+    <div class="aura-orb aura-1"></div>
+    <div class="aura-orb aura-2"></div>
+    <div class="film-grain"></div>
+
+    <!-- Music Player -->
+    <div id="music-player" class="soft-card">
+        <div class="music-icon-wrapper"><i data-lucide="music"></i></div>
+        <div class="music-info">
+            <div class="music-name">Thanh Xuân (Lofi)</div>
+            <div class="music-status">Nhấn để nghe nhạc...</div>
+        </div>
+        <button id="toggle-music" class="music-btn"><i data-lucide="play-circle"></i></button>
+        <audio id="bg-audio" loop>
+            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <!-- Main Header -->
+    <header class="hero-soft" style="min-height: 80vh;">
+        <a href="sign.html" style="position: fixed; top: 30px; left: 30px; z-index: 100; text-decoration: none;" class="soft-card user-pill">
+            <i data-lucide="user-edit" style="margin-right: 10px;"></i>
+            <span class="mono">SỬA HỒ SƠ</span>
+        </a>
+        <h1 class="title-modern">Chúng Ta <br><span style="opacity: 0.6;">Của Năm Ấy</span></h1>
+        <p class="subtitle-modern">Tập hợp những đóa hoa rực rỡ nhất niên khóa 2026.</p>
+        <div class="mono" style="margin-top: 40px; opacity: 0.4;">CUỘN XUỐNG ĐỂ ÔN LẠI KỶ NIỆM ↓</div>
+    </header>
+
+    <!-- Grid Chân dung -->
+    <div id="members-grid" class="grid-container">
+        <!-- Dữ liệu thực từ Firebase -->
+    </div>
+
+    <!-- Wish Wall -->
+    <section class="wish-section">
+        <div class="wish-content">
+            <h2 class="title-modern" style="font-size: 3.5rem;">Lời Chúc <br> Gửi Tương Lai</h2>
+            <div id="wishes-container" class="wishes-flow"></div>
+            <div class="wish-form-box soft-card">
+                <input type="text" id="wish-input" placeholder="Viết một lời nhắn nhỏ...">
+                <button id="send-wish"><i data-lucide="send"></i></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Group Photo -->
+    <section class="hero-soft" style="min-height: 100vh;">
+        <div class="group-photo-container" style="max-width: 1000px;">
+            <img src="https://images.unsplash.com/photo-1523050853063-bd8012fbb230?q=80&w=2070" alt="Group Photo">
+            <div class="handwritten" style="font-size: 2.2rem; margin-top: 25px; color: #1e40af; text-align: center;">Hẹn gặp lại ở một đỉnh cao mới!</div>
+        </div>
+    </header>
+
+    <!-- Detail Modal -->
+    <div id="detail-modal" class="modern-overlay" style="display: none;">
+        <div class="modern-modal">
+            <button class="close-modal"><i data-lucide="x"></i></button>
+            <div id="detail-content-target"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        window.fb = { initializeApp, getAuth, onAuthStateChanged, getDatabase, ref, onValue, push };
+    </script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/app-class.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

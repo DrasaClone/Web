@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghi Danh - Lưu Bút Thanh Xuân</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pattaya&family=Quicksand:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div id="sakura-container"></div>
+    <div class="film-grain"></div>
+
+    <main class="hero-soft" style="min-height: 100vh;">
+        <!-- Login Section -->
+        <div id="auth-portal" class="hero-content">
+            <h1 class="title-modern">Cổng <br><span style="opacity: 0.6;">Kỷ Yếu</span></h1>
+            <p class="subtitle-modern">Đăng nhập để bắt đầu hành trình của cậu.</p>
+            <button id="login-btn" class="google-btn soft-card">
+                <i data-lucide="log-in"></i>
+                <span style="margin-left: 15px;">Kết nối bằng Google</span>
+            </button>
+        </div>
+
+        <!-- Registration/Edit Form -->
+        <div id="reg-section" style="display: none; width: 100%; max-width: 800px; padding: 20px;">
+            <div class="soft-card" style="padding: 40px;">
+                <h2 class="title-modern" style="font-size: 2.5rem; margin-bottom: 10px;">Hồ Sơ Của Tớ</h2>
+                <p class="mono" style="opacity: 0.5; margin-bottom: 30px;">CẬU CÓ THỂ CHỈNH SỬA THÔNG TIN BẤT CỨ LÚC NÀO</p>
+                
+                <form id="reg-form" class="soft-form">
+                    <div class="image-upload-wrapper">
+                        <label for="avatar-input" class="avatar-label">
+                            <div id="avatar-preview">📸 Tải ảnh của cậu</div>
+                        </label>
+                        <input type="file" id="avatar-input" hidden accept="image/*">
+                    </div>
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label class="mono">Tên của cậu</label>
+                            <input type="text" id="reg-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="mono">Tính cách</label>
+                            <input type="text" id="reg-personality" placeholder="VD: Vui tính, Trầm mặc" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="mono">Thành tựu nổi bật</label>
+                        <textarea id="reg-achievements" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="mono">Lời nhắn gửi thanh xuân</label>
+                        <input type="text" id="reg-quote" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="mono">Kỷ niệm bí mật</label>
+                        <textarea id="reg-secret" required></textarea>
+                    </div>
+                    <div style="display: flex; gap: 20px;">
+                        <button type="submit" id="reg-submit" class="submit-btn" style="flex: 1;">LƯU THÔNG TIN</button>
+                        <a href="myclass.html" id="view-class-btn" class="submit-btn" style="flex: 1; background: var(--sakura-deep); text-decoration: none; text-align: center; display: none;">XEM THÀNH QUẢ</a>
+                    </div>
+                </form>
+            </div>
+            <button id="logout-btn" class="mono" style="margin-top: 20px; background: none; border: none; cursor: pointer; opacity: 0.5;">[ Đăng xuất tài khoản ]</button>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        window.fb = { initializeApp, getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, getDatabase, ref, set, get };
+    </script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/app-sign.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
