@@ -1,19 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Pattaya&family=Dancing+Script:wght@400;700&family=Quicksand:wght@300;500;700&family=Caveat:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,800;1,400&family=Quicksand:wght@300;500;700&family=Pattaya&display=swap');
 
 :root {
-  --sakura-base: #fffefb; /* Màu giấy hơi ngả vàng tự nhiên */
-  --sakura-pink: #ff8fab;
-  --ink-blue: #2563eb;    /* Màu mực bút bi xanh */
-  --ink-purple: #7c3aed;  /* Màu mực tím học trò */
-  --text-main: #374151;
-  --glass-white: rgba(255, 255, 255, 0.5);
-  --radius-xl: 40px;
-  --soft-shadow: 0 20px 40px rgba(255, 143, 171, 0.1);
+  --base-dark: #020617;
+  --sakura-vibrant: #ff8fab;
+  --sakura-glow: #fb6f92;
+  --sun-gold: #fde047;
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-bright: #f8fafc;
   
-  --font-hand: 'Dancing Script', cursive;
-  --font-fancy: 'Pattaya', sans-serif;
+  --font-serif: 'EB Garamond', serif;
   --font-main: 'Quicksand', sans-serif;
-  --font-ink: 'Caveat', cursive;
+  --font-hand: 'Pattaya', sans-serif;
 }
 
 * {
@@ -23,127 +21,188 @@
 }
 
 body {
-  background-color: var(--sakura-base);
-  background-image: url('https://www.transparenttextures.com/patterns/notebook.png'); /* Texture giấy tập */
-  color: var(--text-main);
+  background-color: var(--base-dark);
+  color: var(--text-bright);
   font-family: var(--font-main);
   overflow-x: hidden;
   line-height: 1.6;
 }
 
-/* --- CHỮ VIẾT TAY TỰ NHIÊN --- */
-.handwritten-title {
-  font-family: var(--font-fancy);
-  color: var(--sakura-pink);
-  transform: rotate(-2deg);
-  display: inline-block;
+/* --- HIỆU ỨNG NỀN CINEMATIC --- */
+.aura-orb {
+  position: fixed;
+  width: 800px;
+  height: 800px;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.3;
 }
 
-.ink-text {
-  font-family: var(--font-hand);
-  color: var(--ink-blue);
-  font-size: 1.8rem;
-  line-height: 1.2;
+.sun-flare {
+  position: fixed;
+  top: -10%; right: -10%;
+  width: 60vw; height: 60vh;
+  background: radial-gradient(circle, rgba(253, 224, 71, 0.15) 0%, transparent 70%);
+  filter: blur(80px);
+  z-index: 1;
+  pointer-events: none;
 }
 
-.doodle-text {
-  font-family: var(--font-ink);
-  color: var(--ink-purple);
-  opacity: 0.8;
-}
-
-/* --- UI ĐĂNG NHẬP THÂN THIỆN --- */
-.login-card {
-  background: white;
-  border: 1px solid rgba(0,0,0,0.05);
-  border-radius: 35px;
-  padding: 60px 30px;
-  width: 100%;
-  max-width: 500px;
-  box-shadow: var(--soft-shadow);
+/* --- TIÊU ĐỀ TRÌNH CHIẾU ĐẲNG CẤP --- */
+.hero-presentation {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
   position: relative;
-  background-image: radial-gradient(#f1f1f1 1px, transparent 1px);
-  background-size: 20px 20px;
+  z-index: 10;
 }
 
-.google-btn-custom {
-  background: #fff;
-  color: #444;
-  border: 1px solid #ddd;
-  padding: 15px 35px;
-  border-radius: 50px;
-  font-size: 1rem;
+.title-presentation {
+  font-family: var(--font-serif);
+  font-size: clamp(4rem, 15vw, 9rem);
+  font-weight: 800;
+  line-height: 0.85;
+  letter-spacing: -2px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  background: linear-gradient(to bottom, #fff 40%, var(--sakura-vibrant));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle-presentation {
+  font-family: var(--font-hand);
+  font-size: 2.5rem;
+  color: var(--sun-gold);
+  text-shadow: 0 0 20px rgba(253, 224, 71, 0.5);
+}
+
+/* --- BENTO GLASS UI --- */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 40px;
+  padding: 100px 8vw;
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 20px;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card:hover {
+  transform: translateY(-15px) scale(1.02);
+  border-color: var(--sakura-vibrant);
+  box-shadow: 0 30px 60px rgba(251, 111, 146, 0.2);
+}
+
+.card-image-box {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-image {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: contrast(1.1) brightness(0.9);
+  transition: transform 1s ease;
+}
+
+.glass-card:hover .card-image {
+  transform: scale(1.1);
+  filter: contrast(1.1) brightness(1.1);
+}
+
+.card-name {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 10px;
+}
+
+/* --- LOGIN PORTAL (RE-DESIGNED) --- */
+.portal-card {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(40px);
+  border: 1px solid var(--glass-border);
+  border-radius: 40px;
+  padding: 80px 50px;
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+  box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+}
+
+.google-btn-premium {
+  background: white;
+  color: var(--base-dark);
+  border: none;
+  padding: 22px 50px;
+  border-radius: 100px;
+  font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  transition: all 0.3s ease;
-  font-family: var(--font-main);
-}
-
-.google-btn-custom:hover {
-  background: var(--sakura-base);
-  border-color: var(--sakura-pink);
-  transform: scale(1.02);
-}
-
-/* --- THẺ SINH VIÊN KIỂU KÝ TÊN --- */
-.soft-card {
-  background: white;
-  border-radius: 30px;
-  padding: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-  border: 1px solid #f9f9f9;
+  gap: 15px;
   transition: all 0.4s ease;
+  margin-top: 40px;
 }
 
-.member-name {
-  font-family: var(--font-fancy);
-  font-size: 2.2rem;
-  color: var(--text-main);
-  margin-top: 10px;
-  text-align: center;
+.google-btn-premium:hover {
+  background: var(--sun-gold);
+  transform: scale(1.05);
 }
 
-/* --- WISH ITEMS --- */
-.wish-item {
+/* --- MODAL TRÌNH CHIẾU --- */
+.presentation-modal {
+  background: #050a1f;
+  width: 100%;
+  max-width: 1200px;
+  height: 85vh;
+  border-radius: 32px;
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  position: relative;
+}
+
+.modal-left { flex: 1; height: 100%; }
+.modal-right { flex: 1.2; padding: 70px; display: flex; flex-direction: column; justify-content: center; }
+
+.label-cap {
+  font-size: 0.7rem;
+  letter-spacing: 5px;
+  color: var(--sakura-vibrant);
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+}
+
+/* --- WISH WALL STARFIELD --- */
+.wish-star {
   position: absolute;
   font-family: var(--font-hand);
-  font-size: 1.5rem;
-  color: var(--ink-blue);
-  background: none;
-  border: none;
+  font-size: 1.8rem;
+  color: var(--sun-gold);
+  text-shadow: 0 0 15px var(--sun-gold);
   white-space: nowrap;
   pointer-events: none;
-}
-
-/* --- FORMS --- */
-.soft-form input, .soft-form textarea {
-  width: 100%;
-  padding: 15px 20px;
-  border: none;
-  border-bottom: 2px dashed #eee;
-  background: transparent;
-  font-family: var(--font-ink);
-  font-size: 1.4rem;
-  color: var(--ink-blue);
-  outline: none;
-}
-
-.soft-form input:focus {
-  border-bottom-color: var(--sakura-pink);
-}
-
-.submit-btn {
-  background: var(--sakura-pink);
-  color: white;
-  border: none;
-  padding: 18px 40px;
-  border-radius: 50px;
-  font-family: var(--font-fancy);
-  font-size: 1.2rem;
-  cursor: pointer;
-  box-shadow: 0 10px 20px rgba(255, 143, 171, 0.2);
 }
