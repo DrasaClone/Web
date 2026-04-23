@@ -3,12 +3,8 @@
 :root {
   --base-dark: #020617;
   --sakura-vibrant: #ff8fab;
-  --sakura-glow: #fb6f92;
   --sun-gold: #fde047;
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.1);
   --text-bright: #f8fafc;
-  
   --font-serif: 'EB Garamond', serif;
   --font-main: 'Quicksand', sans-serif;
   --font-hand: 'Pattaya', sans-serif;
@@ -20,226 +16,126 @@
   box-sizing: border-box;
 }
 
-body {
+html, body {
+  width: 100%;
+  height: 100vh;
   background-color: var(--base-dark);
   color: var(--text-bright);
   font-family: var(--font-main);
-  overflow-x: hidden;
-  line-height: 1.6;
+  overflow: hidden;
 }
 
-/* --- HIỆU ỨNG NỀN CINEMATIC --- */
-.aura-orb {
-  position: fixed;
-  width: 800px;
-  height: 800px;
-  border-radius: 50%;
-  filter: blur(120px);
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0.3;
-}
+/* --- TRANG TRÍ NỀN (KHÔNG GÂY LỆCH) --- */
+#sakura-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+.sun-flare { position: fixed; top: 0; right: 0; width: 50%; height: 50%; background: radial-gradient(circle, rgba(253, 224, 71, 0.1) 0%, transparent 70%); filter: blur(60px); z-index: 1; }
 
-.sun-flare {
-  position: fixed;
-  top: -10%; right: -10%;
-  width: 60vw; height: 60vh;
-  background: radial-gradient(circle, rgba(253, 224, 71, 0.15) 0%, transparent 70%);
-  filter: blur(80px);
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* --- TIÊU ĐỀ TRÌNH CHIẾU ĐẲNG CẤP --- */
-.hero-presentation {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+/* --- CĂN GIỮ TRUNG TÂM TUYỆT ĐỐI (STEEL FRAME) --- */
+.absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 600px;
   text-align: center;
-  position: relative;
-  z-index: 10;
+  z-index: 100;
+  padding: 20px;
 }
 
 .title-presentation {
   font-family: var(--font-serif);
-  font-size: clamp(4rem, 15vw, 9rem);
-  font-weight: 800;
-  line-height: 0.85;
-  letter-spacing: -2px;
+  font-size: clamp(3.5rem, 10vw, 6rem);
+  line-height: 1;
+  color: white;
   margin-bottom: 20px;
-  text-transform: uppercase;
-  background: linear-gradient(to bottom, #fff 40%, var(--sakura-vibrant));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  display: block;
 }
 
 .subtitle-presentation {
   font-family: var(--font-hand);
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   color: var(--sun-gold);
-  text-shadow: 0 0 20px rgba(253, 224, 71, 0.5);
+  margin-bottom: 40px;
+  display: block;
 }
 
-/* --- BENTO GLASS UI --- */
-.grid-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 40px;
-  padding: 100px 8vw;
-}
-
-.glass-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
-  border-radius: 24px;
-  padding: 20px;
-  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
-.glass-card:hover {
-  transform: translateY(-15px) scale(1.02);
-  border-color: var(--sakura-vibrant);
-  box-shadow: 0 30px 60px rgba(251, 111, 146, 0.2);
-}
-
-.card-image-box {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 16px;
-  overflow: hidden;
-  margin-bottom: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.card-image {
-  width: 100%; height: 100%; object-fit: cover;
-  filter: contrast(1.1) brightness(0.9);
-  transition: transform 1s ease;
-}
-
-.glass-card:hover .card-image {
-  transform: scale(1.1);
-  filter: contrast(1.1) brightness(1.1);
-}
-
-.card-name {
-  font-family: var(--font-serif);
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: white;
-  margin-bottom: 10px;
-}
-
-/* --- NEW MINIMALIST STACK LAYOUT (ANTI-ALIGNMENT ISSUES) --- */
-.presentation-container {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  min-height: 100vh;
-}
-
-.portal-stack {
-  width: 100%;
-  max-width: 500px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  z-index: 100;
-  padding: 0 20px;
-}
-
-.title-presentation {
-  font-family: var(--font-serif);
-  font-size: clamp(3rem, 12vw, 5.5rem);
-  font-weight: 800;
-  line-height: 1;
-  color: white;
-  margin-bottom: 20px;
-  text-transform: none; /* Trông tự nhiên hơn */
-  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
-}
-
-.google-btn-pill {
+/* --- NÚT GOOGLE (CĂN GIỮ CỨNG) --- */
+.google-btn-fixed {
   background: white;
-  color: #1a1a1a;
+  color: #000;
   border: none;
-  padding: 16px 32px;
   border-radius: 100px;
-  font-size: 0.95rem;
+  padding: 0 35px;
+  height: 60px;
+  font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 15px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  margin-top: 40px;
-  min-width: 280px; /* Đảm bảo nút đủ dài và cân đối */
+  margin: 0 auto; /* Ép vào giữa */
+  width: fit-content;
+  min-width: 300px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
 }
 
-.google-btn-pill:hover {
-  transform: translateY(-8px) scale(1.05);
-  background: var(--sun-gold);
-  box-shadow: 0 30px 50px rgba(253, 224, 71, 0.3);
-}
-
-.glass-box-new {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 35px;
-  padding: 50px;
-  width: 100%;
-  box-shadow: 0 40px 100px rgba(0,0,0,0.2);
-}
-
-.google-btn-premium:hover {
-  background: var(--sun-gold);
+.google-btn-fixed:hover {
   transform: scale(1.05);
+  background: var(--sun-gold);
 }
-
-/* --- MODAL TRÌNH CHIẾU --- */
-.presentation-modal {
-  background: #050a1f;
-  width: 100%;
-  max-width: 1200px;
-  height: 85vh;
-  border-radius: 32px;
-  display: flex;
-  overflow: hidden;
-  border: 1px solid var(--glass-border);
-  position: relative;
-}
-
-.modal-left { flex: 1; height: 100%; }
-.modal-right { flex: 1.2; padding: 70px; display: flex; flex-direction: column; justify-content: center; }
 
 .label-cap {
   font-size: 0.7rem;
   letter-spacing: 5px;
   color: var(--sakura-vibrant);
-  font-weight: 700;
-  text-transform: uppercase;
+  opacity: 0.5;
   margin-bottom: 15px;
+  display: block;
 }
 
-/* --- WISH WALL STARFIELD --- */
-.wish-star {
-  position: absolute;
-  font-family: var(--font-hand);
-  font-size: 1.8rem;
-  color: var(--sun-gold);
-  text-shadow: 0 0 15px var(--sun-gold);
-  white-space: nowrap;
-  pointer-events: none;
+/* --- FORM ĐĂNG KÝ (FIXED OVERLAY) --- */
+.reg-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(2, 6, 23, 0.95);
+  z-index: 1000;
+  display: none; /* Hiện bằng JS */
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.glass-card-fixed {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  padding: 50px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.soft-form input, .soft-form textarea {
+  width: 100%;
+  padding: 15px 20px;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  color: white;
+  font-family: inherit;
+  margin-top: 5px;
+}
+
+.submit-btn {
+  background: var(--sakura-vibrant);
+  color: white;
+  border: none;
+  padding: 18px 40px;
+  border-radius: 50px;
+  font-weight: 700;
+  cursor: pointer;
 }
