@@ -137,54 +137,70 @@ body {
   margin-bottom: 10px;
 }
 
-/* --- LOGIN PORTAL (RE-DESIGNED & CENTERED) --- */
-.portal-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  border: 1px solid var(--glass-border);
-  border-radius: 40px;
-  padding: 80px 40px;
+/* --- NEW MINIMALIST STACK LAYOUT (ANTI-ALIGNMENT ISSUES) --- */
+.presentation-container {
+  display: grid;
+  place-items: center;
   width: 100%;
-  max-width: 580px;
-  text-align: center;
-  box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+  min-height: 100vh;
+}
+
+.portal-stack {
+  width: 100%;
+  max-width: 500px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: auto;
+  text-align: center;
+  z-index: 100;
+  padding: 0 20px;
 }
 
 .title-presentation {
   font-family: var(--font-serif);
-  font-size: clamp(3.5rem, 10vw, 6rem);
+  font-size: clamp(3rem, 12vw, 5.5rem);
   font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -1px;
-  margin-bottom: 25px;
-  background: linear-gradient(to bottom, #fff 30%, var(--sakura-vibrant));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  line-height: 1;
+  color: white;
+  margin-bottom: 20px;
+  text-transform: none; /* Trông tự nhiên hơn */
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
 }
 
-.google-btn-premium {
+.google-btn-pill {
   background: white;
-  color: var(--base-dark);
+  color: #1a1a1a;
   border: none;
-  padding: 18px 35px;
+  padding: 16px 32px;
   border-radius: 100px;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  gap: 15px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   margin-top: 40px;
-  width: fit-content;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  min-width: 280px; /* Đảm bảo nút đủ dài và cân đối */
+}
+
+.google-btn-pill:hover {
+  transform: translateY(-8px) scale(1.05);
+  background: var(--sun-gold);
+  box-shadow: 0 30px 50px rgba(253, 224, 71, 0.3);
+}
+
+.glass-box-new {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 35px;
+  padding: 50px;
+  width: 100%;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.2);
 }
 
 .google-btn-premium:hover {
