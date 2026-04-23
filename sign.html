@@ -3,82 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cổng Ghi Danh - Lưu Bút Thanh Xuân</title>
+    <title>Tham Gia Kỷ Yếu - Lưu Bút Thanh Xuân</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="presentation-container" style="overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100vh;">
+<body class="presentation-container">
     <div id="sakura-container"></div>
-    <div class="sun-flare" style="opacity: 0.5;"></div>
-    <div class="aura-orb" style="top: 20%; left: 10%; background: radial-gradient(circle, rgba(255,143,171,0.15) 0%, transparent 70%);"></div>
+    <div class="sun-flare"></div>
 
     <!-- MAIN PORTAL -->
-    <main style="z-index: 100; width: 100%; display: flex; justify-content: center; align-items: center;">
+    <main class="portal-stack">
         
-        <!-- CỔNG ĐĂNG NHẬP -->
-        <div id="auth-portal" class="portal-card">
-            <div class="label-cap" style="color: white; opacity: 0.5; margin-bottom: 20px;">SECURE_MEMORY_PORTAL_V.2026</div>
-            <h1 class="title-presentation">Ghi Danh <br><span style="color: var(--sakura-vibrant);">Kỷ Yếu</span></h1>
-            <p style="opacity: 0.7; max-width: 420px; margin: 0 auto; line-height: 1.5;">Cùng chúng mình lưu giữ những khoảnh khắc rực rỡ nhất của niên khóa 2026.</p>
+        <!-- CỔNG ĐĂNG NHẬP (MINIMALIST & CENTERED) -->
+        <div id="auth-portal" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <div class="label-cap" style="color: white; opacity: 0.5; margin-bottom: 30px;">AUTH_ACCESS // CLASS_2026</div>
+            <h1 class="title-presentation">Ký Ức <br> <span style="color: var(--sakura-vibrant);">Rực Rỡ</span></h1>
+            <p style="opacity: 0.8; font-size: 1.1rem; line-height: 1.6; margin-bottom: 10px;">Chúng mình cùng lưu giữ những mảnh ghép đẹp nhất nhé.</p>
             
-            <button id="login-btn" class="google-btn-premium">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" width="20" alt="Google Logo">
+            <button id="login-btn" class="google-btn-pill">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" width="20" alt="Google">
                 <span>Tham gia bằng Google</span>
             </button>
             
-            <div class="subtitle-presentation" style="margin-top: 40px; font-size: 1.5rem;">Hẹn gặp lại cậu ở bên trong!</div>
+            <div class="subtitle-presentation" style="margin-top: 50px; font-size: 1.4rem; opacity: 0.6;">Hẹn gặp cậu ở bên trong!</div>
         </div>
 
-        <!-- REGISTRATION FORM (MODERN BENTO) -->
-        <div id="reg-section" style="display: none; width: 90%; max-width: 1000px;">
-            <div class="glass-card" style="padding: 50px; cursor: default; border-radius: 40px;">
+        <!-- FORM ĐĂNG KÝ (NEW BENTO LAYOUT) -->
+        <div id="reg-section" style="display: none; width: 100%; max-width: 900px;">
+            <div class="glass-box-new">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
-                    <h2 class="title-presentation" style="font-size: 2.5rem; margin: 0;">Hồ Sơ <span style="color: var(--sakura-vibrant);">Của Tớ</span></h2>
-                    <button id="logout-btn" class="label-cap" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 10px 20px; border-radius: 100px; cursor: pointer; color: white;">ĐĂNG XUẤT</button>
+                    <h2 class="title-presentation" style="font-size: 2.8rem; margin: 0; text-align: left;">Hồ Sơ <br><span style="color: var(--sakura-vibrant);">Của Tớ</span></h2>
+                    <button id="logout-btn" class="label-cap" style="background: none; border: 1px solid rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 100px; cursor: pointer; color: white;">ĐĂNG XUẤT</button>
                 </div>
                 
                 <form id="reg-form" class="soft-form">
-                    <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; margin-bottom: 30px;">
                         <div style="text-align: center;">
-                            <label for="avatar-input">
-                                <div id="avatar-preview" style="width: 100%; aspect-ratio: 0.85; border-radius: 20px; border: 2px dashed var(--glass-border); display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,0.01); cursor: pointer; overflow: hidden;">
-                                    <i data-lucide="camera" style="width: 30px; height: 30px; opacity: 0.3; margin-bottom: 10px;"></i>
+                            <label for="avatar-input" style="cursor: pointer;">
+                                <div id="avatar-preview" style="width: 100%; aspect-ratio: 0.85; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;">
+                                    <i data-lucide="camera" style="width: 30px; opacity: 0.3; margin-bottom: 10px;"></i>
                                     <span class="label-cap" style="font-size: 0.6rem;">ẢNH CHÂN DUNG</span>
                                 </div>
                             </label>
                             <input type="file" id="avatar-input" hidden accept="image/*">
                         </div>
 
-                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
                             <div class="form-group">
-                                <label class="label-cap" style="font-size: 0.6rem;">TÊN THÂN MẬT</label>
+                                <label class="label-cap">Tên thân mật</label>
                                 <input type="text" id="reg-name" placeholder="..." required>
                             </div>
                             <div class="form-group">
-                                <label class="label-cap" style="font-size: 0.6rem;">TÍNH CÁCH</label>
+                                <label class="label-cap">Tính cách</label>
                                 <input type="text" id="reg-personality" placeholder="..." required>
                             </div>
                             <div class="form-group">
-                                <label class="label-cap" style="font-size: 0.6rem;">THÀNH TỰU</label>
-                                <textarea id="reg-achievements" placeholder="..." required style="height: 80px;"></textarea>
+                                <label class="label-cap">Thành tựu</label>
+                                <textarea id="reg-achievements" placeholder="..." required style="height: 70px;"></textarea>
                             </div>
                         </div>
                     </div>
 
-                    <div style="margin-top: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left;">
                         <div class="form-group">
-                            <label class="label-cap" style="font-size: 0.6rem;">LỜI NHẮN</label>
+                            <label class="label-cap">Lời nhắn cho cả lớp</label>
                             <input type="text" id="reg-quote" placeholder="..." required>
                         </div>
                         <div class="form-group">
-                            <label class="label-cap" style="font-size: 0.6rem;">KỶ NIỆM BÍ MẬT</label>
-                            <textarea id="reg-secret" placeholder="..." required style="height: 80px;"></textarea>
+                            <label class="label-cap">Kỷ niệm bí mật</label>
+                            <textarea id="reg-secret" placeholder="..." required style="height: 70px;"></textarea>
                         </div>
                     </div>
 
                     <div style="display: flex; gap: 20px; margin-top: 40px;">
-                        <button type="submit" id="reg-submit" class="submit-btn" style="flex: 1.5;">LƯU LẠI KỶ NIỆM</button>
-                        <a href="myclass.html" id="view-class-btn" class="submit-btn" style="flex: 1; background: #fff; color: var(--base-dark); text-decoration: none; text-align: center; display: none; line-height: 2.5;">XEM THÀNH QUẢ</a>
+                        <button type="submit" id="reg-submit" class="submit-btn" style="flex: 1.5; border-radius: 100px;">LƯU KỶ NIỆM</button>
+                        <a href="myclass.html" id="view-class-btn" class="submit-btn" style="flex: 1; background: white; color: black; text-decoration: none; text-align: center; border-radius: 100px; display: none; padding-top: 18px;">VÀO TRANG LỚP</a>
                     </div>
                 </form>
             </div>
@@ -92,8 +91,7 @@
     <script src="assets/js/app-sign.js"></script>
     <script>
         lucide.createIcons();
-        // Animation Entry
-        gsap.from(".portal-card", { scale: 0.9, opacity: 0, duration: 1.2, ease: "power4.out" });
+        gsap.from(".portal-stack", { opacity: 0, y: 30, duration: 1.5, ease: "power3.out" });
     </script>
 </body>
 </html>
