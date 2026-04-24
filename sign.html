@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghi Danh Lưu Bút - Thanh Xuân 2026</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-sign bg-fixed-layer">
+    <div id="sakura-container"></div>
+
+    <main class="center-full">
+        <!-- CỔNG ĐĂNG NHẬP -->
+        <div id="auth-portal" style="text-align: center; width: 100%; max-width: 500px;">
+            <h1 class="title-indie">Chào Cậu, Bạn Cũ!</h1>
+            <p style="font-size: 1.2rem; margin-bottom: 40px;">Đăng nhập bằng Google để chúng mình <br> cùng viết lưu bút nhé!</p>
+            
+            <button id="login-btn" class="btn-indie" style="margin: 0 auto;">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" width="20">
+                <span>VÀO KÝ TÊN</span>
+            </button>
+            
+            <div style="margin-top: 60px; opacity: 0.4;" class="handwritten">Hẹn gặp cậu ở bên trong!</div>
+        </div>
+
+        <!-- FORM GHI DANH -->
+        <div id="reg-section" style="display: none; width: 100%; max-width: 850px;">
+            <div class="sticker-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                    <h2 class="title-indie" style="font-size: 3rem; margin: 0; transform: none;">Hồ Sơ Của Tớ</h2>
+                    <button id="logout-btn" style="background: none; border: 1px solid #ddd; padding: 5px 15px; border-radius: 20px; cursor: pointer;">Đăng xuất</button>
+                </div>
+                
+                <form id="reg-form" class="soft-form">
+                    <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px;">
+                        <div style="text-align: center;">
+                            <label for="avatar-input" style="cursor: pointer;">
+                                <div id="avatar-preview" style="width: 100%; aspect-ratio: 0.8; border: 2px dashed #ccc; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fafafa; overflow: hidden;">
+                                    <i data-lucide="camera" style="width: 30px; opacity: 0.3; margin-bottom: 10px;"></i>
+                                    <span style="font-size: 0.7rem; opacity: 0.5;">CHỌN ẢNH XINH NHẤT</span>
+                                </div>
+                            </label>
+                            <input type="file" id="avatar-input" hidden accept="image/*">
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 20px; text-align: left;">
+                            <div class="form-group">
+                                <label class="handwritten" style="font-size: 1.2rem;">Tên thân mật của cậu</label>
+                                <input type="text" id="reg-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="handwritten" style="font-size: 1.2rem;">Tính cách nổi bật</label>
+                                <input type="text" id="reg-personality" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="handwritten" style="font-size: 1.2rem;">Thành tựu tự hào</label>
+                                <textarea id="reg-achievements" required style="height: 80px;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; text-align: left;">
+                        <div class="form-group">
+                            <label class="handwritten" style="font-size: 1.2rem;">Lời nhắn cho cả lớp</label>
+                            <input type="text" id="reg-quote" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="handwritten" style="font-size: 1.2rem;">Kỷ niệm thầm kín</label>
+                            <textarea id="reg-secret" required style="height: 80px;"></textarea>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px; margin-top: 40px;">
+                        <button type="submit" id="reg-submit" class="btn-indie" style="flex: 1.5;">LƯU LẠI KỶ NIỆM</button>
+                        <a href="myclass.html" id="view-class-btn" class="btn-indie" style="flex: 1; background: var(--sky-blue); text-decoration: none; text-align: center; display: none; line-height: 2.2;">XEM TRANG LỚP</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="assets/js/config.js"></script>
+    <script type="module" src="assets/js/firebase-init.js"></script>
+    <script src="assets/js/app-sign.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
