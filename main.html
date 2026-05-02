@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lưu Bút Thanh Xuân 2026</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div id="sakura-container"></div>
+    <div class="film-grain"></div>
+
+    <div class="indie-container">
+        <section class="section-wrapper">
+            <p class="handwritten" style="font-size: 1.6rem; color: var(--primary); margin-bottom: 16px;">Thương gửi niên khóa 2022 - 2026</p>
+            <h1 class="title-main" style="font-family: var(--font-display); font-size: clamp(3rem, 10vw, 5.5rem); font-weight: 600;">Ký Ức Trong Veo</h1>
+            <p class="subtitle-indie" style="margin-bottom: 48px;">Gói ghém thanh xuân vào từng cánh hoa</p>
+            
+            <div class="btn-group">
+                <a href="sign.html" class="btn-indie">
+                    <i data-lucide="pen-tool"></i>
+                    <span>GHI DANH LƯU BÚT</span>
+                </a>
+                <a href="myclass.html" class="btn-indie">
+                    <i data-lucide="users"></i>
+                    <span>GHÉ THĂM LỚP MÌNH</span>
+                </a>
+            </div>
+
+            <div class="handwritten" style="margin-top: 80px; opacity: 0.6; font-size: 1.4rem; color: var(--primary);">
+                Kéo xuống để cùng tớ lật giở kỷ niệm nhé...
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script>
+        window.addEventListener('load', () => {
+            lucide.createIcons();
+            
+            gsap.from(".title-main, .subtitle-indie, .btn-group, .handwritten", { 
+                opacity: 0, 
+                y: 20, 
+                duration: 1, 
+                stagger: 0.2, 
+                ease: "power2.out",
+                clearProps: "all"
+            });
+            
+            const container = document.getElementById('sakura-container');
+            for (let i = 0; i < 15; i++) {
+                const p = document.createElement('div');
+                p.innerHTML = '🌸';
+                p.style.cssText = `position:fixed; top:-50px; left:${Math.random()*100}vw; font-size:${Math.random()*20+15}px; opacity:${Math.random()*0.5}; pointer-events:none; z-index:100;`;
+                container.appendChild(p);
+                gsap.to(p, { y: '110vh', x: '+=150', rotation: 360, duration: 8 + Math.random() * 5, repeat: -1, delay: Math.random() * 5, ease: 'none' });
+            }
+        });
+    </script>
+</body>
+</html>
