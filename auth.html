@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tham Gia Ký Ức - Kỷ Yếu 2026</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .auth-container {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOADING SCREEN -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-logo">Về Nhà Thôi</div>
+        <p class="handwritten" style="color: var(--secondary); font-size: 1.2rem;">Đang kết nối những tâm hồn...</p>
+    </div>
+
+    <div id="sakura-container"></div>
+    <div class="film-grain"></div>
+
+    <main class="auth-container">
+        <!-- Login Portal -->
+        <div id="auth-portal" class="sticker-card" style="max-width: 400px; text-align: center;">
+            <i data-lucide="sparkles" size="48" style="color: var(--tertiary); margin-bottom: 20px;"></i>
+            <h1 class="title-indie" style="font-size: 2.5rem;">Về Nhà Thôi</h1>
+            <p style="color: var(--secondary); margin-bottom: 30px;">Cùng nhau lưu giữ những trang ký ức thanh xuân nhé!</p>
+            <button id="login-btn" class="btn-indie" style="width: 100%;">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" width="20">
+                <span>ĐĂNG NHẬP VỚI GOOGLE</span>
+            </button>
+        </div>
+
+        <!-- Registration Form -->
+        <div id="reg-section" class="sticker-card" style="display: none; max-width: 800px;">
+            <h2 class="title-indie" style="font-size: 2rem; margin-bottom: 30px;">Hồ Sơ Thanh Xuân</h2>
+            <form id="reg-form" class="soft-form">
+                <div class="form-header-grid">
+                    <div>
+                        <label for="avatar-input" class="avatar-column" id="avatar-preview-container">
+                            <div id="avatar-preview">
+                                <i data-lucide="camera" size="32" style="color: var(--secondary); opacity: 0.5;"></i>
+                                <span style="font-size: 0.7rem; font-weight: 700; margin-top: 8px;">ẢNH CẬU</span>
+                            </div>
+                        </label>
+                        <input type="file" id="avatar-input" hidden accept="image/*">
+                    </div>
+                    <div class="input-column">
+                        <div class="form-group">
+                            <label>Tên gọi</label>
+                            <input type="text" id="reg-name" required placeholder="Cậu tên gì nhỉ?">
+                        </div>
+                        <div class="form-group">
+                            <label>Tính cách</label>
+                            <input type="text" id="reg-personality" required placeholder="Vui vẻ, hay ngủ gật...">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Lời nhắn gửi mai sau</label>
+                    <input type="text" id="reg-quote" required placeholder="Một câu nói để đời...">
+                </div>
+                <div class="form-group">
+                    <label>Kỷ niệm đóng băng</label>
+                    <textarea id="reg-secret" required style="height: 100px;"></textarea>
+                </div>
+                <button type="submit" id="reg-submit" class="btn-indie" style="width: 100%;">
+                    <span>GÓI GÉM KÝ ỨC</span>
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="assets/js/config.js"></script>
+    <script type="module" src="assets/js/firebase-init.js"></script>
+    <script src="assets/js/app-auth.js"></script>
+    <script>window.addEventListener('load', lucide.createIcons);</script>
+</body>
+</html>
