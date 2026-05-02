@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lưu Bút Thanh Xuân 2026</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <!-- LOADING SCREEN -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-logo">Ký Ức Trong Veo</div>
+        <p class="handwritten" style="color: var(--secondary); font-size: 1.2rem;">Đang lật mở từng trang lưu bút...</p>
+    </div>
+
+    <div id="sakura-container"></div>
+    <div class="film-grain"></div>
+
+    <div class="indie-container">
+        <section class="section-wrapper">
+            <div style="background: var(--surface); padding: 40px; border-radius: var(--radius-lg); box-shadow: var(--shadow-soft); border: 1px solid rgba(158,130,181,0.1); position: relative;">
+                <div class="paper-clip"></div>
+                <p class="handwritten" style="font-size: 1.8rem; color: var(--secondary); margin-bottom: 10px;">Thương gửi niên khóa 2022 - 2026</p>
+                <h1 class="title-main" style="font-size: clamp(3rem, 10vw, 6rem); margin-bottom: 20px;">Ký Ức Trong Veo</h1>
+                <p class="subtitle-indie" style="margin-bottom: 48px; opacity: 0.8;">Gói ghém thanh xuân vào từng cánh hoa</p>
+                
+                <div class="btn-group">
+                    <a href="sign.html" class="btn-indie">
+                        <i data-lucide="pen-tool"></i>
+                        <span>GHI DANH LƯU BÚT</span>
+                    </a>
+                    <a href="myclass.html" class="btn-outline">
+                        <i data-lucide="users"></i>
+                        <span>GHÉ THĂM LỚP MÌNH</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="handwritten" style="margin-top: 60px; opacity: 0.6; font-size: 1.6rem; color: var(--primary);">
+                Cuộn để bắt đầu hành trình ký ức... ↓
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script>
+        window.addEventListener('load', () => {
+            lucide.createIcons();
+            
+            gsap.from(".title-main, .subtitle-indie, .btn-group, .handwritten", { 
+                opacity: 0, 
+                y: 20, 
+                duration: 1, 
+                stagger: 0.2, 
+                ease: "power2.out",
+                clearProps: "all"
+            });
+            
+            const container = document.getElementById('sakura-container');
+            for (let i = 0; i < 15; i++) {
+                const p = document.createElement('div');
+                p.innerHTML = '🌸';
+                p.style.cssText = `position:fixed; top:-50px; left:${Math.random()*100}vw; font-size:${Math.random()*20+15}px; opacity:${Math.random()*0.5}; pointer-events:none; z-index:100;`;
+                container.appendChild(p);
+                gsap.to(p, { y: '110vh', x: '+=150', rotation: 360, duration: 8 + Math.random() * 5, repeat: -1, delay: Math.random() * 5, ease: 'none' });
+            }
+        });
+    </script>
+</body>
+</html>
