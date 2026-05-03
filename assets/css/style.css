@@ -1,0 +1,545 @@
+/* IMPORT FONTS CHUẨN - Thêm Kalam cho chữ viết tay tự nhiên */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Nunito:wght@400;600;700&family=Kalam:wght@300;400;700&display=swap');
+
+:root {
+  /* BẢNG MÀU TACTILE SCRAPBOOK (Dựa trên Pastel nhưng sâu hơn) */
+  --primary: #3A2747;    
+  --secondary: #9E82B5;  
+  --tertiary: #FF8AB8;   
+  --neutral: #FFF3F7;    
+  --surface: #FFFFFF;    
+  --on-primary: #FFFFFF; 
+
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 32px;
+
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 32px;
+
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Nunito', sans-serif;
+  --font-hand: 'Kalam', cursive;
+
+  /* Shadow dập nổi (Tactile) */
+  --shadow-soft: 0 10px 30px rgba(58, 39, 71, 0.08);
+  --shadow-tactile: 5px 5px 15px rgba(158, 130, 181, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background-color: var(--neutral);
+  /* Background texture giấy cũ + Pattern kẻ ô */
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)),
+    url('https://www.transparenttextures.com/patterns/p6.png'),
+    linear-gradient(rgba(158, 130, 181, 0.05) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(158, 130, 181, 0.05) 2px, transparent 2px);
+  background-size: auto, auto, 40px 40px, 40px 40px;
+  color: var(--primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* === 1. BỐ CỤC KHUNG XƯƠNG (SCRAPBOOK BINDER) === */
+.indie-container {
+  width: 100%; max-width: 1200px; margin: 40px auto; padding: 60px; 
+  position: relative; background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: 20px 20px 60px rgba(58, 39, 71, 0.1),
+              -20px -20px 60px rgba(255, 255, 255, 0.8);
+  min-height: 100vh;
+  /* Thêm texture giấy cho container chính */
+  background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+}
+
+/* Hiệu ứng gáy sổ còng (Binder Rings) */
+.indie-container::before {
+  content: '';
+  position: absolute;
+  left: 30px; top: 50px; bottom: 50px;
+  width: 12px;
+  background-image: radial-gradient(circle, #ddd 30%, transparent 35%);
+  background-size: 12px 40px;
+  opacity: 0.6;
+}
+
+.section-wrapper {
+  min-height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 0; text-align: center;
+}
+.grid-indie {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 40px; padding: 40px 0; width: 100%;
+}
+
+/* === 2. TYPOGRAPHY === */
+h1, h2, h3, .title-display, .title-indie {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--primary);
+}
+.title-h1 { font-size: 2.25rem; }
+.title-display { font-size: 4rem; }
+.title-indie { font-size: clamp(2.5rem, 8vw, 4rem); line-height: 1.1; margin-bottom: 24px; }
+.subtitle-indie { font-family: var(--font-hand); font-size: clamp(1.5rem, 4vw, 2.2rem); color: var(--primary); opacity: 0.9; }
+.handwritten { font-family: var(--font-hand); }
+
+.title-hover-effect:hover {
+  transform: scale(1.05) rotate(-2deg);
+  color: var(--tertiary);
+}
+
+/* === 3. BUTTONS (TACTILE) === */
+.btn-primary, .btn-indie, .btn-scrapbook {
+  background-color: var(--tertiary);
+  color: var(--on-primary);
+  border-radius: var(--radius-md);
+  padding: 12px 30px;
+  border: none;
+  font-family: var(--font-body);
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  box-shadow: 0 4px 0 #D16A94; /* Hiệu ứng phím cơ */
+}
+.btn-primary:active, .btn-indie:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 #D16A94;
+}
+
+.btn-outline {
+  background-color: var(--surface);
+  color: var(--primary);
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-md);
+  padding: 12px 30px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px;
+}
+.btn-outline:hover {
+  background-color: var(--secondary);
+  color: var(--on-primary);
+}
+
+/* === 4. FORMS & CARDS (PASTEL CANDY LAYOUT TỐI ƯU) === */
+.sticker-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 48px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(158, 130, 181, 0.1);
+  width: 100%;
+  position: relative;
+  z-index: 10;
+  background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+}
+
+.soft-form { display: flex; flex-direction: column; gap: 24px; }
+
+/* KHÓA CHẶT GRID 2 CỘT TỶ LỆ TRÊN DESKTOP */
+.form-header-grid {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr); 
+  gap: 40px;
+  align-items: start;
+  margin-bottom: 24px;
+}
+
+.avatar-column {
+  width: 100%;
+  aspect-ratio: 3/4; 
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--secondary);
+  background: var(--neutral);
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.avatar-column:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 30px rgba(255, 138, 184, 0.2);
+  border-color: var(--tertiary);
+}
+
+.input-column { display: flex; flex-direction: column; gap: 20px; }
+
+.form-group { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+.form-group label { font-family: var(--font-body); font-size: 0.85rem; color: var(--secondary); font-weight: 700; }
+
+input, textarea {
+  width: 100%;
+  padding: 16px 20px;
+  border: 1px solid rgba(158, 130, 181, 0.2);
+  border-radius: var(--radius-md);
+  background: var(--neutral); 
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--primary);
+  outline: none;
+  box-shadow: inset 4px 4px 8px rgba(158, 130, 181, 0.1),
+              inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+input:focus, textarea:focus {
+  background: var(--surface);
+  border-color: var(--tertiary);
+  box-shadow: 0 0 0 4px rgba(255, 138, 184, 0.1);
+}
+
+/* Sticker dán cố định trên board */
+.placed-sticker {
+  position: absolute;
+  font-size: 2.5rem;
+  cursor: default;
+  z-index: 60;
+  user-select: none;
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: sticker-appear 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes sticker-appear {
+  0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+
+/* === 5. POLAROID & CORKBOARD (TACTILE UPGRADE) === */
+.polaroid-card {
+  width: 100%;
+  perspective: 1000px; /* Cần thiết cho hiệu ứng 3D */
+  cursor: pointer;
+  position: relative;
+  height: 380px; /* Fix chiều cao để xoay không bị giật */
+}
+
+.polaroid-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.polaroid-card.is-flipped .polaroid-inner {
+  transform: rotateY(180deg);
+}
+
+.polaroid-front, .polaroid-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  background: white;
+  padding: 12px 12px 40px 12px;
+  border-radius: 4px;
+  border: 1px solid #f1f1f1;
+  box-shadow: var(--shadow-tactile);
+  background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+}
+
+.polaroid-back {
+  transform: rotateY(180deg);
+  background: #fffcf0; /* Màu giấy cũ */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+}
+
+.polaroid-back::before {
+  content: '';
+  position: absolute;
+  top: 10px; left: 10px; right: 10px; bottom: 10px;
+  border: 1px dashed var(--secondary);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.card-img-box { width: 100%; height: 260px; overflow: hidden; background: var(--neutral); border-radius: 2px; }
+.card-img-box img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Nẹp giấy / Kẹp bướm */
+.paper-clip {
+  position: absolute;
+  top: -15px;
+  right: 20px;
+  width: 30px;
+  height: 50px;
+  background: linear-gradient(to right, #ccc, #eee, #ccc);
+  border-radius: 10px;
+  z-index: 20;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+.washi-tape {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%) rotate(-2deg);
+  width: 100px; height: 35px; 
+  background: rgba(255, 138, 184, 0.3); 
+  backdrop-filter: blur(4px); 
+  border: 1px solid rgba(0,0,0,0.05); z-index: 10;
+}
+
+/* Sticker Tray */
+.sticker-tray {
+  position: fixed;
+  right: -250px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 240px;
+  background: var(--surface);
+  border-radius: 24px 0 0 24px;
+  padding: 24px;
+  box-shadow: var(--shadow-soft);
+  z-index: 1000;
+  transition: right 0.5s cubic-bezier(0.2, 0, 0.2, 1);
+  border: 2px solid var(--secondary);
+  background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+}
+.sticker-tray.is-open { right: 0; }
+.sticker-handle {
+  position: absolute;
+  left: -50px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 100px;
+  background: var(--tertiary);
+  border-radius: 12px 0 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+}
+
+.sticker-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.sticker-item {
+  font-size: 2rem;
+  cursor: grab;
+  text-align: center;
+  padding: 8px;
+  background: var(--neutral);
+  border-radius: 12px;
+  transition: transform 0.2s;
+  user-select: none;
+}
+.sticker-item:hover { transform: scale(1.1) rotate(5deg); }
+
+/* Sticky Note Draggable Style */
+.sticky-note {
+  background-color: #fff9c4;
+  color: #1a1a1a;
+  padding: 25px;
+  width: 220px;
+  min-height: 160px;
+  box-shadow: 5px 5px 20px rgba(58, 39, 71, 0.1);
+  font-family: var(--font-hand);
+  font-size: 1.3rem;
+  cursor: grab;
+  position: absolute;
+  transition: box-shadow 0.3s;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-image: url('https://www.transparenttextures.com/patterns/p6.png');
+}
+.sticky-note::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  border-width: 0 15px 15px 0;
+  border-style: solid;
+  border-color: transparent var(--neutral) transparent transparent;
+  display: block; width: 0;
+}
+
+
+/* === 6. MUSIC PLAYER === */
+.vinyl-player { 
+  position: fixed; bottom: 24px; left: 24px; z-index: 9999; 
+  display: flex; align-items: center; gap: 15px; 
+  background: rgba(255, 255, 255, 0.8); 
+  backdrop-filter: blur(10px);
+  padding: 10px 20px; border-radius: 100px; border: 2px solid var(--secondary); 
+}
+.vinyl-disc { 
+  width: 40px; height: 40px; border-radius: 50%; background: var(--primary); 
+  display: flex; justify-content: center; align-items: center; 
+  animation: spin 4s linear infinite; animation-play-state: paused; 
+}
+.vinyl-center { width: 12px; height: 12px; background: var(--tertiary); border-radius: 50%; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* === 7. MODAL PROFILE === */
+.modern-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 243, 247, 0.95); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px; }
+.profile-modal-content { background: var(--surface); width: 100%; max-width: 900px; max-height: 90vh; overflow-y: auto; border-radius: var(--radius-lg); border: 2px solid var(--secondary); position: relative; }
+
+.wish-section { 
+  background: var(--neutral); border-radius: 60px 60px 0 0; border-top: 2px solid var(--secondary); margin-top: 80px; padding: 80px 20px;
+  background-image: url('https://www.transparenttextures.com/patterns/p6.png');
+}
+
+/* === LOADING SCREEN (PREMIUM SPLASH) === */
+.loading-screen {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: var(--neutral);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 10000;
+  transition: opacity 0.8s ease, visibility 0.8s;
+  background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+}
+.loading-screen.is-hidden { opacity: 0; visibility: hidden; }
+
+.loading-logo {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  color: var(--primary);
+  text-shadow: 2px 2px 0 var(--surface), 4px 4px 0 rgba(158, 130, 181, 0.1);
+  animation: pulse-tactile 2s infinite ease-in-out;
+  margin-bottom: 20px;
+}
+@keyframes pulse-tactile {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(158,130,181,0)); }
+  50% { transform: scale(1.05); filter: drop-shadow(0 10px 20px rgba(158,130,181,0.2)); }
+}
+
+/* === LIVE COMMENTS (BACK OF CARD) === */
+.comment-section {
+  width: 100%;
+  margin-top: 15px;
+  max-height: 120px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+.comment-section::-webkit-scrollbar { width: 4px; }
+.comment-section::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 10px; }
+
+.mini-comment {
+  background: var(--surface);
+  border: 1px dashed var(--secondary);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: var(--font-hand);
+  font-size: 0.9rem;
+  color: var(--primary);
+  margin-bottom: 8px;
+  text-align: left;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.02);
+}
+
+.comment-input-box {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: 10px;
+}
+.comment-input-box input {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  border-radius: 50px;
+  height: 32px;
+}
+.comment-input-box button {
+  background: var(--tertiary);
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 0 #D16A94;
+}
+
+/* Hiệu ứng Handwriting xuất hiện */
+.handwritten-fade {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 1s ease;
+}
+.handwritten-fade.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+
+@media (max-width: 768px) {
+  .sticker-card { padding: 32px 20px; }
+  .form-header-grid { grid-template-columns: 1fr; gap: 24px; }
+  .avatar-column { width: 200px; margin: 0 auto; }
+}
+
+/* VIBE MATCH THEMES */
+:root[data-vibe="mint"] { --tertiary: #6FCF97; }
+:root[data-vibe="butter"] { --tertiary: #F2C94C; }
+:root[data-vibe="lavender"] { --tertiary: #BB6BD9; }
+
+/* Theme Selector UI */
+.vibe-selector-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+.vibe-label {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: rgba(255, 255, 255, 0.8);
+  padding: 2px 10px;
+  border-radius: 20px;
+  backdrop-filter: blur(5px);
+  border: 1px solid var(--secondary);
+}
+.vibe-selector {
+  display: flex;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 8px;
+  border-radius: 50px;
+  border: 1px solid var(--secondary);
+  backdrop-filter: blur(10px);
+}
+.vibe-btn {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent; 
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.vibe-btn:hover { transform: scale(1.2); border-color: white; }
+
