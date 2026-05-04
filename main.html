@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ký Ức Trong Veo - Cinematic Experience</title>
+    
+    <!-- TECH STACK (CDN-ONLY) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@11.11.17/dist/framer-motion.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+        window.Motion = window.FramerMotion;
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['"Instrument Serif"', 'serif'],
+                        body: ['"Barlow"', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        DEFAULT: '9999px',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background: #000; margin: 0; overflow-x: hidden; }
+        .font-heading { font-style: italic; }
+        
+        /* Smooth Video Rendering */
+        video {
+            filter: brightness(0.8) contrast(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+        const { motion, AnimatePresence } = Motion;
+
+        // --- FADING VIDEO COMPONENT ---
+        const FadingVideo = ({ src, className, style }) => {
+            const videoRef = useRef(null);
+            const rAfRef = useRef(null);
+            const fadingOutRef = useRef(false);
+
+            const fadeTo = (targetOpacity, duration = 500) => {
+                if (rAfRef.current) cancelAnimationFrame(rAfRef.current);
+                
+                const startOpacity = parseFloat(videoRef.current.style.opacity) || 0;
+                const startTime = performance.now();
+
+                const animate = (now) => {
+                    const elapsed = now - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const currentOpacity = startOpacity + (targetOpacity - startOpacity) * progress;
+                    
+                    if (videoRef.current) {
+                        videoRef.current.style.opacity = currentOpacity;
+                    }
+
+                    if (progress < 1) {
+                        rAfRef.current = requestAnimationFrame(animate);
+                    }
+                };
+                rAfRef.current = requestAnimationFrame(animate);
+            };
+
+            useEffect(() => {
+                const video = videoRef.current;
+                if (!video) return;
+
+                const handleLoadedData = () => {
+                    video.style.opacity = 0;
+                    video.play();
+                    fadeTo(1);
+                };
+
+                const handleTimeUpdate = () => {
+                    const timeLeft = video.duration - video.currentTime;
+                    if (!fadingOutRef.current && timeLeft <= 0.55 && timeLeft > 0) {
+                        fadingOutRef.current = true;
+                        fadeTo(0);
+                    }
+                };
+
+                const handleEnded = () => {
+                    video.style.opacity = 0;
+                    setTimeout(() => {
+                        video.currentTime = 0;
+                        video.play();
+                        fadingOutRef.current = false;
+                        fadeTo(1);
+                    }, 100);
+                };
+
+                video.addEventListener('loadeddata', handleLoadedData);
+                video.addEventListener('timeupdate', handleTimeUpdate);
+                video.addEventListener('ended', handleEnded);
+
+                return () => {
+                    video.removeEventListener('loadeddata', handleLoadedData);
+                    video.removeEventListener('timeupdate', handleTimeUpdate);
+                    video.removeEventListener('ended', handleEnded);
+                    if (rAfRef.current) cancelAnimationFrame(rAfRef.current);
+                };
+            }, [src]);
+
+            return (
+                <video
+                    ref={videoRef}
+                    src={src}
+                    muted
+                    playsInline
+                    preload="auto"
+                    className={className}
+                    style={{ ...style, opacity: 0 }}
+                />
+            );
+        };
+
+        // --- BLUR TEXT COMPONENT ---
+        const BlurText = ({ text, className, delay = 0 }) => {
+            const words = useMemo(() => text.split(' '), [text]);
+            const [isVisible, setIsVisible] = useState(false);
+            const ref = useRef(null);
+
+            useEffect(() => {
+                const observer = new IntersectionObserver(
+                    ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
+                    { threshold: 0.1 }
+                );
+                if (ref.current) observer.observe(ref.current);
+                return () => observer.disconnect();
+            }, []);
+
+            return (
+                <p ref={ref} className={`flex flex-wrap justify-center row-gap-[0.1em] ${className}`}>
+                    {words.map((word, i) => (
+                        <motion.span
+                            key={i}
+                            initial={{ filter: 'blur(10px)', opacity: 0, y: 50 }}
+                            animate={isVisible ? {
+                                filter: ['blur(10px)', 'blur(5px)', 'blur(0px)'],
+                                opacity: [0, 0.5, 1],
+                                y: [50, -5, 0]
+                            } : {}}
+                            transition={{
+                                duration: 0.7,
+                                times: [0, 0.5, 1],
+                                ease: 'easeOut',
+                                delay: delay + (i * 0.1)
+                            }}
+                            style={{ display: 'inline-block', marginRight: '0.28em' }}
+                        >
+                            {word}
+                        </motion.span>
+                    ))}
+                </p>
+            );
+        };
+
+        // --- MAIN APP ---
+        const App = () => {
+            const handleConfetti = () => {
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#FFFFFF', '#9E82B5', '#FF8AB8', '#F2C94C', '#6FCF97']
+                });
+            };
+
+            return (
+                <div className="relative min-h-screen font-body text-white selection:bg-white/30">
+                    {/* SECTION 1: HERO */}
+                    <section className="relative h-screen w-full flex flex-col overflow-hidden bg-black">
+                        <FadingVideo 
+                            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260418_080021_d598092b-c4c2-4e53-8e46-94cf9064cd50.mp4"
+                            className="absolute left-1/2 top-0 -translate-x-1/2 object-cover object-top z-0"
+                            style={{ width: "120%", height: "120%" }}
+                        />
+                        
+                        {/* NAVBAR */}
+                        <nav className="fixed top-4 left-0 w-full px-8 lg:px-16 z-50 flex items-center justify-between">
+                            <div className="w-12 h-12 liquid-glass rounded-full flex items-center justify-center font-heading text-2xl lowercase">
+                                k
+                            </div>
+                            <div className="hidden md:flex liquid-glass rounded-full px-1.5 py-1.5 items-center gap-1">
+                                {['Trang Chủ', 'Ký Ức', 'Lớp Học', 'Khám Phá'].map(link => (
+                                    <a key={link} href="#" className="px-3 py-2 text-sm font-medium text-white/90 hover:text-white transition-colors">{link}</a>
+                                ))}
+                                <a href="auth.html" className="bg-white text-black px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 hover:bg-white/90 transition-all">
+                                    Tham Gia Ngay 
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+                                </a>
+                            </div>
+                            <div className="w-12 h-12" /> {/* Spacer */}
+                        </nav>
+
+                        {/* HERO CONTENT */}
+                        <div className="relative z-10 flex-1 flex flex-col items-center justify-center pt-24 px-4 text-center">
+                            <motion.div 
+                                initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }}
+                                animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+                                transition={{ delay: 0.4, duration: 0.8 }}
+                                className="liquid-glass rounded-full pl-1 pr-3 py-1 flex items-center gap-3 mb-8"
+                            >
+                                <span className="bg-white text-black px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Mới</span>
+                                <span className="text-sm text-white/90 font-light">Niên khóa 2022 - 2026 chính thức tốt nghiệp</span>
+                            </motion.div>
+
+                            <div onClick={handleConfetti} className="cursor-pointer">
+                                <BlurText 
+                                    text="Ký Ức Trong Veo Thanh Xuân Của Chúng Ta" 
+                                    className="text-6xl md:text-7xl lg:text-[5.5rem] font-heading italic leading-[0.8] max-w-3xl tracking-[-4px]"
+                                />
+                            </div>
+
+                            <motion.p 
+                                initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }}
+                                animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+                                transition={{ delay: 0.8, duration: 0.8 }}
+                                className="mt-8 text-sm md:text-base text-white/80 max-w-2xl font-light leading-relaxed font-body"
+                            >
+                                Những trang lưu bút chưa kịp viết hết, những lời chưa kịp ngỏ, và cả những nụ cười rạng rỡ nhất dưới mái trường này. Chúng ta gói ghém tất cả vào một không gian vĩnh cửu—nơi thanh xuân không bao giờ phai nhạt.
+                            </motion.p>
+
+                            <motion.div 
+                                initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }}
+                                animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+                                transition={{ delay: 1.1, duration: 0.8 }}
+                                className="flex flex-wrap items-center justify-center gap-6 mt-10"
+                            >
+                                <a href="auth.html" className="liquid-glass-strong rounded-full px-8 py-3.5 text-sm font-medium flex items-center gap-3 hover:scale-105 transition-transform group">
+                                    Ghi Danh Lưu Bút
+                                    <svg className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+                                </a>
+                                <a href="myclass.html" className="flex items-center gap-3 text-sm font-medium hover:text-white/70 transition-colors group">
+                                    Ghé Thăm Lớp Mình
+                                    <div className="w-10 h-10 rounded-full liquid-glass flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M6 4l14 8-14 8V4z"/></svg>
+                                    </div>
+                                </a>
+                            </motion.div>
+
+                            {/* STATS */}
+                            <motion.div 
+                                initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }}
+                                animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+                                transition={{ delay: 1.3, duration: 0.8 }}
+                                className="flex flex-wrap items-stretch justify-center gap-4 mt-16"
+                            >
+                                <div className="liquid-glass p-5 w-[220px] rounded-[1.25rem] text-left">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                                    <h4 className="font-heading text-4xl mt-4 leading-none">1.460 Ngày</h4>
+                                    <p className="text-[10px] uppercase tracking-widest text-white/50 mt-2">Đồng hành cùng nhau</p>
+                                </div>
+                                <div className="liquid-glass p-5 w-[220px] rounded-[1.25rem] text-left">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.66-8.66 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                                    <h4 className="font-heading text-4xl mt-4 leading-none">52 Bạn</h4>
+                                    <p className="text-[10px] uppercase tracking-widest text-white/50 mt-2">Mảnh ghép hoàn hảo</p>
+                                </div>
+                            </motion.div>
+                        </div>
+
+                        {/* PARTNERS */}
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 1.5, duration: 1 }}
+                            className="relative z-10 flex flex-col items-center gap-6 pb-12"
+                        >
+                            <span className="liquid-glass rounded-full px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] font-medium text-white/60">
+                                Hành trình kết nối từ 2022
+                            </span>
+                            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 font-heading text-2xl md:text-3xl text-white/40 tracking-tighter italic">
+                                <span>Thanh Xuân</span>
+                                <span>·</span>
+                                <span>Ước Mơ</span>
+                                <span>·</span>
+                                <span>Hẹn Ước</span>
+                                <span>·</span>
+                                <span>Gắn Kết</span>
+                            </div>
+                        </motion.div>
+                    </section>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
