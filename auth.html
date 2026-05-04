@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghi Danh | Ký Ức Trong Veo</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+    <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+    
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        body { background: #000; margin: 0; overflow: hidden; cursor: none; }
+        #cursor {
+            width: 20px; height: 20px; background: rgba(255,255,255,0.5); border-radius: 50%;
+            position: fixed; pointer-events: none; z-index: 9999; mix-blend-mode: difference;
+        }
+    </style>
+</head>
+<body>
+    <div id="cursor"></div>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useEffect } = React;
+
+        const AuthApp = () => {
+            useEffect(() => {
+                const cursor = document.getElementById('cursor');
+                window.addEventListener('mousemove', (e) => {
+                    gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.2, ease: "power2.out" });
+                });
+                
+                // Entry animation
+                gsap.from(".auth-card", {
+                    duration: 1.5,
+                    opacity: 0,
+                    scale: 0.95,
+                    filter: "blur(20px)",
+                    ease: "power4.out"
+                });
+            }, []);
+
+            return (
+                <div className="min-h-screen flex items-center justify-center p-8">
+                    <div className="auth-card liquid-glass-strong p-16 rounded-[2rem] max-w-lg w-full text-center border border-white/5">
+                        <h1 className="font-heading italic text-6xl mb-8">Về Nhà Thôi</h1>
+                        <p className="font-body text-white/60 mb-12">Cánh cửa thanh xuân đang chờ đợi. Đăng nhập để cùng nhau mở lại những thước phim cũ.</p>
+                        
+                        <button className="liquid-glass w-full py-5 rounded-full flex items-center justify-center gap-4 hover:bg-white/10 transition-all hover:scale-[1.02] active:scale-95">
+                            <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="24" />
+                            <span className="font-heading italic text-lg">Kết nối với Google</span>
+                        </button>
+
+                        <a href="main.html" className="mt-8 block text-sm text-white/40 hover:text-white transition-colors">
+                            Quay lại sảnh chính
+                        </a>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<AuthApp />);
+    </script>
+</body>
+</html>

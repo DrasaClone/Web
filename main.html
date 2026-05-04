@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ký Ức Trong Veo | Cinematic Scrapbook</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+    <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/gsap@3.12.5/dist/Observer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        body { background: #000; margin: 0; overflow-x: hidden; cursor: none; }
+        #cursor {
+            width: 20px; height: 20px; background: rgba(255,255,255,0.5); border-radius: 50%;
+            position: fixed; pointer-events: none; z-index: 9999; mix-blend-mode: difference;
+        }
+        .cinematic-film-grain {
+            position: fixed; inset: 0; background: url('https://www.transparenttextures.com/patterns/stardust.png');
+            opacity: 0.15; pointer-events: none; z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div id="cursor"></div>
+    <div class="cinematic-film-grain"></div>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useEffect, useRef } = React;
+        gsap.registerPlugin(ScrollTrigger, Observer);
+
+        // Page Transition Handler
+        const handleNavigation = (e, url) => {
+            e.preventDefault();
+            gsap.to(document.body, {
+                opacity: 0,
+                duration: 0.5,
+                ease: "power2.inOut",
+                onComplete: () => { window.location.href = url; }
+            });
+        };
+
+        const CinematicApp = () => {
+            const containerRef = useRef(null);
+
+            useEffect(() => {
+                // Initial fade in
+                gsap.from(document.body, { opacity: 0, duration: 0.8 });
+
+                // Advanced Cursor
+                const cursor = document.getElementById('cursor');
+                window.addEventListener('mousemove', (e) => {
+                    gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.2, ease: "power2.out" });
+                });
+
+                // Physics-based Parallax
+                gsap.to(".hero-title", {
+                    scrollTrigger: { trigger: containerRef.current, scrub: true },
+                    yPercent: 50,
+                    opacity: 0
+                });
+            }, []);
+
+            return (
+                <div ref={containerRef} className="min-h-screen text-white p-16">
+                    <section className="h-screen flex flex-col items-center justify-center relative">
+                        <div className="absolute inset-0 z-0 bg-[url('https://images.unsplash.com/photo-1506318137071-a8e063b4bae0?q=80&w=2070')] bg-cover bg-center opacity-30"></div>
+                        
+                        <h1 className="hero-title font-heading italic text-9xl z-10 relative">
+                            Ký Ức Trong Veo
+                        </h1>
+                        
+                        <div className="mt-12 z-10 flex gap-8">
+                            <a href="auth.html" onClick={(e) => handleNavigation(e, 'auth.html')} className="liquid-glass-strong px-12 py-6 text-xl rounded-full hover:scale-110 transition-transform">
+                                Ghi Danh
+                            </a>
+                            <a href="myclass.html" onClick={(e) => handleNavigation(e, 'myclass.html')} className="liquid-glass px-12 py-6 text-xl rounded-full hover:scale-110 transition-transform">
+                                Thăm Lớp
+                            </a>
+                        </div>
+                    </section>
+                </div>
+            );
+        };
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<CinematicApp />);
+    </script>
+</body>
+</html>
