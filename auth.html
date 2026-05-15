@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghi Danh | Ký Ức Trong Veo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+    <div id="sakura-container"></div>
+    <div id="page-overlay" class="fixed inset-0 bg-[#FFFBF0] z-[10000] pointer-events-none opacity-0"></div>
+    <div id="toast-container" class="toast"></div>
+    
+    <div id="loading-screen" class="fixed inset-0 bg-[#FFFBF0] z-[9999] flex flex-col items-center justify-center">
+        <h1 class="font-heading italic text-5xl text-[#5D4037]">Đang mở cửa ký ức...</h1>
+        <div class="mt-6 w-48 h-[2px] bg-[#5D4037]/10 overflow-hidden rounded-full">
+            <div id="loading-bar" class="w-full h-full bg-[#FF8AB8] origin-left scale-x-0"></div>
+        </div>
+    </div>
+
+    <div id="app" class="opacity-0"></div>
+
+    <template id="auth-template">
+        <div class="min-h-screen flex items-center justify-center p-8">
+            <div class="liquid-glass p-16 rounded-[2rem] max-w-lg w-full text-center border-[#5D4037]/10 shadow-2xl">
+                <div class="flex justify-end mb-4">
+                    <button id="dark-mode-toggle" class="w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-all text-lg" title="Chuyển giao diện">🌙</button>
+                </div>
+                <h1 class="font-heading italic text-6xl mb-8 text-muted">Về Nhà Thôi</h1>
+                <p class="font-body text-muted opacity-70 mb-12 leading-relaxed">
+                    Cánh cửa thanh xuân đang chờ đợi. Đăng nhập để cùng nhau mở lại những thước phim cũ.
+                </p>
+                
+                <button id="google-login-btn" class="liquid-glass w-full py-5 rounded-full flex items-center justify-center gap-4 hover:bg-white/10 transition-all hover:scale-[1.02] active:scale-95 border-muted/20">
+                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="24" />
+                    <span class="font-heading italic text-lg text-muted">Kết nối với Google</span>
+                </button>
+
+                <a href="main.html" class="mt-8 block text-sm text-muted opacity-50 hover:opacity-100 transition-all font-body">
+                    Quay lại sảnh chính
+                </a>
+            </div>
+        </div>
+    </template>
+
+    <script type="module" src="assets/js/utils.js"></script>
+    <script type="module" src="assets/js/loading.js"></script>
+    <script type="module" src="assets/js/auth.js"></script>
+</body>
+</html>
